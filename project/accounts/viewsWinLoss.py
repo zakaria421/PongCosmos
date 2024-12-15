@@ -29,7 +29,9 @@ class UpdateWinLossView(APIView):
             return Response({
                 "message": f"User {user_profile.nickname} updated successfully.",
                 "wins": user_profile.wins,
-                "losses": user_profile.losses
+                "losses": user_profile.losses,
+                "id":user_profile.id,
+                "get_id":user_id
             }, status=200)
 
         except UserProfile.DoesNotExist:

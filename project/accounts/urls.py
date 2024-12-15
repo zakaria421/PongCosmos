@@ -6,10 +6,12 @@ from .viewsUserInfo import ProtectedView
 from .views_changePass import ChangePasswordView
 from .views_PrflUpdate import UserProfileUpdateView, ChangeProfilePictureAPIView
 from .viewsWinLoss import UpdateWinLossView
+# from .views import ProxyToChat
 
 from . import viewsUserInfo
 
 urlpatterns = [
+    # path('proxy/block/<int:user_id>/', ProxyToChat.as_view(), name='proxy_to_chat'),
     path('userinfo/', ProtectedView.as_view(),),
     path('oauthcallback/', oauth_callback),
     path('signup/',RegisterView.as_view(),),

@@ -1,5 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.views.generic import ListView
+
+
 
 class ChatRoom(models.Model):
     name = models.CharField(max_length=255, unique=True)
@@ -20,10 +23,22 @@ class Message(models.Model):
         return f"Message from {self.sender.username} to {self.receiver.username} at {self.timestamp}"
 
 
+class MessageListView(ListView):
+    model = Message
+    template_name = 'chat/message_list.html'
 
+    def get_queryset(self):
+        # Get the friend ID from the URL and filter messages accordingly
+        friend_id = self.kwargs.get('friend_id')
+        return Message.objects.filter(receiver_id=friend_id).order_by('timestamp')
+    
 class Block(models.Model):
-    blocker = models.ForeignKey(User, related_name='blocked_by', on_delete=models.CASCADE)
-    blocked = models.ForeignKey(User, related_name='blocked_users', on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f"{self.blocker.username} blocked {self.blocked.username}"
+    blocker = models.ForeignKey(User, on_delete=models.CASCADE, related_name="blocker")
+    blocked_user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="blocked_user",
+        null=True,  # Allow null values temporarily
+        blank=True
+    )
+    created_at = models.DateTimeField(auto_now_add=True)

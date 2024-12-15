@@ -7,10 +7,13 @@ from django.contrib.auth.models import User
 from .models import ChatRoom, Message
 from rest_framework.permissions import IsAuthenticated
 from .serializers import ChatRoomSerializer, MessageSerializer
-# from .models import Q
+from django.db.models import Q
 
 from django.http import JsonResponse
-from .models import Block
+from .models import Block, User
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+import json
 
 
 
@@ -21,7 +24,7 @@ from .models import Block
 
 #         # Create a room and link users (simplified)
 #         room = ChatRoom.objects.create(name=room_name)
-#         for user_id in users:
+#         for friend_id in users:
 #             user = User.objects.get(id=user_id)
 #             room.users.add(user)
 
@@ -42,7 +45,7 @@ class ChatRoomView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class MessageListView(APIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def get(self, request, friend_id):
         try:
@@ -74,13 +77,65 @@ class MessageListView(APIView):
             return Response({"error": str(e)}, status=500)
 
 
+
+@csrf_exempt
 def block_user(request, friend_id):
-    user = request.user
-    try:
-        friend = User.objects.get(id=friend_id)
-        if Block.objects.filter(blocker=user, blocked=friend).exists():
-            return JsonResponse({"status": "already_blocked"}, status=400)
-        Block.objects.create(blocker=user, blocked=friend)
-        return JsonResponse({"status": "success"})
-    except User.DoesNotExist:
-        return JsonResponse({"status": "user_not_found"}, status=404)
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            blocker_id = data.get('blocker_id')
+
+            # Check if blocker and blocked user exist
+            blocker = User.objects.get(id=blocker_id)
+            blocked_user = User.objects.get(id=friend_id)
+
+            # Create a block relationship
+            Block.objects.get_or_create(blocker=blocker, blocked_user=blocked_user)
+
+            return JsonResponse({"status": "blocked", "message": f"User {blocked_user.username} has been blocked."})
+
+        except User.DoesNotExist:
+            return JsonResponse({"error": "User not found."}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    return JsonResponse({"error": "Invalid request method."}, status=400)
+
+@csrf_exempt
+def unblock_user(request, friend_id):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            blocker_id = data.get('blocker_id')
+
+            # Fetch the blocker and blocked users
+            blocker = User.objects.get(id=blocker_id)
+            blocked_user = User.objects.get(id=friend_id)
+
+            # Delete the block entry
+            deleted, _ = Block.objects.filter(blocker=blocker, blocked_user=blocked_user).delete()
+
+            if deleted > 0:
+                return JsonResponse({"status": "unblocked", "message": f"User {blocked_user.username} has been unblocked."}, status=200)
+            else:
+                return JsonResponse({"error": "No block entry found to delete."}, status=404)
+
+        except User.DoesNotExist:
+            return JsonResponse({"error": "User not found."}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    return JsonResponse({"error": "Invalid request method."}, status=400)
+
+
+
+@csrf_exempt
+def block_status(request, friend_id):
+    if request.method == "GET":
+        try:
+            blocker = User.objects.get(id=request.user.id)  # Assuming user is authenticated
+            blocked_user = User.objects.get(id=friend_id)
+
+            is_blocked = Block.objects.filter(blocker=blocker, blocked_user=blocked_user).exists()
+            return JsonResponse({"is_blocked": is_blocked}, status=200)
+        except User.DoesNotExist:
+            return JsonResponse({"error": "User not found"}, status=404)
+    return JsonResponse({"error": "Invalid request method"}, status=400)

@@ -1,9 +1,9 @@
-import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import sync_to_async
+import json
+import logging
 from django.contrib.auth.models import User
 from .models import ChatRoom, Message, Block
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
 
-        # Accept the WebSocket connection first
+        # Accept the WebSocket connection
         await self.accept()
         logger.info(f"WebSocket connected: {self.room_group_name}")
 
@@ -62,7 +62,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             message_list = [
                 {
                     "content": message.content,
-                    "sender": message.sender.username,  # Ensure sender is correctly accessed
+                    "sender": message.sender.username,
                     "timestamp": message.timestamp.isoformat(),
                 }
                 for message in messages
@@ -76,23 +76,24 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         try:
             data = json.loads(text_data)
-            logger.info(f"Received WebSocket data: {data}")  # Log the received data
+            logger.info(f"Received WebSocket data: {data}")
 
             message = data.get("message")
             username = data.get("username")
-
+            
             if not message or not username:
                 await self.send(
                     text_data=json.dumps({"error": "Invalid message format"})
                 )
-                logger.error("Invalid message format received.")
                 return
-            
-            # # Save the message to the database
-            # sender = await self.save_message(username, message)
-            # if await self.is_blocked(sender, message["receiver"]):
-            #     await self.send(text_data=json.dumps({"error": "You are blocked and cannot send messages."}))
-            #     return
+
+            # Check if the sender is blocked
+            if await self.is_blocked(username):
+                await self.send(
+                    text_data=json.dumps({"error": "You are blocked from sending messages"})
+                )
+                return
+
             # Save the message to the database
             await self.save_message(username, message)
 
@@ -112,7 +113,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 text_data=json.dumps({"error": f"Server error: {str(e)}"})
             )
 
-
     async def chat_message(self, event):
         try:
             logger.info(f"Broadcasting message: {event}")
@@ -128,7 +128,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
         except Exception as e:
             logger.error(f"Error broadcasting message: {e}")
-
 
     @sync_to_async
     def save_message(self, username, message):
@@ -156,7 +155,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
             logger.error(f"Error saving message: {e}")
             raise
 
-    # @sync_to_async
-    # def is_blocked(self, sender, receiver):
-    #     # Check if the receiver has blocked the sender
-    #     return Block.objects.filter(blocker=receiver, blocked=sender).exists()
+    @sync_to_async
+    def is_blocked(self, username):
+        try:
+            sender = User.objects.get(username=username)
+            
+            # Check if the user is blocked by any other user
+            return Block.objects.filter(blocked_user=sender).exists()
+        except User.DoesNotExist:
+            logger.error(f"User {username} does not exist.")
+            return True  # Treat non-existent users as blocked
+        except Exception as e:
+            logger.error(f"Error checking block status: {e}")
+            return False

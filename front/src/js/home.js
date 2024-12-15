@@ -215,6 +215,7 @@ export function initHomePage() {
   let userData;
   let socket = null;
   let currentRoomId = null;
+  let currentFriendId = null;
   // Fetch User Data
   async function fetchUserData() {
     let token = sessionStorage.getItem("jwtToken");
@@ -331,16 +332,10 @@ function disconnectWebSocket() {
   const friendItems = document.querySelectorAll(".friend-item");
   friendItems.forEach((friend) => {
       friend.addEventListener("click", () => {
-          const roomId = friend.dataset.friendId;
-          const username = userData.nickname;
-  
-          // Disconnect from any existing WebSocket before connecting to a new one
-          disconnectWebSocket();
-          connectWebSocket(roomId, username);
-  
           // Update UI for the selected friend
           const friendName = friend.querySelector(".friend-name").textContent;
           const friendAvatar = friend.querySelector(".friend-avatar").src;
+          
   
           document.getElementById("chatUserAvatar").src = friendAvatar;
           document.getElementById("chatUserName").textContent = friendName;
@@ -582,86 +577,86 @@ fetchFriendRequests();
 
 let searchResults = document.querySelector(".search-results");
 
-    if (!searchResults) {
-        searchResults = document.createElement("div");
-        searchResults.classList.add("search-results");
-        searchContainer.appendChild(searchResults);
-    }
+  if (!searchResults) {
+      searchResults = document.createElement("div");
+      searchResults.classList.add("search-results");
+      searchContainer.appendChild(searchResults);
+  }
 
-    searchInput.addEventListener("input", async () => {
-        const query = searchInput.value.trim();
+searchInput.addEventListener("input", async () => {
+    const query = searchInput.value.trim();
 
-        if (query) {
-            try {
-                const response = await fetch(`http://0.0.0.0:8000/api/search-friends/?query=${query}`, {
-                    headers: {
-                        "Authorization": `Bearer ${sessionStorage.getItem("jwtToken")}`,
-                        "Content-Type": "application/json",
-                    },
-                });
+    if (query) {
+        try {
+            const response = await fetch(`http://0.0.0.0:8000/api/search-friends/?query=${query}`, {
+                headers: {
+                    "Authorization": `Bearer ${sessionStorage.getItem("jwtToken")}`,
+                    "Content-Type": "application/json",
+                },
+            });
 
-                if (response.ok) {
-                    const data = await response.json();
-                    searchResults.innerHTML = data.results
-                        .map(
-                            (result) => `
-                            <div class="search-result-item" data-friend-id="${result.id}">
-                              <img src="${result.avatar || 'default-avatar.jpg'}" class="result-avatar" alt="Avatar" />
-                              <div class="result-info">
-                                  <span class="result-name">${result.name}</span>
-                                  <span class="result-bio">${result.bio || "No bio available"}</span>
-                              </div>
-                              <button class="btn btn-sm btn-primary chat-btn" data-friend-id="${result.id}" data-friend-name="${result.name}" data-friend-avatar="${result.avatar}">Chat</button>
-                            </div>`
-                        )
-                        .join("");
-                      // Add click listeners to each Chat button
-                document.querySelectorAll(".chat-btn").forEach((button) => {
-                  button.addEventListener("click", () => {
-                    const friendId = button.dataset.friendId; 
-                    const friendName = button.dataset.friendName;
-                    const friendAvatar = button.dataset.friendAvatar;
+            if (response.ok) {
+                const data = await response.json();
+                searchResults.innerHTML = data.results
+                    .map(
+                        (result) => `
+                        <div class="search-result-item" data-friend-id="${result.id}">
+                          <img src="${result.avatar || 'default-avatar.jpg'}" class="result-avatar" alt="Avatar" />
+                          <div class="result-info">
+                              <span class="result-name">${result.name}</span>
+                              <span class="result-bio">${result.bio || "No bio available"}</span>
+                          </div>
+                          <button class="btn btn-sm btn-primary chat-btn" data-friend-id="${result.id}" data-friend-name="${result.name}" data-friend-avatar="${result.avatar}">Chat</button>
+                        </div>`
+                    )
+                    .join("");
+                  // Add click listeners to each Chat button
+            document.querySelectorAll(".chat-btn").forEach((button) => {
+              button.addEventListener("click", () => {
+                const friendId = button.dataset.friendId; 
+                const friendName = button.dataset.friendName;
+                const friendAvatar = button.dataset.friendAvatar;
 
-                    console.log("Starting chat with:", friendName);
+                console.log("Starting chat with:", friendName);
 
-                    // Disconnect existing WebSocket (if any)
-                    disconnectWebSocket();
+                // Disconnect existing WebSocket (if any)
+                disconnectWebSocket();
 
-                    // Connect to the new WebSocket for this friend
-                    connectWebSocket(userData.nickname, friendId);
+                // Connect to the new WebSocket for this friend
+                connectWebSocket(userData.nickname, friendId);
 
-                    // Update the chat UI
-                    document.getElementById("chatUserAvatar").src = friendAvatar || "default-avatar.jpg";
-                    document.getElementById("chatUserName").textContent = friendName;
+                // Update the chat UI
+                document.getElementById("chatUserAvatar").src = friendAvatar || "default-avatar.jpg";
+                document.getElementById("chatUserName").textContent = friendName;
 
-                    // Show the chat window and hide the default content
-                    document.getElementById("defaultContent").classList.add("d-none");
-                    document.getElementById("chatWindow").classList.remove("d-none");
+                // Show the chat window and hide the default content
+                document.getElementById("defaultContent").classList.add("d-none");
+                document.getElementById("chatWindow").classList.remove("d-none");
 
-                    // Clear previous messages (if any)
-                    const chatMessagesContainer = document.getElementById("chat-messages");
-                    chatMessagesContainer.innerHTML = "";
+                // Clear previous messages (if any)
+                const chatMessagesContainer = document.getElementById("chat-messages");
+                chatMessagesContainer.innerHTML = "";
+          });
               });
-                  });
 
-                    document.querySelectorAll(".search-result-item").forEach((item) => {
-                        item.addEventListener("click", () => {
-                            const friendId = item.dataset.friendId;
-                            console.log("Selected friend ID:", friendId);
-                            searchInput.value = ""; // Clear search input
-                            searchResults.innerHTML = ""; // Clear search results
-                        });
+                document.querySelectorAll(".search-result-item").forEach((item) => {
+                    item.addEventListener("click", () => {
+                        const friendId = item.dataset.friendId;
+                        console.log("Selected friend ID:", friendId);
+                        searchInput.value = ""; // Clear search input
+                        searchResults.innerHTML = ""; // Clear search results
                     });
-                } else {
-                    console.error("Error fetching search results:", response.statusText);
-                }
-            } catch (err) {
-                console.error("Error during search:", err);
+                });
+            } else {
+                console.error("Error fetching search results:", response.statusText);
             }
-        } else {
-            searchResults.innerHTML = "";
+        } catch (err) {
+            console.error("Error during search:", err);
         }
-    });
+    } else {
+        searchResults.innerHTML = "";
+    }
+});
   
     function fetchFriendList() {
       const token = sessionStorage.getItem("jwtToken");
@@ -733,34 +728,100 @@ let searchResults = document.querySelector(".search-results");
   
 fetchFriendList();
 
+const blockBtn = document.getElementById('blockBtn');
 
+// Add event listener for the block button
+blockBtn.addEventListener('click', async function () {
+  const friendId = blockBtn.dataset.friendId;
+  console.log("Friend ID:", friendId);
 
-function blockUser(friendId) {
-  fetch(`/api/block/${friendId}/`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      action: "block",
-    }),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.status === "success") {
-        console.log("User blocked successfully!");
-      } else {
-        console.log("Error blocking user");
-      }
-    })
-    .catch((error) => console.error("Error blocking user:", error));
+  // Determine if the button says 'Block' or 'Unblock'
+  if (blockBtn.textContent.trim() === 'Block') {
+    await blockUser(friendId);
+    blockBtn.textContent = 'Unblock';
+    blockBtn.classList.remove('btn-danger'); // Red color
+    blockBtn.classList.add('btn-success');   // Green color
+  } else {
+    await unblockUser(friendId);
+    blockBtn.textContent = 'Block';
+    blockBtn.classList.remove('btn-success'); // Green color
+    blockBtn.classList.add('btn-danger');     // Red color
+  }
+});
+
+// Function to block a user
+async function blockUser(friendId) {
+  const blockerId = userData.id;
+
+  console.log("Blocker ID:", blockerId);
+  console.log("Friend ID:", friendId);
+
+  try {
+    const response = await fetch(`http://0.0.0.0:8002/chat/block/${friendId}/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ blocker_id: blockerId }),
+    });
+
+    const result = await response.json();
+    console.log("User Blocked:", result.message);
+  } catch (error) {
+    console.error('Error blocking user:', error);
+  }
 }
 
-document.querySelectorAll(".block-btn").forEach((button) => {
-  button.addEventListener("click", function () {
-    const friendId = button.dataset.friendId;
-    blockUser(friendId);
-  });
-});
+// Function to unblock a user
+async function unblockUser(friendId) {
+  const blockerId = userData.id;
+
+  console.log("Unblock Function Triggered! Blocker ID:", blockerId, "Friend ID:", friendId);
+
+  try {
+    const response = await fetch(`http://0.0.0.0:8002/chat/unblock/${friendId}/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ blocker_id: blockerId }),
+    });
+
+    const result = await response.json();
+    console.log("Unblock API Response:", result);
+
+    // Check for response status
+    if (result.status === 'unblocked') {
+      console.log("User successfully unblocked!");
+      blockBtn.textContent = 'Block';
+      blockBtn.classList.remove('btn-success');
+      blockBtn.classList.add('btn-danger');
+    }
+  } catch (error) {
+    console.error('Error unblocking user:', error);
+  }
+}
+
+// Function to update the block button state when selecting a friend
+async function updateBlockButtonState(friendId) {
+  const blockerId = userData.id;
+
+  try {
+    // Fetch block status
+    const response = await fetch(`http://0.0.0.0:8002/chat/status/${friendId}/`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    const result = await response.json();
+    if (result.is_blocked) {
+      blockBtn.textContent = 'Unblock';
+      blockBtn.classList.remove('btn-danger'); // Red
+      blockBtn.classList.add('btn-success');   // Green
+    } else {
+      blockBtn.textContent = 'Block';
+      blockBtn.classList.remove('btn-success'); // Green
+      blockBtn.classList.add('btn-danger');     // Red
+    }
+  } catch (error) {
+    console.error('Error fetching block status:', error);
+  }
+}
 
 }
