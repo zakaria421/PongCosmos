@@ -38,6 +38,8 @@ remove-net:
 # Rebuild the services after cleaning containers and images
 rebuild: remove remove-containers remove-images remove-net build
 
+remove-volumes:
+	docker volume rm $$(docker volume ls)
 
 # View running containers
 ps:
