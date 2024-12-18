@@ -1,10 +1,17 @@
 from django.db import models
 from django.contrib.auth.models import User
-from .views import profilePics
 import random
 import os
 
-# Create your models here.
+profilePics = [
+    'images/poro0.jpg',
+    'images/poro1.jpg',
+    'images/poro2.jpg',
+    'images/poro3.jpg',
+    'images/poro4.jpg',
+    'images/poro5.jpg',
+    'images/poro6.jpg',
+]
 
 class UserProfile(models.Model):
     user                    = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user_profile')

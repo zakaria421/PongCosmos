@@ -1,28 +1,17 @@
-
 from django.http import HttpResponse
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from django.shortcuts import get_object_or_404
+from .models import UserProfile
+from .serializers import UserProfileSerializer
 
 
-# def home(request):
-#     return HttpResponse("welcome frome home")
+class UserProfileDetailView(APIView):
+    permission_classes = [IsAuthenticated]
 
-
-# def UserInfo():
-
-
-
-
-profilePics = [
-    'images/poro0.jpg',
-    'images/poro1.jpg',
-    'images/poro2.jpg',
-    'images/poro3.jpg',
-    'images/poro4.jpg',
-    'images/poro5.jpg',
-    'images/poro6.jpg',
-]
-
-# def 
-# '{"email":"edde@gmail.com","loginID":"rergerg",
-# "password":"ergeergergergERGERGERGE5151515","passwordC":"ergeergergergERGERGERGE5151515"}'
-
-##login added to the home page now should see if can login with existing user???
+    def get(self, request, nickname):
+        # Fetch the user profile by nickname
+        user_profile = get_object_or_404(UserProfile, nickname=nickname)
+        serializer = UserProfileSerializer(user_profile)
+        return Response(serializer.data)

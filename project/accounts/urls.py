@@ -6,6 +6,7 @@ from .viewsUserInfo import ProtectedView
 from .views_changePass import ChangePasswordView
 from .views_PrflUpdate import UserProfileUpdateView, ChangeProfilePictureAPIView
 from .viewsWinLoss import UpdateWinLossView
+from .views import UserProfileDetailView
 # from .views import ProxyToChat
 
 from . import viewsUserInfo
@@ -20,6 +21,8 @@ urlpatterns = [
     path('profile/update/changepassword/',ChangePasswordView.as_view()),
     path('profile/update/picture/',ChangeProfilePictureAPIView.as_view(),),
     path('profile/update/<str:result>/', UpdateWinLossView.as_view()), #this is the path for the win or loss
+    ####
+    path('user-profile/<str:nickname>/', UserProfileDetailView.as_view(), name='user-profile-detail'),
     # *************************************************************************new
     path('api/search-friends/', viewsUserInfo.search_friends, name='search_friends'),
     path('api/add-friend/', viewsUserInfo.add_friend, name='add_friend'),

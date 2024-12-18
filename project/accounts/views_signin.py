@@ -2,7 +2,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .serializers import LoginSerializer    
-from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 
 
