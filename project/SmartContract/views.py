@@ -34,6 +34,8 @@ account = Account.from_key(private_key)
 CHAIN_ID = 1337
 global_nonce = web3.eth.get_transaction_count(account.address, 'latest')
 contract_instance = web3.eth.contract(abi=abi, bytecode=byteCode)
+print("********BEFORE***************")
+time.sleep(2)
 transaction = contract_instance.constructor().build_transaction({
     'from': account.address,
     'gas': 4700000,

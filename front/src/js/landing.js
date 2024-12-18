@@ -8,7 +8,7 @@ export function initLandingPage() {
 
     // Example: Extract a query parameter called 'code'
     const authCode = urlParams.get("code");
-
+    console.log(authCode);
     if (authCode) {
       console.log("Authorization Code:", authCode);
       fetchOAuthCode(authCode);
@@ -20,6 +20,7 @@ export function initLandingPage() {
 async function fetchOAuthCode(authCode) {
   try {
     console.log("before");
+    console.log("-------------------------------FETCHING-----------------------")
     const response = await fetch(
       "http://0.0.0.0:8000/oauthcallback?code=" + authCode
     );

@@ -32,8 +32,12 @@ remove-containers:
 remove-images:
 	docker rmi -f $$(docker images -q)
 
+remove-net:
+	docker network rm my-net
+
 # Rebuild the services after cleaning containers and images
-rebuild: remove remove-containers remove-images build
+rebuild: remove remove-containers remove-images remove-net build
+
 
 # View running containers
 ps:

@@ -75,6 +75,7 @@ services:
         - ./ChatBackend:/app
       depends_on:
         - redis
+        - db
       environment:
         - REDIS_HOST=redis
         - REDIS_PORT=6379
@@ -108,4 +109,4 @@ volumes:
 
 networks:
   my-net:
-    # name: my-net
+    name: my-net
