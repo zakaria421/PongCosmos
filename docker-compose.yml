@@ -21,13 +21,14 @@ services:
       - "8000:8000"
     depends_on: 
       - db
+      - gethnode
     environment:
       - DB_NAME=ft_transcandencedb
       - DB_USER=othmane
       - DB_PASSWORD=otitebah1234
       - DB_HOST=db
       - DB_PORT=5432
-      - private_key=08fdb79d0797a2f3be23e65c04b7ea373873132a8b0c1952298ebd103dafa656
+      - WEB3_PROVIDER_URL="http://gethnode:8545"
       - PYTHONUNBUFFERED=1
     networks:
       - my-net
@@ -91,8 +92,20 @@ services:
     networks:
     - my-net
 
+  gethnode:
+    build: ./geth
+    container_name: gethnode
+    ports:
+      - "8545:8545"
+    volumes:
+      - ./geth/gethdata:/root/.ethereum
+      - ./geth/init_wallet.sh:/root/init_wallet.sh
+    networks:
+      - my-net
+
 volumes:
   postgres_data:
 
 networks:
   my-net:
+    # name: my-net

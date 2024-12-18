@@ -1,5 +1,7 @@
 # Variables
 DOCKER_COMPOSE_FILE=docker-compose.yml
+GETHDATA_DIR = ./geth/gethdata
+
 # PROJECT_NAME=my_project  # Replace with your Docker Compose project name
 
 # Build and start services
@@ -14,8 +16,13 @@ clean:
 stop:
 	docker compose -f $(DOCKER_COMPOSE_FILE) down 
 
+remove:
+	rm -rf $(GETHDATA_DIR)/*
+
+purify: remove clean
+
 # Restart services
-restart: clean build
+restart: clean remove build
 
 # Remove only containers
 remove-containers:
@@ -25,11 +32,8 @@ remove-containers:
 remove-images:
 	docker rmi -f $$(docker images -q)
 
-# Remove volumes
-remove-volumes:
-	docker volume rm $$(docker volume ls -q)
 # Rebuild the services after cleaning containers and images
-rebuild: remove-containers remove-images build
+rebuild: remove remove-containers remove-images build
 
 # View running containers
 ps:
@@ -39,4 +43,4 @@ ps:
 logs:
 	docker compose -f $(DOCKER_COMPOSE_FILE) logs -f
 
-.PHONY: build clean restart remove-containers remove-images rebuild ps logs
+.PHONY: build clean restart remove-containers remove-images rebuild ps logs purify

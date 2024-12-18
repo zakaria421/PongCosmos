@@ -1,7 +1,7 @@
 #!/bin/bash
 set -a  # Automatically export all variables
 
-source SmartContract/.env
+# source SmartContract/.env
 
 set +a  # Stop exporting
 
