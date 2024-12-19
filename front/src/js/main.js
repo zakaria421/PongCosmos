@@ -188,6 +188,11 @@ function initializePageScripts(page, mode) {
           module.initGamePage(mode);
         });
         break;
+      case 'otheruser':
+        import('./otheruser.js').then(module => {
+          module.initOtherUserPage(mode);
+        });
+        break;
     default:
       console.log('No script found for this page');
   }
@@ -199,150 +204,13 @@ function getQueryParamsFromUrl() {
   const queryString = hash.split('?')[1]; // after '?'
   const urlParams = new URLSearchParams(queryString);
   const mode = urlParams.get('mode');
+  if (!mode) {
+    const name = urlParams.get('name');
+    if (name)
+      return name;
+  }
   return mode;
 }
-
-// window.addEventListener('popstate', (event) => {
-//   const hash = window.location.hash.slice(1);
-//   const [page, query] = hash.split('?');
-//   const mode = new URLSearchParams(query).get('mode');
-//   console.log("POPSTATE: ", page);
-
-//   loadPage(page || 'landing', mode);
-// });
-
-// window.addEventListener('hashchange', () => {
-//   const hash = window.location.hash.slice(1);
-//   const [page, query] = hash.split('?');
-//   const mode = new URLSearchParams(query).get('mode');
-//   console.log("HASH CHANGE", page);
-//   loadPage(page || 'landing', mode);
-// });
-
-// Remove the popstate listener, only keep hashchange
-// window.addEventListener('hashchange', () => {
-//   const hash = window.location.hash.slice(1);
-//   const [page, query] = hash.split('?');
-//   const mode = new URLSearchParams(query).get('mode');
-//   console.log("HASH CHANGE", page);
-//   loadPage(page || 'landing', mode);
-// });
-
-// Update navigateTo to change only the hash, avoiding pushState where unnecessary
-// export function navigateTo(page, queryParams = {}) {
-//   const queryString = new URLSearchParams(queryParams).toString();
-//   const urlWithParams = queryString ? `#${page}?${queryString}` : `#${page}`;
-//   window.location.hash = urlWithParams; // Triggers the hashchange event
-// }
-
-// let lastHash = window.location.hash;
-
-// // Use a single listener to handle routing
-// function handleRouting(event) {
-//   console.log("event : ", event);
-//   const hash = window.location.hash.slice(1);
-//   if (lastHash === hash) return; // Prevent duplicate triggers
-//   lastHash = hash;
-
-//   const [page, query] = hash.split('?');
-//   const mode = new URLSearchParams(query).get('mode');
-//   loadPage(page || 'landing', mode);
-// }
-
-// window.addEventListener('hashchange', handleRouting);
-// window.addEventListener('popstate', handleRouting);
-
-// export function navigateTo(page, queryParams = {}) {
-//   // Construct query string from queryParams object
-//   const queryString = new URLSearchParams(queryParams).toString();
-//   const urlWithParams = queryString ? `#${page}?${queryString}` : `#${page}`;
-
-//   // Check if the current hash is the same as the new one to avoid duplicate events
-//   if (window.location.hash === urlWithParams) return;
-
-//   // Update the hash (triggers hashchange)
-//   window.location.hash = urlWithParams;
-// }
-
-// let lastHash = window.location.hash; // Track the last known hash to prevent duplicates
-
-// function handleRouting(event) {
-//   // Extract the current hash
-//   const hash = window.location.hash.slice(1);
-
-//   // Prevent handling if the hash hasn't changed
-//   if (lastHash === hash) return;
-//   lastHash = hash;
-
-//   // Split the hash into page and query
-//   const [page, query] = hash.split('?');
-//   const queryParams = new URLSearchParams(query);
-
-//   // Extract specific query params (example: 'mode')
-//   const mode = queryParams.get('mode');
-
-//   // Clean the URL if it contains a login code
-//   if (window.location.search.includes('code=')) {
-//     // Preserve the current hash but remove the search query
-//     history.replaceState(null, '', `${window.location.origin}${window.location.pathname}${window.location.hash}`);
-//   }
-
-//   // Call the page loader with the appropriate parameters
-//   loadPage(page || 'landing', mode);
-// }
-
-// // Add a single event listener for both hashchange and popstate
-// window.addEventListener('hashchange', handleRouting);
-
-
-// export function navigateTo(page, queryParams = {}) {
-//   // Construct the query string from the queryParams object
-//   const queryString = new URLSearchParams(queryParams).toString();
-//   const hash = queryString ? `#${page}?${queryString}` : `#${page}`;
-
-//   // Build the full URL, starting from the base URL
-//   const fullUrl = `${window.location.origin}/${hash}`;
-
-//   // Check if the current URL is already the target URL to avoid redundant updates
-//   if (window.location.href === fullUrl) return;
-
-//   // Update the URL while resetting the base path
-//   history.replaceState(null, '', fullUrl);
-
-//   // Trigger page load for the given page
-//   loadPage(page);
-// }
-
-// let lastHash = window.location.hash; // Track the last known hash
-
-// function handleRouting(event) {
-//   // Get the current hash, excluding the `#`
-//   const hash = window.location.hash.slice(1);
-
-//   // Prevent duplicate handling if the hash hasn't changed
-//   if (lastHash === hash) return;
-//   lastHash = hash;
-
-//   // Split the hash into the page name and query parameters
-//   const [page, query] = hash.split('?');
-//   const queryParams = new URLSearchParams(query);
-
-//   // Handle specific query parameters (e.g., mode)
-//   const mode = queryParams.get('mode');
-
-//   // If the URL contains a login code, clean it
-//   if (window.location.search.includes('code=')) {
-//     // Remove the search query and reset the path to root
-//     history.replaceState(null, '', `${window.location.origin}/${window.location.hash}`);
-//   }
-
-//   // Load the appropriate page
-//   loadPage(page || 'landing', mode);
-// }
-
-// // Add a single event listener for routing
-// window.addEventListener('hashchange', handleRouting);
-
 
 export function navigateTo(page, queryParams = {}) {
   // Construct the query string from the queryParams object

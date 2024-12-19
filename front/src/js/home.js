@@ -118,7 +118,7 @@ export function initHomePage() {
 
   mobileFriendsToggle.addEventListener("click", () => {
     friendListSection.classList.toggle("active");
-    mobileFriendsToggle.style.zIndex = 0;
+    mobileFriendsToggle.style.zIndex = 10;
   });
 
   // Add event listener to "Play" button
@@ -353,7 +353,7 @@ export function initHomePage() {
     // console.log("Message appended to chat:", messageElement);
   }
 
-
+console.log("pllllllllllllllllllllllllllllllllllllll");
   // Friend selection logic to initiate chat
   const friendItems = document.querySelectorAll(".friend-item");
   friendItems.forEach((friend) => {
@@ -373,6 +373,14 @@ export function initHomePage() {
       // Update the friend profile section
       document.getElementById("friendProfileName").textContent = friendName;
       document.getElementById("friendProfileBio").textContent = friend.dataset.friendBio;
+
+      // Show chat window and friend profile
+      mobileFriendsToggle.classList.add("d-none");
+      userProfile.classList.add("d-none");
+      friendProfile.classList.remove("d-none");
+
+      // Close friend list on mobile
+      friendListSection.classList.remove("active");
     });
   });
 
@@ -846,4 +854,24 @@ export function initHomePage() {
   }
 
   // Initial call to set up listeners in case elements are already present
+  // To get the other user profil
+  // Add an event listener to the entire chat-user-info container
+  document.getElementById("chatUserInfo").addEventListener("click", function () {
+  // Get the content of the #chatUserName
+  const userName = document.getElementById("chatUserName").textContent.trim();
+    console.log("userName is : ", userName);
+  // Construct the endpoint URL
+  const endpoint = `http://0.0.0.0:8000/99999/${userName}`;
+
+  // Send a request to the backend
+  fetch(endpoint)
+    .then(response => response.json())
+    .then(data => {
+      navigateTo("otheruser", {name: userName})
+    })
+    .catch(error => {
+      console.error("Error fetching profile data:", error);
+    });
+});
+
 }

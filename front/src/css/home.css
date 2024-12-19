@@ -144,9 +144,10 @@ body {
 }
 
 /* Chat Styles */
-#chatWindow {
+/* ----------------------------------------------------------ggggggggggggrrgrgrgrgrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr */
+/* #chatWindow {
   background: rgba(0, 0, 0, 0.7);
-}
+} */
 
 .chat-header {
   padding-bottom: 1rem;
