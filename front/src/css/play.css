@@ -4,7 +4,7 @@ body {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #1E2328;
+  background-color: var(--colors-body);
   background-image: 
     radial-gradient(circle at top left, rgb(213, 5, 255) 1%, transparent 40%),
     radial-gradient(circle at bottom left, rgb(15, 195, 231) 1%, transparent 40%);
@@ -26,7 +26,7 @@ body {
 .navbar {
   height: 120px;
   margin-bottom: 0.5rem;
-  /* border-bottom: 1px solid var(--colors-gold) !important; */
+  /* border-bottom: 1px solid var(--colors-cyan) !important; */
 }
 
 .nav-item a {
@@ -48,7 +48,7 @@ body {
 
 .fonts {
   font-size: 1.2rem;
-  color: #F0E6D2;
+  color: white;
 }
 
 .shows {
@@ -95,12 +95,12 @@ body {
 .mode-image:hover,
 .mode-item:hover .mode-image {
   transform: scale(1.05);
-  border-color: #C8AA6E;
+  border-color: var(--colors-cyan);
   box-shadow: 0 0 15px rgba(200, 170, 110, 0.3);
 }
 
 .mode-title {
-  color: #C8AA6E;
+  color: white;
   font-size: 24px;
   margin: 10px 0;
   font-weight: bold;
@@ -141,9 +141,9 @@ body {
 }
 
 #confirmButton {
-  background-color: #1E2328;
-  color: #C8AA6E;
-  border: 1px solid #C8AA6E;
+  background-color: var(--colors-body);
+  color: white;
+  border: 1px solid var(--colors-cyan);
   padding: 15px 80px;
   font-size: 24px;
   cursor: pointer;
@@ -151,8 +151,8 @@ body {
 }
 
 #confirmButton:hover {
-  background-color: #C8AA6E;
-  color: #1E2328;
+  background-color: var(--colors-cyan);
+  color: var(--colors-body);
 }
 
 @media (max-width: 1200px) {
@@ -278,7 +278,7 @@ body {
 #user-menu {
   display: none; /* Hidden by default */
   position: absolute; /* Position it below the user-container */
-  background-color: #1E2328 !important; /* Adjust color */
+  background-color: var(--colors-body) !important; /* Adjust color */
   color: white !important;
   border: 1px solid #ccc;
   border-radius: 4px;

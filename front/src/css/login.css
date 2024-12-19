@@ -12,7 +12,7 @@ body{
     height: 100vh !important;
     /* min-width: 60% !important; */
     overflow: hidden !important;
-    background-color: #1E2328;
+    background-color: var(--colors-body);
   background-image: 
     radial-gradient(circle at top left, rgb(213, 5, 255) 1%, transparent 40%),
     radial-gradient(circle at bottom left, rgb(15, 195, 231) 1%, transparent 40%);
@@ -25,7 +25,7 @@ body{
 .container {
     background-color: #ffffff !important;
     border-radius: 30px !important;
-    box-shadow: 0 5px 15px var(--colors-gold) !important;
+    box-shadow: 0 5px 15px var(--colors-cyan) !important;
     position: relative !important;
     overflow: hidden !important;
     width: 90% !important;
@@ -53,7 +53,7 @@ body{
 }
 
 .container .styled{
-    background-color: var(--colors-gold) !important;
+    background-color: var(--colors-cyan) !important;
     color: #fff !important;
     font-size: 12px !important;
     padding: 10px 45px !important;
@@ -67,7 +67,7 @@ body{
 }
 
 .container button.hidden{
-    background-color: var(--colors-gold) !important;
+    background-color: var(--colors-cyan) !important;
 }
 
 .container form{
@@ -83,7 +83,7 @@ body{
 
 .container .input-box {
     background-color: black !important;
-    border: 1px solid var(--colors-gold) !important;
+    border: 1px solid var(--colors-cyan) !important;
     margin: 8px 0 !important;
     padding: 10px 15px !important;
     font-size: 13px !important;
@@ -177,7 +177,7 @@ body{
 }
 
 .social-icons a {
-    border: 1px solid var(--colors-gold) !important;
+    border: 1px solid var(--colors-cyan) !important;
     border-radius: 50% !important;
     display: inline-block !important;
     margin: 0 5px !important;
@@ -272,7 +272,7 @@ body{
     text-decoration: none;
     border: none;
     background-color: white;
-    color: var(--colors-gold);
+    color: var(--colors-cyan);
   }
   
   

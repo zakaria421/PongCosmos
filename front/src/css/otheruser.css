@@ -3,7 +3,8 @@ html {
   margin: 0;
   padding: 0;
   overflow: visible;
-  background-color: #1E2328;
+  /* min-height: 100vh; */
+  background-color: var(--colors-body);
   background-image: 
     radial-gradient(circle at top left, rgb(213, 5, 255) 1%, transparent 40%),
     radial-gradient(circle at bottom left, rgb(15, 195, 231) 1%, transparent 40%);
@@ -11,7 +12,6 @@ html {
   background-size: 100vh 100vh;
   background-position: top left, bottom left;
   background-attachment: fixed;
-  min-height: 100vh;
 }
 
 /*------------------------------*/
@@ -26,14 +26,15 @@ html {
 
 .fonts {
   font-size: 1.2rem;
-  color: #F0E6D2;
+  color: white;
 }
 
 /* NAVBAR */
 .navbar {
   height: 120px !important;
   margin-bottom: 0.5rem;
-  /* border-bottom: 1px solid var(--colors-gold) !important; */
+
+  /* border-bottom: 1px solid var(--colors-cyan) !important; */
   /* Bottom border color */
   /* background-color: transparent; */
 }
@@ -179,8 +180,8 @@ html {
 }
 
 #editProfileBtn {
-  background-color: var(--colors-gold);
-  border: 1px solid var(--colors-gold);
+  background-color: var(--colors-cyan);
+  border: 1px solid var(--colors-cyan);
 }
 
 #profileBio {
@@ -188,7 +189,7 @@ html {
   width: 100%;
   height: 100px;
   display: flex;
-  background-color: #1E2328;
+  background-color: var(--colors-body);
 }
 
 .max-width-container {
@@ -212,7 +213,7 @@ html {
 
 .bio:focus {
   outline: none;
-  border: 1px solid #C8AA6E;
+  border: 1px solid var(--colors-cyan);
   /* border-color: #C8AA6E; Highlight border on focus */
 }
 
@@ -251,7 +252,7 @@ html {
 }
 
 .section-title {
-  border-bottom: 2px solid var(--colors-gold);
+  border-bottom: 2px solid var(--colors-cyan);
   padding-bottom: 10px;
   margin-bottom: 5px;
   color: white;
@@ -280,9 +281,9 @@ html {
 }
 
 .scoreboard-section {
-  background-color: #1E2328;
+  background-color: var(--colors-body);
   border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(253, 249, 23, 0.5);
+  box-shadow: 0 4px 8px rgba(35,242,255, 0.5);
   padding: 20px;
   /* height: auto; */
   width: 98%;
@@ -295,13 +296,13 @@ html {
 }
 
 .stylingColor {
-  color: var(--colors-gold);
+  color: var(--colors-cyan);
 }
 
 .level-pentagon {
   width: 80px;
   height: 80px;
-  background: linear-gradient(to bottom, var(--colors-gold), black) !important;
+  background: linear-gradient(to bottom, var(--colors-cyan), black) !important;
   clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
   display: flex;
   justify-content: center;
@@ -320,11 +321,11 @@ html {
 .level-label {
   display: inline-block;
   padding: 2px 8px;
-  border: 1px solid var(--colors-gold);
+  border: 1px solid var(--colors-cyan);
   border-radius: 12px;
   font-size: 0.9em;
   color: #ffffff;
-  background-color: #1E2328;
+  background-color: var(--colors-body);
 }
 
 .friends-container {
@@ -333,8 +334,8 @@ html {
 }
 
 .friends-section {
-  background-color: #1E2328;
-  box-shadow: 0 4px 8px rgba(253, 249, 23, 0.5);
+  background-color: var(--colors-body);
+  box-shadow: 0 4px 8px rgba(35,242,255, 0.5);
   border-radius: 5%;
 }
 
@@ -399,13 +400,13 @@ html {
 
 .bio::-webkit-scrollbar-thumb,
 .friends-container::-webkit-scrollbar-thumb {
-  background: var(--colors-gold);
+  background: var(--colors-cyan);
   border-radius: 10px;
 }
 
 .bio::-webkit-scrollbar-thumb:hover,
 .friends-container::-webkit-scrollbar-thumb:hover {
-  background: var(--colors-gold);
+  background: var(--colors-cyan);
 }
 
 @media (min-width: 992px) {
@@ -421,7 +422,7 @@ html {
     top: 0;
     left: 66%;
     width: 1px;
-    background-color: var(--colors-gold);
+    background-color: var(--colors-cyan);
     z-index: 0;
   }
   .achievement-item {
@@ -440,13 +441,13 @@ html {
 .match-history {
   max-width: 100%;
   margin: 0 auto;
-  background-color: #1a1a1a;
-  border: 2px solid #333;
+  background-color: var(--colors-body);
+  border: 2px solid #230444;
   border-radius: 15px;
   padding: 20px;
 }
 .match-card {
-  background-color: #2a2a2a;
+  background-color: hsla(269, 89%, 11%, 0.5);
   border-radius: 10px;
   overflow: hidden;
   transition: transform 0.2s;
@@ -454,7 +455,7 @@ html {
 }
 .match-card:hover {
   transform: translateY(-5px);
-  background-color: #3a3a3a;
+  background-color: hsla(269, 49%, 31%, 0.5);
 }
 .player-icon,
 .enemy-icon {
@@ -600,7 +601,7 @@ html {
  /* For editable name and bio, set hover cursor */
  [contenteditable="true"] {
   outline: 0;
-  /* border-bottom: 1px dashed var(var(--colors-gold)); */
+  /* border-bottom: 1px dashed var(var(--colors-cyan)); */
   cursor: text;
 }
 /*-------------------------------------------------------*/
@@ -609,7 +610,7 @@ html {
 #user-menu {
   display: none; /* Hidden by default */
   position: absolute; /* Position it below the user-container */
-  background-color: #1E2328 !important; /* Adjust color */
+  background-color: var(--colors-body) !important; /* Adjust color */
   color: white !important;
   border: 1px solid #ccc;
   border-radius: 4px;

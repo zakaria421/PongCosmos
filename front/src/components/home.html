@@ -54,7 +54,7 @@
       aria-controls="offcanvasNavbar"
       aria-label="Toggle navigation"
     >
-      <span class="navbar-toggler-icon" style="color: var(--colors-gold) !important;"></span>
+      <span class="navbar-toggler-icon"></span> <!--style="color: var(--colors-cyan) !important;"-->
     </button>
     <!-- USER PROFILE -->
     <div id="user-container" class="user-container position-relative profil">
@@ -78,7 +78,7 @@
 <div class="main-container">
   <div class="row g-4">
     <!-- Friend List -->
-    <div class="col-lg-3" id="friendListSection" style="box-shadow: 0 4px 8px #C8AA6E; border-radius: 16px;">
+    <div class="col-lg-3" id="friendListSection"> <!--style="box-shadow: 0 4px 8px #C8AA6E; border-radius: 16px;"-->
       <div class="section-card">
         <div class="friend-header">
           <h5>Friends</h5>
@@ -116,7 +116,7 @@
           <div class="add-friend-container d-none mb-3">
             <div class="input-group">
               <input type="text" class="form-control" id="addFriendInput" placeholder="Enter friend's username" />
-            <button class="btn btn-primary" style="background-color: var(--colors-gold); border: 1px solid var(--colors-gold)" id="addFriendButton">Add</button>
+            <button class="btn btn-primary" id="addFriendButton" style="background-color: var(--colors-cyan); border: 1px solid var(--colors-cyan)">Add</button> <!--style="background-color: var(--colors-cyan); border: 1px solid var(--colors-cyan)"-->
           </div>
           <div id="addFriendResult"></div>
           <div id="friendRequestResult"></div>          
@@ -132,7 +132,7 @@
     <div class="col-lg-6">
       <div class="section-card">
         <div id="defaultContent" class="content-center">
-          <h2>Welcome, Summoners,</h2>
+          <h2 style="color: var(--colors-cyan);">Welcome, Summoners,</h2>
           <p class="lead">
             to the ultimate Ping Pong experience! Immerse yourself in a world
             where skill meets precision, and every game is a battle for glory.
@@ -162,7 +162,7 @@
           </div>
           <div class="chat-input">
             <input type="text" class="form-control" placeholder="Type your message..."/>
-            <button class="btn btn-primary" style="background-color: var(--colors-gold); border: 1px solid var(--colors-gold)">
+            <button class="btn btn-primary" style="background-color: var(--colors-cyan); border: 1px solid var(--colors-cyan)" >
               <i class="bi bi-send-fill"></i>
             </button>
           </div>
@@ -170,7 +170,7 @@
       </div>
     </div>
     <!-- Profile Section -->
-    <div class="col-lg-3" style="box-shadow: 0 4px 8px #C8AA6E; border-radius: 16px;">
+    <div class="col-lg-3" style="border-radius: 16px;"> <!--box-shadow: 0 4px 8px #C8AA6E; -->
       <div class="section-card text-center" id="userProfile">
         <img src="https://picsum.photos/200" class="profile-avatar mb-3" />
         <h4>Your Profile</h4>
@@ -184,7 +184,7 @@
     </div>
   </div>
   <!-- Add this before closing body tag -->
-  <button class="mobile-friends-toggle d-lg-none" id="mobileFriendsToggle" style="background-color: var(--colors-gold); border: 1px solid var(--colors-gold)">
+  <button class="mobile-friends-toggle d-lg-none" id="mobileFriendsToggle" style="background-color: var(--colors-cyan); border: 1px solid var(--colors-cyan)">
     <i class="bi bi-chat-dots-fill"></i>
   </button>
 </div>
