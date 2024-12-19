@@ -6,6 +6,8 @@ export function initLoginPage() {
     document.getElementsByClassName("passwordToggleBtn");
   const passwordSimilar1 = document.getElementById("passW1");
   const passwordSimilar2 = document.getElementById("passW2");
+  const email = document.getElementById("email");
+  const name = document.getElementById("name");
 
   // shifting
   const container = document.getElementById("container");
@@ -36,7 +38,6 @@ export function initLoginPage() {
       }
     });
   }
-
   document
     .getElementById("signUpForm")
     .addEventListener("submit", async function (event) {
@@ -46,6 +47,7 @@ export function initLoginPage() {
         return;
       }
       const formData = new FormData(this);
+      console.log("FORM: ", formData);
       try {
         let response = await fetch("http://0.0.0.0:8000/signup/", {
           headers: {
@@ -56,10 +58,17 @@ export function initLoginPage() {
           body: formDataToJson(formData),
         });
         if (response.ok) {
+          passwordSimilar1.value = "";
+          name.value = "";
+          email.value = "";
+          passwordSimilar2.value = "";
           container.classList.remove("active");
         }
+        else {
+          alert("The nickname you entered is already in use. Please choose a different nickname.");
+        }
       } catch (error) {
-        alert("Account wasn't created correctly, retry again !");
+        alert("Account creation failed. Please try again.");
       }
     });
 
@@ -122,8 +131,11 @@ export function initLoginPage() {
           sessionStorage.setItem("jwtToken", token);
           navigateTo("home");
         }
+        else {
+          alert("Incorrect nickname or password. Please try again.");
+        }
       } catch (error) {
-        console.error("Error : ", error);
+        console.error("Error occured: ", error);
       }
     });
 

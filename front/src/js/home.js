@@ -859,19 +859,7 @@ console.log("pllllllllllllllllllllllllllllllllllllll");
   document.getElementById("chatUserInfo").addEventListener("click", function () {
   // Get the content of the #chatUserName
   const userName = document.getElementById("chatUserName").textContent.trim();
-    console.log("userName is : ", userName);
-  // Construct the endpoint URL
-  // const endpoint = `http://0.0.0.0:8000/user/${userName}`;
-
-  // Send a request to the backend
-  // fetch(endpoint)
-  //   .then(response => response.json())
-  //   .then(data => {
-      navigateTo("otheruser", {name: userName})
-    // // })
-    // .catch(error => {
-    //   console.error("Error fetching profile data:", error);
-    // });
+  navigateTo("otheruser", {name: userName})
 });
 
 }
