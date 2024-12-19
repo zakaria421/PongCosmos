@@ -7,40 +7,6 @@ window.addEventListener('DOMContentLoaded', function () {
   loadPage(page || 'landing', mode);
 });
 
-
-// Function to handle navigation
-// export function navigateTo(page, queryParams = {}) {
-//   // Clear all query parameters and hash from the URL
-//   const baseUrl = location.origin + '/';
-  
-//   // Construct query string from the queryParams object
-//   const queryString = new URLSearchParams(queryParams).toString();
-  
-//   // If there are query parameters, append them to the URL
-//   const urlWithParams = queryString ? `${baseUrl}#${page}?${queryString}` : `${baseUrl}#${page}`;
-
-//   // Replace the current state to clear any query parameters
-//   window.history.replaceState({}, '', baseUrl);
-  
-//   // Push the new state with the desired page hash and optional query parameters
-//   history.pushState({ page }, '', urlWithParams);
-//   loadPage(page);
-// }
-
-// export function navigateTo(page, queryParams = {}) {
-//   const baseUrl = location.origin + '/';
-//   const queryString = new URLSearchParams(queryParams).toString();
-//   const urlWithParams = queryString ? `${baseUrl}#${page}?${queryString}` : `${baseUrl}#${page}`;
-
-//   // Push the new state directly (don't replace first)
-//   history.pushState({ page }, '', urlWithParams);
-
-//   // Load the page content
-//   loadPage(page);
-// }
-
-
-
 // Function to load page content dynamically
 function loadPage(page) {
   const token = sessionStorage.getItem('jwtToken');

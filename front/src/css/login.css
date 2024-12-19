@@ -172,7 +172,7 @@ body{
     }
 }
 
-.social-icons{
+.social-icons {
     margin: 20px 0 !important;
 }
 
@@ -186,7 +186,20 @@ body{
     vertical-align: middle !important;
     text-align: center !important;
     line-height: 30px !important;
+    position: relative; /* Ensure container is positioned */
+    overflow: hidden; /* Prevent the image from breaking out */
 }
+
+.icon {
+    width: 100%; /* Image fills the container */
+    height: 100%; /* Ensures full coverage */
+    object-fit: contain; /* Fit inside the container without distortion */
+    position: absolute; /* Position image inside anchor tag */
+    top: 0;
+    left: 0;
+    z-index: 0; /* Place the image below the border */
+}
+
 
 .toggle-container{
     position: absolute !important;
