@@ -325,9 +325,9 @@ function placeCaretAtEnd(el) {
         let profilePicture = "http://0.0.0.0:8000/" + userData.profile_picture;
         console.log(profilePicture);
         updateUserDisplay(userData, profilePicture);
-        document.getElementById("profileName").textContent = userData.nickname;
-        document.getElementById("profileBio").textContent = userData.bio;
-        document.getElementById("profileImage").src = profilePicture;
+        // document.getElementById("profileName").textContent = userData.nickname;
+        // document.getElementById("profileBio").textContent = userData.bio;
+        // document.getElementById("profileImage").src = profilePicture;
         attachUserMenuListeners();
       } else {
         console.error("Failed to fetch user data:", response.statusText);
@@ -340,10 +340,10 @@ function placeCaretAtEnd(el) {
   async function fetchProfilPlayer() {
     console.log(token);
     try {
-      let response = await fetch(`http://0.0.0.0:8000/99999/${name}/`, {
+      let response = await fetch(`http://0.0.0.0:8000/user-profile/${name}/`, {
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         method: "GET",
       });
@@ -399,93 +399,7 @@ function placeCaretAtEnd(el) {
 
   console.log("displayed twice for some reason: ");
   fetchUserData();
-  // Edit profile logic
-  document
-    .getElementById("editProfileBtn")
-    .addEventListener("click", function () {
-      isEditing = !isEditing;
 
-      if (isEditing) {
-        document
-          .getElementById("profileName")
-          .setAttribute("contenteditable", "true");
-        document
-          .getElementById("profileBio")
-          .setAttribute("contenteditable", "true");
-        document.getElementById("profileImage").style.cursor = "pointer";
-        document.getElementById("profileImage").classList.add("editable");
-        document.getElementById("editImageIcon").style.display = "block";
-        this.innerHTML = '<i class="fas fa-save me-2"></i>Save Profile';
-
-        document.getElementById("profileName").focus();
-      } else {
-        const updatedName = document.getElementById("profileName").textContent;
-        const updatedBio = document.getElementById("profileBio").textContent;
-
-        fetch("http://0.0.0.0:8000/profile/update/", {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ nickname: updatedName, bio: updatedBio }),
-        })
-          .then((response) => response.json())
-          .then((userData) => {
-            document.getElementById("nickName").textContent = userData.nickname;
-            console.log("Profile updated successfully:", userData);
-          })
-          .catch((error) => console.error("Error updating profile:", error));
-
-        document
-          .getElementById("profileName")
-          .setAttribute("contenteditable", "false");
-        document
-          .getElementById("profileBio")
-          .setAttribute("contenteditable", "false");
-        document.getElementById("profileImage").style.cursor = "not-allowed";
-        document.getElementById("profileImage").classList.remove("editable");
-        document.getElementById("editImageIcon").style.display = "none";
-        this.innerHTML = '<i class="fas fa-pencil-alt me-2"></i>Edit Profile';
-      }
-    });
-
-  // Image upload logic
-  document
-    .getElementById("profileImage")
-    .addEventListener("click", function () {
-      console.log("Image clicked");
-      if (isEditing) {
-        document.getElementById("fileInput").click();
-      }
-    });
-
-  document
-    .getElementById("fileInput")
-    .addEventListener("change", function (event) {
-      event.preventDefault();
-      console.log("File input changed");
-      let formData = new FormData();
-      const file = event.target.files[0];
-
-      if (file) {
-        formData.append("profile_picture", file);
-        fetch("http://0.0.0.0:8000/profile/update/picture/", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        })
-          .then((response) => response.json())
-          .then((userData) => {
-            const imageUrl = "http://0.0.0.0:8000/" + userData.profile_picture;
-            document.getElementById("profilPicture").src = imageUrl;
-            document.getElementById("profileImage").src = imageUrl;
-          })
-          .catch((error) => console.error("Error uploading image:", error));
-      }
-    });
   /******************************************************************************** */
   const homebtn = document.getElementsByClassName("home");
   if (homebtn[0]) {

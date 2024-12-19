@@ -6,7 +6,7 @@ from .viewsUserInfo import ProtectedView
 from .views_changePass import ChangePasswordView
 from .views_PrflUpdate import UserProfileUpdateView, ChangeProfilePictureAPIView
 from .viewsWinLoss import UpdateWinLossView
-from .views import UserProfileDetailView
+from .views import UserProfileDetailView, Enable2FAView
 # from .views import ProxyToChat
 
 from . import viewsUserInfo
@@ -26,5 +26,9 @@ urlpatterns = [
     # *************************************************************************new
     path('api/search-friends/', viewsUserInfo.search_friends, name='search_friends'),
     path('api/add-friend/', viewsUserInfo.add_friend, name='add_friend'),
+
+    path('2fa/enable/', Enable2FAView.as_view(), name='enable_2fa'),
+    # path('2fa/verify/', VerifyOTPView.as_view(), name='verify_otp'),
+    # path('2fa/disable/', Disable2FAView.as_view(), name='disable_2fa'),
     
 ]
