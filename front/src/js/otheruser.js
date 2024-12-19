@@ -354,6 +354,7 @@ function placeCaretAtEnd(el) {
         document.getElementById("profileName").textContent = userData.nickname;
         document.getElementById("profileBio").textContent = userData.bio;
         document.getElementById("profileImage").src = profilePicture;
+        attachUserMenuListeners();
       } else {
         console.error("Failed to fetch user data:", response.statusText);
       }
@@ -367,6 +368,7 @@ function placeCaretAtEnd(el) {
         <button class="user btn p-2 no-border">
           <div class="d-flex align-items-center gap-2">
             <!-- Profile Image -->
+            <div id="toggler">
             <div class="users-container">
               <img src="./src/assets/home/border.png" alt="" class="users-border">
               <img src="${profilePicture}" alt="Profile Image" class="rounded-circle users">
@@ -377,6 +379,7 @@ function placeCaretAtEnd(el) {
               <p class="text-white text-decoration-none">
                 <strong>${userData.nickname}</strong>
               </p>
+            </div>
             </div>
 
             <!-- Notification Icon -->
@@ -525,7 +528,7 @@ function placeCaretAtEnd(el) {
     // }
      // Function to attach event listeners when elements exist
 function attachUserMenuListeners() {
-  const userContainer = document.getElementById("user-container");
+  const userContainer = document.getElementById("toggler");
   const userMenu = document.getElementById("user-menu");
   console.log(userMenu, userContainer);
   if (userContainer && userMenu) {
@@ -568,7 +571,6 @@ function attachUserMenuListeners() {
     }
   });
 }
-attachUserMenuListeners();
   // }
   /******************************************************************************** */
 }

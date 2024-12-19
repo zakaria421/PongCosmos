@@ -1,10 +1,11 @@
-body, html {
-    margin: 0;
-    padding: 0;
-    overflow: visible !important;
-    overflow-x: hidden !important;
-    background-color: #1E2328;
-  background-image: 
+body,
+html {
+  margin: 0;
+  padding: 0;
+  overflow: visible !important;
+  overflow-x: hidden !important;
+  background-color: #1E2328;
+  background-image:
     radial-gradient(circle at top left, rgb(213, 5, 255) 1%, transparent 40%),
     radial-gradient(circle at bottom left, rgb(15, 195, 231) 1%, transparent 40%);
   background-repeat: no-repeat;
@@ -14,47 +15,49 @@ body, html {
 }
 
 /* LOGO */
-.image { 
-    display: block;
-    width: 40px;
-    height: auto;
-    margin: 0 0 0 20px;
+.image {
+  display: block;
+  width: 40px;
+  height: auto;
+  margin: 0 0 0 20px;
 }
 
 .fonts {
-    font-size: 1.2rem;
-    color: #F0E6D2;
+  font-size: 1.2rem;
+  color: #F0E6D2;
 }
 
 /* NAVBAR */
 .navbar {
   height: 120px;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid var(--colors-gold) !important;
+  margin-bottom: 0.5rem;
+  /* border-bottom: 1px solid var(--colors-gold) !important; */
 }
 
 .user {
-    margin-left: auto !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 10px !important;
+  margin-left: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
 }
 
 .container-fluid {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    height: 100% !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  height: 100% !important;
 }
 
 .nav-item a {
-  font-size: 1rem; /* Adjust font size */
-  text-align: center; /* katcentri f togglebar*/
+  font-size: 1rem;
+  /* Adjust font size */
+  text-align: center;
+  /* katcentri f togglebar*/
 }
 
 .navbar-toggler {
-    margin-right: auto !important;
-    margin-left: 0 !important;
+  margin-right: auto !important;
+  margin-left: 0 !important;
 }
 
 .shows {
@@ -62,151 +65,214 @@ body, html {
 }
 
 .navbar .sidebar .offcanvas-body .nav-link {
-    padding: 10px !important;
-    margin: 10px;
+  padding: 10px !important;
+  margin: 10px;
 }
 
 .navbar .user {
-    background: none !important;
-    border: none !important;
+  background: none !important;
+  border: none !important;
 }
 
 .navbar .user .customBack {
-    /* background-color: #007bff !important; */
-    color: #a6009e !important; /*user !!!!*/
-    font-weight: bold !important;
-    border: none !important;
+  /* background-color: #007bff !important; */
+  color: #a6009e !important;
+  /*user !!!!*/
+  font-weight: bold !important;
+  border: none !important;
 }
 
 @media (max-width: 991px) {
-    .offcanvas-body, .offcanvas-header  {
-        background-color: var(--colors-body);
-    }
+
+  .offcanvas-body,
+  .offcanvas-header {
+    background-color: var(--colors-body);
+  }
 }
 
 @media (max-width: 989px) {
-    .contain {
-      flex-direction: column;
-    }
-    
-    .friend-list, .conversation {
-      width: calc(100% - 66px);
-      margin: 20px 0;
-    }
+  .contain {
+    flex-direction: column;
+  }
 
-    .toggle-btn {
-      width: 10rem;
-      display: block;
-      position: fixed;
-      bottom: 2rem;
-      left: 2rem;
-      z-index: 3;
-    }
+  .friend-list,
+  .conversation {
+    width: calc(100% - 66px);
+    margin: 20px 0;
+  }
 
-    .Text {
-        display: none;
-    }
-/* 
+  .toggle-btn {
+    width: 10rem;
+    display: block;
+    position: fixed;
+    bottom: 2rem;
+    left: 2rem;
+    z-index: 3;
+  }
+
+  .Text {
+    display: none;
+  }
+
+  /* 
     .play {
         position: fixed;
         left: 20%;
         top: 20%;
         transform: translate(-50%, -50%);
         z-index: 0;
-      } later on !!!!! */ 
-  }
-  
-  @media (min-width: 990px) {
-    .contain {
-      flex-direction: row;
-    }
-
-    .friend-list {
-        display: block;
-    }
-    
-    .conversation {
-      /* display: block; */
-      position: static; /* Reset positioning */
-    }
-    
-    .toggle-btn {
-      display: none;
-    }
-
-    .Text {
-        font-size: 3vw;
-        left: 30%;
-      }
+      } later on !!!!! */
 }
 
-.users-container {
-    width: 100px !important;
-    height: 100px !important;
-    position: relative !important;
-    margin-bottom: 10px !important;
-  }
-  
-  .users-border {
-    width: 100% !important;
-    height: 100% !important;
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    z-index: 1;
-  }
-  
-  .users {
-    width: 55.5% !important; /*AVATAR */
-    height: 55.5% !important;
-    object-fit: cover !important;
-    border-radius: 50% !important;
-    position: absolute !important;
-    top: 23% !important; /* Center the avatar */
-    left: 23% !important;
-    z-index: 0;
-  }
-  
-  .level {
-    color: white;
-    font-weight: bold;
-    font-size: 10px;
-    position: inherit;
-    top: 73%;
-    z-index: 1;
+@media (min-width: 990px) {
+  .contain {
+    flex-direction: row;
   }
 
+  .friend-list {
+    display: block;
+  }
+
+  .conversation {
+    /* display: block; */
+    position: static;
+    /* Reset positioning */
+  }
+
+  .toggle-btn {
+    display: none;
+  }
+
+  .Text {
+    font-size: 3vw;
+    left: 30%;
+  }
+}
+
+#toggler {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  padding: 10px;
+}
+
+.user {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+}
+
+/* Users Container (Image + Border) */
+.users-container {
+  width: 100px !important;
+  height: 100px !important;
+  position: relative !important;
+  flex-shrink: 0; /* Prevents shrinking */
+}
+
+/* Profile Border */
+.users-border {
+  width: 100% !important;
+  height: 100% !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 1;
+}
+
+/* Profile Avatar */
+.users {
+  width: 55.5% !important; /* Avatar size */
+  height: 55.5% !important;
+  object-fit: cover !important;
+  border-radius: 50% !important;
+  position: absolute !important;
+  top: 23% !important; /* Center the avatar */
+  left: 23% !important;
+  z-index: 0;
+}
+
+/* User Name */
+.UserProfile {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+}
+
+.UserProfile p {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+/* Notification Icon */
+.Notifications {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
+.Notifications i {
+  font-size: 1rem;
+  color: #ffffff;
+}
+
+.level {
+  color: white;
+  font-weight: bold;
+  font-size: 10px;
+  position: inherit;
+  top: 73%;
+  z-index: 1;
+}
+
+.developer-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.developer-card img {
+  max-width: 100%;
+  height: auto;
+}
+
+@media (max-width: 767px) {
   .developer-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     text-align: center;
-    margin-bottom: 20px;
   }
-  
-  .developer-card img {
-    max-width: 100%;
-    height: auto;
-  }
-  
-  @media (max-width: 767px) {
-    .developer-card {
-      text-align: center;
-    }
-  }
-  /*-------------------------------------------------------*/
+}
+
+/*-------------------------------------------------------*/
 
 /* Dropdown Menu Styling */
 #user-menu {
-  display: none; /* Hidden by default */
-  position: absolute; /* Position it below the user-container */
-  background-color: #1E2328 !important; /* Adjust color */
+  display: none;
+  /* Hidden by default */
+  position: absolute;
+  /* Position it below the user-container */
+  background-color: #1E2328 !important;
+  /* Adjust color */
   color: white !important;
   border: 1px solid #ccc;
   border-radius: 4px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  z-index: 1000; /* Ensure it appears above other elements */
-  top: 90%; /* Positioned below the user button */
+  z-index: 1000;
+  /* Ensure it appears above other elements */
+  top: 90%;
+  /* Positioned below the user button */
   right: 0;
   min-width: 100%;
 }
@@ -230,4 +296,10 @@ body, html {
 
 #user-menu a:hover {
   background-color: hsl(210, 14%, 25%);
+}
+
+@media (max-width: 450px) {
+  .users-container {
+    display: none;
+  }
 }

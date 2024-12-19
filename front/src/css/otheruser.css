@@ -32,7 +32,8 @@ html {
 /* NAVBAR */
 .navbar {
   height: 120px !important;
-  border-bottom: 1px solid var(--colors-gold) !important;
+  margin-bottom: 0.5rem;
+  /* border-bottom: 1px solid var(--colors-gold) !important; */
   /* Bottom border color */
   /* background-color: transparent; */
 }
@@ -488,13 +489,35 @@ html {
 }
 
 /*-------------------------------------------------------*/
+
+#toggler {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  padding: 10px;
+}
+
+.user {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+}
+
+/* Users Container (Image + Border) */
 .users-container {
   width: 100px !important;
   height: 100px !important;
   position: relative !important;
-  margin-bottom: 10px !important;
+  flex-shrink: 0; /* Prevents shrinking */
 }
 
+/* Profile Border */
 .users-border {
   width: 100% !important;
   height: 100% !important;
@@ -504,8 +527,9 @@ html {
   z-index: 1;
 }
 
+/* Profile Avatar */
 .users {
-  width: 55.5% !important; /*AVATAR */
+  width: 55.5% !important; /* Avatar size */
   height: 55.5% !important;
   object-fit: cover !important;
   border-radius: 50% !important;
@@ -513,6 +537,35 @@ html {
   top: 23% !important; /* Center the avatar */
   left: 23% !important;
   z-index: 0;
+}
+
+/* User Name */
+.UserProfile {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+}
+
+.UserProfile p {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+/* Notification Icon */
+.Notifications {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
+.Notifications i {
+  font-size: 1rem;
+  color: #ffffff;
 }
 
 .level {
@@ -586,4 +639,10 @@ html {
 
 #user-menu a:hover {
   background-color: hsl(210, 14%, 25%);
+}
+
+@media (max-width: 450px) {
+  .users-container {
+    display: none;
+  }
 }
