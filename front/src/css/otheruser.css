@@ -4,6 +4,13 @@ html {
   padding: 0;
   overflow: visible;
   background-color: #1E2328;
+  background-image: 
+    radial-gradient(circle at top left, rgb(213, 5, 255) 1%, transparent 40%),
+    radial-gradient(circle at bottom left, rgb(15, 195, 231) 1%, transparent 40%);
+  background-repeat: no-repeat;
+  background-size: 100vh 100vh;
+  background-position: top left, bottom left;
+  background-attachment: fixed;
   min-height: 100vh;
 }
 
@@ -542,4 +549,41 @@ html {
   outline: 0;
   /* border-bottom: 1px dashed var(var(--colors-gold)); */
   cursor: text;
+}
+/*-------------------------------------------------------*/
+
+/* Dropdown Menu Styling */
+#user-menu {
+  display: none; /* Hidden by default */
+  position: absolute; /* Position it below the user-container */
+  background-color: #1E2328 !important; /* Adjust color */
+  color: white !important;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000; /* Ensure it appears above other elements */
+  top: 90%; /* Positioned below the user button */
+  right: 0;
+  min-width: 100%;
+}
+
+/* Initially hide the menu */
+.hidden {
+  display: none !important;
+}
+
+/* When the menu is visible */
+.visible {
+  display: block !important;
+}
+
+#user-menu a {
+  display: block;
+  padding: 8px 12px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+#user-menu a:hover {
+  background-color: hsl(210, 14%, 25%);
 }

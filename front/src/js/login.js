@@ -43,30 +43,23 @@ export function initLoginPage() {
       event.preventDefault(); // Prevent the default signUp submission
       if (passwordSimilar1.value != passwordSimilar2.value) {
         alert("Password does not meet the requirements.");
-        return; // Stop further execution
+        return;
       }
       const formData = new FormData(this);
-      // console.log(formData.get("nickname"));
-      // console.log(formData.get("password"));
-      // console.log(formData.get("email"));
-      // console.log(formData);
       try {
         let response = await fetch("http://0.0.0.0:8000/signup/", {
-          // Specify the server endpoint directly
           headers: {
-            "Content-Type": "application/json", // Ensure the content type is set to JSON
-            Accept: "application/json", // Optionally, specify the format you want the response in
+            "Content-Type": "application/json",
+            Accept: "application/json",
           },
           method: "POST",
           body: formDataToJson(formData),
         });
-        // console.log("Response : ", rewind);
         if (response.ok) {
-          // let rewind = await response.json();
-          navigateTo("login"); // to be changed later on
+          container.classList.remove("active");
         }
       } catch (error) {
-        console.error("Error : ", error);
+        alert("Account wasn't created correctly, retry again !");
       }
     });
 

@@ -1,4 +1,4 @@
-FROM ethereum/client-go:stable
+FROM ethereum/client-go:latest
 
 RUN apk update && apk add curl
 

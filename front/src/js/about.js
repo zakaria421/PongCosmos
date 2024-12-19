@@ -28,33 +28,35 @@ export function initAboutPage() {
     }
 
     function renderUser(userData, profilePicture) {
-        return `
-          <button class="user btn p-2">
-            <div class="d-flex align-items-center gap-5">
+      return `
+          <button class="user btn p-2 no-border">
+            <div class="d-flex align-items-center gap-2">
               <!-- Profile Image -->
               <div class="users-container">
                 <img src="./src/assets/home/border.png" alt="" class="users-border">
                 <img src="${profilePicture}" alt="Profile Image" class="rounded-circle users">
-                <!-- <p class="level">${userData.level}</p> -->
               </div>
-              
+  
               <!-- User Name -->
               <div class="UserProfile">
-                <a href="#profil" class="text-white text-decoration-none"><strong>${userData.nickname}</strong></a>
+                <p class="text-white text-decoration-none">
+                  <strong>${userData.nickname}</strong>
+                </p>
               </div>
-              
+  
               <!-- Notification Icon -->
               <div class="Notifications">
                 <i class="bi bi-bell-fill text-white"></i>
               </div>
             </div>
           </button>
-        `;
-    }
-
+      `;
+  }
+  
+  
     function updateUserDisplay(userData, profilePicture) {
-        let userContainer = document.getElementById("user-container");
-        userContainer.innerHTML = renderUser(userData, profilePicture);
+      const userProfileButtonContainer = document.getElementById("user-profile-button");
+      userProfileButtonContainer.innerHTML = renderUser(userData, profilePicture);
     }
 
     fetchUserData();
@@ -146,13 +148,60 @@ export function initAboutPage() {
      });
    }
    // if (document.getElementsByClassName("profil")) {
-    const profilButton = document.getElementsByClassName("profil");
-    if (profilButton[0]) {
-      profilButton[0].addEventListener("click", function (event) {
-        event.preventDefault();
-        navigateTo("profil");
-      });
+    // const profilButton = document.getElementsByClassName("profil");
+    // if (profilButton[0]) {
+    //   profilButton[0].addEventListener("click", function (event) {
+    //     event.preventDefault();
+    //     navigateTo("profil");
+    //   });
+    // }
+    // Function to attach event listeners when elements exist
+function attachUserMenuListeners() {
+  const userContainer = document.getElementById("user-container");
+  const userMenu = document.getElementById("user-menu");
+  console.log(userMenu, userContainer);
+  if (userContainer && userMenu) {
+    // Toggle dropdown visibility when clicking on the user container
+    userContainer.addEventListener("click", (event) => {
+      // Prevent click propagation to stop closing the menu immediately
+      // event.stopPropagation();
+
+      // Toggle visibility of the dropdown menu
+      userMenu.classList.toggle("visible");
+
+      // If the menu is now visible, we need to show it
+      if (userMenu.classList.contains("visible")) {
+        userMenu.classList.remove("hidden");
+      }
+    });
+
+    // Close dropdown menu when clicking outside of the user container
+    window.addEventListener("click", (event) => {
+      if (!userMenu.contains(event.target) && !userContainer.contains(event.target)) {
+        userMenu.classList.remove("visible");
+        userMenu.classList.add("hidden");
+      }
+    });
+  }
+
+  // Delegated event listener for "View Profile" and "Log Out" clicks
+  document.body.addEventListener("click", (event) => {
+    if (event.target.closest("#view-profile")) {
+      event.preventDefault();
+      console.log("Viewing profile...");
+      navigateTo("profil"); // Redirect to profile page
     }
+
+    if (event.target.closest("#log-out")) {
+      event.preventDefault();
+      console.log("Logging out...");
+      sessionStorage.clear(); // Clear session storage
+      navigateTo("landing"); // Redirect to landing page
+    }
+  });
+}
+
+attachUserMenuListeners();
    // }
    /******************************************************************************** */
 }

@@ -12,7 +12,14 @@ body{
     height: 100vh !important;
     /* min-width: 60% !important; */
     overflow: hidden !important;
-    background-color: black;
+    background-color: #1E2328;
+  background-image: 
+    radial-gradient(circle at top left, rgb(213, 5, 255) 1%, transparent 40%),
+    radial-gradient(circle at bottom left, rgb(15, 195, 231) 1%, transparent 40%);
+  background-repeat: no-repeat;
+  background-size: 100vh 100vh;
+  background-position: top left, bottom left;
+  background-attachment: fixed;
 }
 
 .container {

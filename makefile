@@ -37,6 +37,7 @@ remove-net:
 
 remove-volumes:
 	docker volume rm $$(docker volume ls)
+
 # Rebuild the services after cleaning containers and images
 rebuild: remove remove-containers remove-images remove-volumes remove-net build
 

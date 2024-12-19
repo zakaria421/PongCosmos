@@ -2,33 +2,6 @@
 import { navigateTo } from "./main.js";
 
 export function initHomePage() {
-
-  // async function fetchUserData() {
-  //   let token = sessionStorage.getItem("jwtToken");
-  //   console.log(token);
-  //   try {
-  //     let response = await fetch("http://0.0.0.0:8000/userinfo/", {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //         "Content-Type": "application/json",
-  //       },
-  //       method: "GET",
-  //     });
-  //     if (response.ok) {
-  //       let userData = await response.json();
-  //       console.log(userData);
-  //       // Decrypt the profile picture and update the user display
-  //       let profilePicture = "http://0.0.0.0:8000/" + userData.profile_picture;
-  //       console.log(profilePicture, userData);
-  //       updateUserDisplay(userData, profilePicture);
-  //     } else {
-  //       console.error("Failed to fetch user data:", response.statusText); // Error handling
-  //     }
-  //   } catch (err) {
-  //     console.error("Error fetching user data:", err);
-  //   }
-  // }
-
   function renderUser(userData, profilePicture) {
     return `
         <button class="user btn p-2 no-border">
@@ -37,12 +10,13 @@ export function initHomePage() {
             <div class="users-container">
               <img src="./src/assets/home/border.png" alt="" class="users-border">
               <img src="${profilePicture}" alt="Profile Image" class="rounded-circle users">
-              <!-- <p class="level"></p> -->
             </div>
 
             <!-- User Name -->
             <div class="UserProfile">
-              <a href="" class="text-white text-decoration-none"><strong>${userData.nickname}</strong></a>
+              <p class="text-white text-decoration-none">
+                <strong>${userData.nickname}</strong>
+              </p>
             </div>
 
             <!-- Notification Icon -->
@@ -51,16 +25,16 @@ export function initHomePage() {
             </div>
           </div>
         </button>
-      `;
-  }
+    `;
+}
+
 
   function updateUserDisplay(userData, profilePicture) {
-    let userContainer = document.getElementById("user-container");
-    userContainer.innerHTML = renderUser(userData, profilePicture);
+    const userProfileButtonContainer = document.getElementById("user-profile-button");
+    userProfileButtonContainer.innerHTML = renderUser(userData, profilePicture);
   }
-  console.log("BEFORE FETCHING DATA: will it be twice and why");
-  fetchUserData();
 
+  console.log("BEFORE FETCHING DATA: will it be twice and why");
   // Elements
   const friendListSection = document.getElementById("friendListSection");
   const closeFriendList = document.getElementById("closeFriendList");
@@ -186,17 +160,19 @@ export function initHomePage() {
     });
   }
   // if (document.getElementsByClassName("profil")) {
-  const profilButton = document.getElementsByClassName("profil");
-  if (profilButton[0]) {
-    profilButton[0].addEventListener("click", function (event) {
-      event.preventDefault();
-      navigateTo("profil");
-    });
-  }
+  // const profilButton = document.getElementsByClassName("profil");
+  // if (profilButton[0]) {
+  //   profilButton[0].addEventListener("click", function (event) {
+  //     event.preventDefault();
+  //     navigateTo("profil");
+  //   });
   // }
-  /******************************************************************************** */
+  // }
+  // Toggle the dropdown menu
+// Toggle the dropdown menu
+// Select the user button and dropdown menu
 
-
+/******************************************************************************** */
 
   const searchBtn = document.getElementById("searchBtn");
   const addFriendBtn = document.getElementById("addFriendBtn");
@@ -240,6 +216,54 @@ export function initHomePage() {
       console.error("Error fetching user data:", err);
     }
   }
+
+// Function to attach event listeners when elements exist
+function attachUserMenuListeners() {
+  const userContainer = document.getElementById("user-container");
+  const userMenu = document.getElementById("user-menu");
+  console.log(userMenu, userContainer);
+  if (userContainer && userMenu) {
+    // Toggle dropdown visibility when clicking on the user container
+    userContainer.addEventListener("click", (event) => {
+      // Prevent click propagation to stop closing the menu immediately
+      // event.stopPropagation();
+
+      // Toggle visibility of the dropdown menu
+      userMenu.classList.toggle("visible");
+
+      // If the menu is now visible, we need to show it
+      if (userMenu.classList.contains("visible")) {
+        userMenu.classList.remove("hidden");
+      }
+    });
+
+    // Close dropdown menu when clicking outside of the user container
+    window.addEventListener("click", (event) => {
+      if (!userMenu.contains(event.target) && !userContainer.contains(event.target)) {
+        userMenu.classList.remove("visible");
+        userMenu.classList.add("hidden");
+      }
+    });
+  }
+
+  // Delegated event listener for "View Profile" and "Log Out" clicks
+  document.body.addEventListener("click", (event) => {
+    if (event.target.closest("#view-profile")) {
+      event.preventDefault();
+      console.log("Viewing profile...");
+      navigateTo("profil"); // Redirect to profile page
+    }
+
+    if (event.target.closest("#log-out")) {
+      event.preventDefault();
+      console.log("Logging out...");
+      sessionStorage.clear(); // Clear session storage
+      navigateTo("landing"); // Redirect to landing page
+    }
+  });
+}
+
+
 
 function connectWebSocket(username, friendId) {
   const roomId = `${Math.min(userData.id, friendId)}_${Math.max(userData.id, friendId)}`;
@@ -397,11 +421,6 @@ function disconnectWebSocket() {
     playButton.addEventListener("click", function () {
       navigateTo("play"); // Redirect to 'login' page when Play button is clicked
     });
-  }
-
-  function updateUserDisplay(userData, profilePicture) {
-    let userContainer = document.getElementById("user-container");
-    userContainer.innerHTML = renderUser(userData, profilePicture);
   }
   fetchUserData();
 
@@ -824,4 +843,6 @@ async function updateBlockButtonState(friendId) {
   }
 }
 
+// Initial call to set up listeners in case elements are already present
+  attachUserMenuListeners();
 }
