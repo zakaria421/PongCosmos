@@ -311,7 +311,7 @@ function placeCaretAtEnd(el) {
   async function fetchUserData() {
     console.log(token);
     try {
-      let response = await fetch("http://localhost:8000/userinfo/", {
+      let response = await fetch("http://0.0.0.0:8000/userinfo/", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -322,7 +322,7 @@ function placeCaretAtEnd(el) {
         let userData = await response.json();
         console.log(userData);
         // Decrypt the profile picture and update the user display
-        let profilePicture = "http://localhost:8000/" + userData.profile_picture;
+        let profilePicture = "http://0.0.0.0:8000/" + userData.profile_picture;
         console.log(profilePicture);
         updateUserDisplay(userData, profilePicture);
         // document.getElementById("profileName").textContent = userData.nickname;
@@ -340,7 +340,7 @@ function placeCaretAtEnd(el) {
   async function fetchProfilPlayer() {
     console.log(token);
     try {
-      let response = await fetch(`http://localhost:8000/user-profile/${name}/`, {
+      let response = await fetch(`http://0.0.0.0:8000/user-profile/${name}/`, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -351,7 +351,7 @@ function placeCaretAtEnd(el) {
         let userData = await response.json();
         console.log(userData);
         // Decrypt the profile picture and update the user display
-        let profilePicture = "http://localhost:8000/" + userData.profile_picture;
+        let profilePicture = "http://0.0.0.0:8000/" + userData.profile_picture;
         document.getElementById("profileName").textContent = userData.nickname;
         document.getElementById("profileBio").textContent = userData.bio;
         document.getElementById("profileImage").src = profilePicture;

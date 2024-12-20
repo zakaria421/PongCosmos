@@ -20,7 +20,7 @@ async function fetchOAuthCode(authCode) {
     console.log("before");
     console.log("-------------------------------FETCHING-----------------------");
     const response = await fetch(
-      "http://localhost:8000/oauthcallback?code=" + authCode
+      "http://0.0.0.0:8000/oauthcallback?code=" + authCode
     );
     if (response.ok) {
       console.log("AFTER");

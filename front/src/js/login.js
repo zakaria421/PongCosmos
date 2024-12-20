@@ -49,7 +49,7 @@ export function initLoginPage() {
       const formData = new FormData(this);
       console.log("FORM: ", formData);
       try {
-        let response = await fetch("http://localhost:8000/signup/", {
+        let response = await fetch("http://0.0.0.0:8000/signup/", {
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
@@ -82,7 +82,7 @@ export function initLoginPage() {
       // console.log(formData.get('email'));
       // console.log(formData);
       try {
-        let response = await fetch("http://localhost:8000/signin/", {
+        let response = await fetch("http://0.0.0.0:8000/signin/", {
           // Specify the server endpoint directly
           headers: {
             "Content-Type": "application/json", // Ensure the content type is set to JSON

@@ -84,4 +84,4 @@ class Enable2FAView(APIView):
 #         if totp.verify(otp):
 #             return Response({"message": "OTP verified successfully!"}, status=200)
 #         else:
-#             return Response({"message": "Invalid OTP."}, status=400)
+#             return Response({"message": "Invalid OTP."}, status=400)     
