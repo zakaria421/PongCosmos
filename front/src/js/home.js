@@ -195,10 +195,11 @@ export function initHomePage() {
   let currentFriendId = null;
   // Fetch User Data
   async function fetchUserData() {
-    let token = sessionStorage.getItem("jwtToken");
-    console.log(token);
+    // let token = localStorage.getItem("jwtToken");
+    let token = localStorage.getItem("jwtToken");
+    console.log("TOEKN  in home page : ",token);
     try {
-      let response = await fetch("http://0.0.0.0:8000/userinfo/", {
+      let response = await fetch("http://localhost:8000/userinfo/", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -208,7 +209,7 @@ export function initHomePage() {
       if (response.ok) {
         userData = await response.json();
         console.log("user data = ", userData);
-        let profilePicture = "http://0.0.0.0:8000/" + userData.profile_picture;
+        let profilePicture = "http://localhost:8000/" + userData.profile_picture;
         updateUserDisplay(userData, profilePicture);
         attachUserMenuListeners();
       } else {
@@ -259,7 +260,7 @@ export function initHomePage() {
       if (event.target.closest("#log-out")) {
         event.preventDefault();
         console.log("Logging out...");
-        sessionStorage.clear(); // Clear session storage
+        localStorage.removeItem('jwtToken'); // Clear session storage
         navigateTo("landing"); // Redirect to landing page
       }
     });
@@ -279,7 +280,7 @@ export function initHomePage() {
       return;
     }
 
-    socket = new WebSocket(`ws://0.0.0.0:8002/ws/chat/${roomId}/`);
+    socket = new WebSocket(`ws://localhost:8002/ws/chat/${roomId}/`);
 
     socket.onopen = () => {
       console.log(`WebSocket connected to room: ${roomId}`);
@@ -471,10 +472,10 @@ console.log("pllllllllllllllllllllllllllllllllllllll");
     console.log("Sending friend request for nickname:", nickname);
 
     try {
-      const response = await fetch(`http://0.0.0.0:8000/friends/send-friend-request/${nickname}/`, {
+      const response = await fetch(`http://localhost:8000/friends/send-friend-request/${nickname}/`, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${sessionStorage.getItem("jwtToken")}`,
+          "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
           "Content-Type": "application/json",
         },
       });
@@ -497,10 +498,10 @@ console.log("pllllllllllllllllllllllllllllllllllllll");
 
   async function fetchFriendRequests() {
     try {
-      const response = await fetch("http://0.0.0.0:8000/friends/friend-requests/", {
+      const response = await fetch("http://localhost:8000/friends/friend-requests/", {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${sessionStorage.getItem("jwtToken")}`,
+          Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
           "Content-Type": "application/json",
         },
       });
@@ -551,10 +552,10 @@ console.log("pllllllllllllllllllllllllllllllllllllll");
       button.addEventListener("click", async () => {
         const nickname = button.dataset.nickname;
         try {
-          const response = await fetch(`http://0.0.0.0:8000/friends/accept-friend-request/${nickname}/`, {
+          const response = await fetch(`http://localhost:8000/friends/accept-friend-request/${nickname}/`, {
             method: "POST",
             headers: {
-              Authorization: `Bearer ${sessionStorage.getItem("jwtToken")}`,
+              Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
               "Content-Type": "application/json",
             },
           });
@@ -578,10 +579,10 @@ console.log("pllllllllllllllllllllllllllllllllllllll");
         const nickname = button.dataset.nickname;
         console.log(`Canceling friend request for: ${nickname}`); // Debug
         try {
-          const response = await fetch(`http://0.0.0.0:8000/friends/cancel-friend-request/${nickname}/`, {
+          const response = await fetch(`http://localhost:8000/friends/cancel-friend-request/${nickname}/`, {
             method: "POST",
             headers: {
-              Authorization: `Bearer ${sessionStorage.getItem("jwtToken")}`,
+              Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
               "Content-Type": "application/json",
             },
           });
@@ -617,9 +618,9 @@ console.log("pllllllllllllllllllllllllllllllllllllll");
 
     if (query) {
       try {
-        const response = await fetch(`http://0.0.0.0:8000/api/search-friends/?query=${query}`, {
+        const response = await fetch(`http://localhost:8000/api/search-friends/?query=${query}`, {
           headers: {
-            "Authorization": `Bearer ${sessionStorage.getItem("jwtToken")}`,
+            "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
             "Content-Type": "application/json",
           },
         });
@@ -688,12 +689,12 @@ console.log("pllllllllllllllllllllllllllllllllllllll");
   });
 
   function fetchFriendList() {
-    const token = sessionStorage.getItem("jwtToken");
+    const token = localStorage.getItem("jwtToken");
     if (!token) {
       console.error("JWT token is missing. Please log in.");
       return;
     }
-    fetch("http://0.0.0.0:8000/friends/friend-list/", {
+    fetch("http://localhost:8000/friends/friend-list/", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -786,7 +787,7 @@ console.log("pllllllllllllllllllllllllllllllllllllll");
     console.log("Friend ID:", friendId);
 
     try {
-      const response = await fetch(`http://0.0.0.0:8002/chat/block/${friendId}/`, {
+      const response = await fetch(`http://localhost:8002/chat/block/${friendId}/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ blocker_id: blockerId }),
@@ -806,7 +807,7 @@ console.log("pllllllllllllllllllllllllllllllllllllll");
     console.log("Unblock Function Triggered! Blocker ID:", blockerId, "Friend ID:", friendId);
 
     try {
-      const response = await fetch(`http://0.0.0.0:8002/chat/unblock/${friendId}/`, {
+      const response = await fetch(`http://localhost:8002/chat/unblock/${friendId}/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ blocker_id: blockerId }),
@@ -833,7 +834,7 @@ console.log("pllllllllllllllllllllllllllllllllllllll");
 
     try {
       // Fetch block status
-      const response = await fetch(`http://0.0.0.0:8002/chat/status/${friendId}/`, {
+      const response = await fetch(`http://localhost:8002/chat/status/${friendId}/`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -861,5 +862,4 @@ console.log("pllllllllllllllllllllllllllllllllllllll");
   const userName = document.getElementById("chatUserName").textContent.trim();
   navigateTo("otheruser", {name: userName})
 });
-
 }

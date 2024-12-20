@@ -1,7 +1,7 @@
 import { navigateTo } from "./main.js";
 
 export function initProfilPage() {
-  let token = sessionStorage.getItem("jwtToken");
+  let token = localStorage.getItem("jwtToken");
   let isEditing = false;
 
   const friendsContainer = document.getElementById("friendsContainer");
@@ -311,7 +311,7 @@ function placeCaretAtEnd(el) {
   async function fetchUserData() {
     console.log(token);
     try {
-      let response = await fetch("http://0.0.0.0:8000/userinfo/", {
+      let response = await fetch("http://localhost:8000/userinfo/", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -322,7 +322,7 @@ function placeCaretAtEnd(el) {
         let userData = await response.json();
         console.log(userData);
         // Decrypt the profile picture and update the user display
-        let profilePicture = "http://0.0.0.0:8000/" + userData.profile_picture;
+        let profilePicture = "http://localhost:8000/" + userData.profile_picture;
         console.log(profilePicture);
         updateUserDisplay(userData, profilePicture);
         document.getElementById("profileName").textContent = userData.nickname;
@@ -396,7 +396,7 @@ function placeCaretAtEnd(el) {
         const updatedName = document.getElementById("profileName").textContent;
         const updatedBio = document.getElementById("profileBio").textContent;
 
-        fetch("http://0.0.0.0:8000/profile/update/", {
+        fetch("http://localhost:8000/profile/update/", {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -444,7 +444,7 @@ function placeCaretAtEnd(el) {
 
       if (file) {
         formData.append("profile_picture", file);
-        fetch("http://0.0.0.0:8000/profile/update/picture/", {
+        fetch("http://localhost:8000/profile/update/picture/", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -453,7 +453,7 @@ function placeCaretAtEnd(el) {
         })
           .then((response) => response.json())
           .then((userData) => {
-            const imageUrl = "http://0.0.0.0:8000/" + userData.profile_picture;
+            const imageUrl = "http://localhost:8000/" + userData.profile_picture;
             document.getElementById("profilPicture").src = imageUrl;
             document.getElementById("profileImage").src = imageUrl;
           })
@@ -540,7 +540,7 @@ function attachUserMenuListeners() {
     if (event.target.closest("#log-out")) {
       event.preventDefault();
       console.log("Logging out...");
-      sessionStorage.clear(); // Clear session storage
+      localStorage.removeItem('jwtToken'); // Clear session storage
       navigateTo("landing"); // Redirect to landing page
     }
   });

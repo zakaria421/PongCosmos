@@ -72,10 +72,10 @@ export function initPlayPage() {
     // }
 
   async function fetchUserData() {
-    let token = sessionStorage.getItem("jwtToken");
+    let token = localStorage.getItem("jwtToken");
     console.log(token);
     try {
-      let response = await fetch("http://0.0.0.0:8000/userinfo/", {
+      let response = await fetch("http://localhost:8000/userinfo/", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -86,7 +86,7 @@ export function initPlayPage() {
         let userData = await response.json();
         console.log(userData);
         // Decrypt the profile picture and update the user display
-        let profilePicture = "http://0.0.0.0:8000/" + userData.profile_picture;
+        let profilePicture = "http://localhost:8000/" + userData.profile_picture;
         console.log(profilePicture, userData);
         updateUserDisplay(userData, profilePicture);
         attachUserMenuListeners();
@@ -172,7 +172,7 @@ function attachUserMenuListeners() {
     if (event.target.closest("#log-out")) {
       event.preventDefault();
       console.log("Logging out...");
-      sessionStorage.clear(); // Clear session storage
+      localStorage.removeItem('jwtToken'); // Clear session storage
       navigateTo("landing"); // Redirect to landing page
     }
   });

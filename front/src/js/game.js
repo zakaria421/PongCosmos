@@ -203,7 +203,7 @@ export function initGamePage(mode) {
       socket.onopen = function (e) {
         console.log("Connection established");
         if (gametype === "remote") {
-          const token = sessionStorage.getItem('jwtToken');
+          const token = localStorage.getItem('jwtToken');
           console.log(id);
           socket.send(
             JSON.stringify({
@@ -214,7 +214,7 @@ export function initGamePage(mode) {
 
           creatloadingscreen();
         } else if (gametype === "local") {
-          const token = sessionStorage.getItem('jwtToken');
+          const token = localStorage.getItem('jwtToken');
           if (gameMode === "bot") {
             socket.send(
               JSON.stringify({

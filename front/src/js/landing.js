@@ -20,7 +20,7 @@ async function fetchOAuthCode(authCode) {
     console.log("before");
     console.log("-------------------------------FETCHING-----------------------");
     const response = await fetch(
-      "http://0.0.0.0:8000/oauthcallback?code=" + authCode
+      "http://localhost:8000/oauthcallback?code=" + authCode
     );
     if (response.ok) {
       console.log("AFTER");
@@ -28,8 +28,13 @@ async function fetchOAuthCode(authCode) {
 
       const rewind = await response.json();
       const token = rewind.access;
-
-      sessionStorage.setItem("jwtToken", token);
+      // Set the cookie to expire in 7 days
+      // const date = new Date();
+      // date.setTime(date.getTime() + (7 * 24 * 60 * 60 * 1000));
+      // document.cookie = `jwtToken=${token}; expires=${date.toUTCString()}; path=/; SameSite=Lax`;
+      // console.log(document.cookie);
+      localStorage.setItem("jwtToken", token);
+      console.log("TOKEN in landing page: ",localStorage.getItem("jwtToken"));
       hideSpinner(); // Hide spinner before navigating
       navigateTo("home");
     } else {

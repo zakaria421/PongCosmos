@@ -49,7 +49,7 @@ export function initLoginPage() {
       const formData = new FormData(this);
       console.log("FORM: ", formData);
       try {
-        let response = await fetch("http://0.0.0.0:8000/signup/", {
+        let response = await fetch("http://localhost:8000/signup/", {
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
@@ -72,39 +72,6 @@ export function initLoginPage() {
       }
     });
 
-  // This script runs when the page loads
-  window.onload = async function () {
-    // Get the query parameters from the URL
-    const urlParams = new URLSearchParams(window.location.search);
-
-    // Example: Extract a query parameter called 'code'
-    const authCode = urlParams.get("code");
-
-    if (authCode) {
-      // console.log("Authorization Code:", authCode);
-      try {
-        const response = await fetch(
-          "http://0.0.0.0:8000/oauthcallback?code=" + authCode
-        );
-        if (response.ok) {
-          console.log("Authentication initiated successfully");
-          console.log(response);
-          let rewind = await response.json();
-          const token = rewind.access; // Replace with actual token retrieval
-          sessionStorage.setItem("jwtToken", token);
-          navigateTo("home"); // to be changed later on
-        } else {
-          console.error("Failed to initiate 42 authentication");
-        }
-      } catch (error) {
-        console.error("Login with 42 failed:", error);
-      }
-    } else {
-      // Handle the absence of the authorization code
-      console.log("No authorization code found.");
-    }
-  };
-
   document
     .getElementById("loginForm")
     .addEventListener("submit", async function (event) {
@@ -115,7 +82,7 @@ export function initLoginPage() {
       // console.log(formData.get('email'));
       // console.log(formData);
       try {
-        let response = await fetch("http://0.0.0.0:8000/signin/", {
+        let response = await fetch("http://localhost:8000/signin/", {
           // Specify the server endpoint directly
           headers: {
             "Content-Type": "application/json", // Ensure the content type is set to JSON
@@ -127,8 +94,14 @@ export function initLoginPage() {
         if (response.ok) {
           let rewind = await response.json();
           // console.log("Response : ", rewind, "||", response);
-          const token = rewind.access;
-          sessionStorage.setItem("jwtToken", token);
+          const token = rewind.access; // JWT token from backend
+          // Set the cookie to expire in 7 days
+          // const date = new Date();
+          // date.setTime(date.getTime() + (7 * 24 * 60 * 60 * 1000));
+          // document.cookie = `jwtToken=${token}; expires=${date.toUTCString()}; path=/; SameSite=Lax`;
+          // console.log(document.cookie);
+          localStorage.setItem("jwtToken", token);
+          console.log("TOKEN in login page: ",localStorage.getItem("jwtToken"));
           navigateTo("home");
         }
         else {
@@ -163,21 +136,21 @@ export function initLoginPage() {
   // Toggle to show sign-in form
   toSigninButton.addEventListener("click", (e) => {
     e.preventDefault();
-      signInForm.style.display = "block";
-      signUpForm.style.display = "none";
+    signInForm.style.display = "block";
+    signUpForm.style.display = "none";
   });
 
-// Function to check window width and remove class
-function checkWindowSize() {  
-  if (window.innerWidth < 768) {
-    container.classList.remove("active");
-  } else {
-    signInForm.style.display = "block";
-    signUpForm.style.display = "block";
+  // Function to check window width and remove class
+  function checkWindowSize() {
+    if (window.innerWidth < 768) {
+      container.classList.remove("active");
+    } else {
+      signInForm.style.display = "block";
+      signUpForm.style.display = "block";
+    }
   }
-}
 
-window.addEventListener("resize", checkWindowSize);
+  window.addEventListener("resize", checkWindowSize);
 
-checkWindowSize();
+  checkWindowSize();
 }
