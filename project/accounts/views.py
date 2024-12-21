@@ -1,3 +1,4 @@
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from .serializers import UserProfileSerializer
@@ -42,8 +43,7 @@ def generate_qr_code(user_profile):
     qr.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode("utf-8")
 
-
-
+## This is for enabling the 2fa
 class Enable2FAView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -65,23 +65,51 @@ class Enable2FAView(APIView):
         return JsonResponse({"message": "2FA enabled successfully.", "qr_code": qr_code})
 
 
-# class VerifyOTPView(APIView):
-#     permission_classes = [IsAuthenticated]
+# This is for verify the otp
+class VerifyOTPView(APIView):
+    def post(self, request):
+        otp = request.data.get("otp")
 
-#     def post(self, request):
-#         otp = request.data.get("otp")
-#         user = request.user
+        user = request.user
+        # Verify if 2FA is enabled
+        try:
+            user_profile = user.user_profile
+        except UserProfile.DoesNotExist:
+            return Response({"message": "User profile does not exist."}, status=400)
+        if not user_profile.is_2fa_enabled:
+            return Response({"message": "2FA is not enabled."}, status=400)
 
-#         try:
-#             user_profile = user.user_profile
-#         except UserProfile.DoesNotExist:
-#             return Response({"message": "User profile does not exist."}, status=400)
+        # Validate the OTP
+        totp = pyotp.TOTP(user_profile.otp_secret)
+        if not totp.verify(otp):
+            return Response({"message": "Invalid OTP."}, status=400)
 
-#         if not user_profile.is_2fa_enabled:
-#             return Response({"message": "2FA is not enabled."}, status=400)
+        # Generate tokens upon successful OTP verification
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            "message": "OTP verified successfully!",
+            "refresh": str(refresh),
+            "access": str(refresh.access_token)
+        }, status=200)
 
-#         totp = pyotp.TOTP(user_profile.otp_secret)
-#         if totp.verify(otp):
-#             return Response({"message": "OTP verified successfully!"}, status=200)
-#         else:
-#             return Response({"message": "Invalid OTP."}, status=400)     
+        
+
+# This is for disable the 2fa
+class Disable2FAView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        try:
+            user_profile = user.user_profile
+        except UserProfile.DoesNotExist:
+            return Response({"message": "User profile does not exist."}, status=400)
+
+        if not user_profile.is_2fa_enabled:
+            return Response({"message": "2FA is not enabled."}, status=400)
+
+        user_profile.is_2fa_enabled = False
+        user_profile.otp_secret = None  # Clear the OTP secret
+        user_profile.save()
+
+        return Response({"message": "2FA disabled successfully."}, status=200)
