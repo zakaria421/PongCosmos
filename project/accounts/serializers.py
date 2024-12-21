@@ -16,7 +16,7 @@ class FriendSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProfile  # Keep it as UserProfile, but get the related profile
-        fields = ['id', 'nickname', 'profile_picture', 'friends', 'level', 'wins', 'losses']
+        fields = ['id', 'nickname', 'profile_picture', 'friends', 'level', 'wins', 'losses',]
 
     def get_id(self, obj):
         return obj.user_profile.id
@@ -40,7 +40,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = ['id', 'nickname', 'profile_picture', 'mimeType', 'email', 
-                  'bio', 'friends', 'level', 'wins', 'losses']
+                  'bio', 'friends', 'level', 'wins', 'losses', 'is_2fa_enabled']
 
     def get_profile_picture(self, obj):
         if obj.profile_picture:
