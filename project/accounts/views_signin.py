@@ -24,6 +24,7 @@ class LoginView(APIView):
                     "message": "2FA is enabled. Please verify the OTP.",
                     "refresh": str(refresh),
                     "access": str(refresh.access_token),
+                    "qr_code": user_profile.qrcode,
                     "twoFa": True,
 
                 }, status=200)

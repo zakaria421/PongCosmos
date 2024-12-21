@@ -93,64 +93,98 @@ export function initLoginPage() {
         });
         if (response.ok) {
           let rewind = await response.json();
-          // console.log("Response : ", rewind, "||", response);
-          const token = rewind.access; // JWT token from backend
-          // Set the cookie to expire in 7 days
-          // const date = new Date();
-          // date.setTime(date.getTime() + (7 * 24 * 60 * 60 * 1000));
-          // document.cookie = `jwtToken=${token}; expires=${date.toUTCString()}; path=/; SameSite=Lax`;
-          // console.log(document.cookie);
-          localStorage.setItem("jwtToken", token);
-          console.log("TOKEN in login page: ",localStorage.getItem("jwtToken"));
-          navigateTo("home");
-        }
-        else {
-          alert("Incorrect nickname or password. Please try again.");
+          const token = rewind.access;
+          const bool = rewind.twoFa;
+          console.log("TOKEENEENENENEN e", token);
+          if (bool) {
+            document.getElementById("qrcode").style.display = "block";
+            const QR = rewind.qr_code;
+            let image = "data:image/jpg;base64," + QR;
+            console.log(image);
+            document.getElementById("QR").src = image;
+            document.getElementById('qrc').addEventListener("click", async function (event) {
+              event.preventDefault();
+              try {
+                console.log("COOODE : : : :" + document.querySelector('#qrcode input[type="text"]').value);
+                const response = await fetch(`http://0.0.0.0:8000/2fa/verify/`, {
+                  method: "POST",
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    otp: document.querySelector('#qrcode input[type="text"]').value,
+                  }),
+                });
+
+                if (response.ok) {
+                  alert("2FA verification successful!");
+                  let rewind = await response.json();
+                  const token = rewind.access;
+                  localStorage.setItem("jwtToken", token);
+                  navigateTo("home");
+                } else {
+                  alert("Failed to verify 2FA. Please try again.");
+                }
+              } catch (error) {
+                console.error("Error:", error);
+                alert("An error occurred while verifying 2FA.");
+              }
+            });
+
+            if (response.ok) {
+              console.log("2FA auth done");
+            }
+          }
+          else {
+            localStorage.setItem("jwtToken", token);
+            navigateTo("home");
+          }
         }
       } catch (error) {
-        console.error("Error occured: ", error);
-      }
-    });
-
-  function formDataToJson(formData) {
-    const obj = {};
-    formData.forEach((value, key) => {
-      obj[key] = value;
-    });
-    return JSON.stringify(obj);
-  }
-
-  const signInForm = document.querySelector(".sign-in");
-  const signUpForm = document.querySelector(".sign-up");
-  const toSignupButton = document.getElementById("to-signup");
-  const toSigninButton = document.getElementById("to-signin");
-
-  // signUpForm.style.display = "none";
-
-  toSignupButton.addEventListener("click", (e) => {
-    e.preventDefault();
-    signUpForm.style.display = "block";
-    signInForm.style.display = "none";
-  });
-
-  // Toggle to show sign-in form
-  toSigninButton.addEventListener("click", (e) => {
-    e.preventDefault();
-    signInForm.style.display = "block";
-    signUpForm.style.display = "none";
-  });
-
-  // Function to check window width and remove class
-  function checkWindowSize() {
-    if (window.innerWidth < 768) {
-      container.classList.remove("active");
-    } else {
-      signInForm.style.display = "block";
-      signUpForm.style.display = "block";
+      console.error("Error occured: ", error);
     }
+});
+
+function formDataToJson(formData) {
+  const obj = {};
+  formData.forEach((value, key) => {
+    obj[key] = value;
+  });
+  return JSON.stringify(obj);
+}
+
+const signInForm = document.querySelector(".sign-in");
+const signUpForm = document.querySelector(".sign-up");
+const toSignupButton = document.getElementById("to-signup");
+const toSigninButton = document.getElementById("to-signin");
+
+// signUpForm.style.display = "none";
+
+toSignupButton.addEventListener("click", (e) => {
+  e.preventDefault();
+  signUpForm.style.display = "block";
+  signInForm.style.display = "none";
+});
+
+// Toggle to show sign-in form
+toSigninButton.addEventListener("click", (e) => {
+  e.preventDefault();
+  signInForm.style.display = "block";
+  signUpForm.style.display = "none";
+});
+
+// Function to check window width and remove class
+function checkWindowSize() {
+  if (window.innerWidth < 768) {
+    container.classList.remove("active");
+  } else {
+    signInForm.style.display = "block";
+    signUpForm.style.display = "block";
   }
+}
 
-  window.addEventListener("resize", checkWindowSize);
+window.addEventListener("resize", checkWindowSize);
 
-  checkWindowSize();
+checkWindowSize();
 }

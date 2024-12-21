@@ -250,11 +250,30 @@ export function initHomePage() {
     }
 
     // Delegated event listener for "View Profile" and "Log Out" clicks
-    document.body.addEventListener("click", (event) => {
+    document.body.addEventListener("click", async (event) => {
       if (event.target.closest("#view-profile")) {
         event.preventDefault();
         console.log("Viewing profile...");
         navigateTo("profil"); // Redirect to profile page
+      }
+
+      if (event.target.closest("#enable-2fa")) {
+        event.preventDefault();
+        console.log("Enabling 2FA...");
+        try {
+          const response = await fetch(`http://0.0.0.0:8000/2fa/enable/`, {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
+              "Content-Type": "application/json",
+            },
+          });
+          if (response.ok) {
+            console.log("2FA auth done");
+          }
+        } catch (error) {
+          console.error("ERROR ", error)
+        }
       }
 
       if (event.target.closest("#log-out")) {

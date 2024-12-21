@@ -1,3 +1,7 @@
+* {
+  box-sizing: border-box;
+}
+
 body,
 html {
   margin: 0;
@@ -12,6 +16,12 @@ html {
   background-size: 100vh 100vh;
   background-position: top left, bottom left;
   background-attachment: fixed;
+  height: 100%;
+}
+
+#app {
+  height: 100%;
+  min-height: 100vh;
 }
 
 /* LOGO */
@@ -236,7 +246,7 @@ html {
   z-index: 1;
 }
 
-.developer-card {
+/* .developer-card {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -253,7 +263,165 @@ html {
   .developer-card {
     text-align: center;
   }
+} */
+
+/* General styles for the cards */
+.main-container {
+  height: calc(100vh - 200px); /* Adjust this if the navbar height changes */
+  padding: 0 1.5rem;
 }
+
+#developer-cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-top: 2rem; /* Adds space from the top to avoid overlap with the navbar */
+}
+
+.developer-card {
+  perspective: 1000px;
+  margin: 10px;
+  flex: 1 1 22%;
+  min-height: 350px;
+  max-height: 450px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.developer-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.8s;
+}
+
+.developer-card:hover .developer-card-inner {
+  transform: rotateY(180deg);
+}
+
+/* Front and back styling with the spin animation */
+.developer-card-front,
+.developer-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: spin 3s linear infinite; /* Spin animation for both front and back */
+}
+
+.developer-card-front {
+  background: var(--colors-body);
+  color: white;
+  padding: 20px;
+  text-align: center;
+}
+
+/* Developer image styling */
+.developer-card-front img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  margin-bottom: 10px;
+  box-shadow: 4px 4px 10px rgba(27, 227, 227, 0.4);
+}
+
+/* Back side of the card */
+.developer-card-back {
+  background: var(--colors-body);
+  color: #fff;
+  transform: rotateY(180deg);
+  /* box-shadow: 8px 8px 15px #64e3f4, -8px -8px 15px #d553f3; */
+}
+
+.developer-card-back p {
+  margin: 10px;
+}
+
+.developer-card-back .social-icons a {
+  color: white;
+  margin: 0 10px;
+  font-size: 1.5rem;
+  transition: transform 0.3s ease-in-out;
+}
+
+.developer-card-back .social-icons a:hover {
+  transform: scale(1.2);
+  color: #00bcd4;
+}
+
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+/* Spin animation for both front and back of the card */
+@keyframes spin {
+  from {
+    --angle: 0deg;
+  }
+  to {
+    --angle: 360deg;
+  }
+}
+
+/* Front side of the card ::before and ::after */
+.developer-card-front::after,
+.developer-card-front::before
+/* .developer-card-back::before,
+.developer-card-back::after  */
+{
+  content: '';
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  background-image: conic-gradient(from var(--angle), var(--colors-cyan), var(--colors-cutePink));
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: -1;
+  padding: 200px;
+  border-radius: 10px;
+  animation: spin 3s linear infinite;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.developer-card-front::before
+/* , .developer-card-back::before  */
+{
+  filter: blur(1.5rem);
+  opacity: 0.5;
+}
+
+/* Media queries for responsiveness */
+@media (max-width: 1024px) {
+  .developer-card {
+    flex: 1 1 45%; /* Two cards per row on medium screens */
+    min-height: 350px;
+    max-height: 450px;
+  }
+}
+
+@media (max-width: 767px) {
+  .developer-card {
+    flex: 1 1 100%; /* Cards take full width on smaller screens */
+    min-height: 300px;
+    max-height: 400px;
+  }
+
+  #developer-cards {
+    margin-top: 5rem; /* Adjust top margin on smaller screens to prevent overlap with navbar */
+  }
+}
+
 
 /*-------------------------------------------------------*/
 

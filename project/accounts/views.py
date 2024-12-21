@@ -63,20 +63,22 @@ class Enable2FAView(APIView):
         user_profile.qrcode = qr_code
         user_profile.save()
 
-        return JsonResponse({"message": "2FA enabled successfully.", "qr_code": qr_code})
+        return JsonResponse({"message": "2FA enabled successfully.", })
 
 
 # This is for verify the otp
 class VerifyOTPView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         otp = request.data.get("otp")
 
         user = request.user
-        # Verify if 2FA is enabled
         try:
             user_profile = user.user_profile
         except UserProfile.DoesNotExist:
             return Response({"message": "User profile does not exist."}, status=400)
+
         if not user_profile.is_2fa_enabled:
             return Response({"message": "2FA is not enabled."}, status=400)
 

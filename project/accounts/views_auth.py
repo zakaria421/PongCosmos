@@ -90,14 +90,20 @@ def oauth_callback(request):
 
     if user_profile.is_2fa_enabled:
         return Response({
-            "message": "2FA is enabled. Please verify the OTP.",
-            "requires_2fa": True
+            'profile_picture': f"{settings.MEDIA_URL}{user_profile.profile_picture.name}",
+            'nickname': login,
+            'access': tokens['access'],  
+            'refresh': tokens['refresh'], 
+            "qr_code": user_profile.qrcode,
+            "twoFa": True,
+
         }, status=200)
     
 
     # login(request, user)
 
     return Response({
+        "twoFa": False,
         'profile_picture': f"{settings.MEDIA_URL}{user_profile.profile_picture.name}",
         'nickname': login,
         'access': tokens['access'],  
