@@ -22,12 +22,15 @@ class LoginView(APIView):
             if user_profile.is_2fa_enabled:
                 return Response({
                     "message": "2FA is enabled. Please verify the OTP.",
-                    "requires_2fa": True
+                    "refresh": str(refresh),
+                    "access": str(refresh.access_token),
+                    "twoFa": True,
+
                 }, status=200)
 
             # Generate JWT tokens if 2FA is not enabled
             return Response({
-                "message": "Login successful",
+                "twoFa": False,
                 "refresh": str(refresh),
                 "access": str(refresh.access_token)
             }, status=200)
