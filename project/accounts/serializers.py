@@ -16,7 +16,7 @@ class FriendSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProfile  # Keep it as UserProfile, but get the related profile
-        fields = ['id', 'nickname', 'profile_picture']
+        fields = ['id', 'nickname', 'profile_picture', 'friends', 'level', 'wins', 'losses']
 
     def get_id(self, obj):
         return obj.user_profile.id
