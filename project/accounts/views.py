@@ -60,6 +60,7 @@ class Enable2FAView(APIView):
         # Generate QR code and enable 2FA
         qr_code = generate_qr_code(user_profile)
         user_profile.is_2fa_enabled = True
+        user_profile.qrcode = qr_code
         user_profile.save()
 
         return JsonResponse({"message": "2FA enabled successfully.", "qr_code": qr_code})

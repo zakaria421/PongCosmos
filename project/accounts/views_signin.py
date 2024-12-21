@@ -17,6 +17,8 @@ class LoginView(APIView):
             except UserProfile.DoesNotExist:
                 return Response({"message": "User profile does not exist."}, status=400)
 
+            refresh = RefreshToken.for_user(user)
+            
             if user_profile.is_2fa_enabled:
                 return Response({
                     "message": "2FA is enabled. Please verify the OTP.",
@@ -24,7 +26,6 @@ class LoginView(APIView):
                 }, status=200)
 
             # Generate JWT tokens if 2FA is not enabled
-            refresh = RefreshToken.for_user(user)
             return Response({
                 "message": "Login successful",
                 "refresh": str(refresh),

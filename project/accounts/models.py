@@ -27,6 +27,7 @@ class UserProfile(models.Model):
     level                   = models.IntegerField(default=0)
     otp_secret              = models.CharField(max_length=32, blank=True, null=True)  # Store OTP secret
     is_2fa_enabled          = models.BooleanField(default=False)
+    qrcode                  = models.CharField()
 
     def __str__(self):
         return self.nickname

@@ -85,12 +85,21 @@ def oauth_callback(request):
                 ContentFile(response.content)
             )
             user_profile.save()
-    # login(request, user)
+    
     tokens = get_tokens_for_user(user)
+
+    if user_profile.is_2fa_enabled:
+        return Response({
+            "message": "2FA is enabled. Please verify the OTP.",
+            "requires_2fa": True
+        }, status=200)
+    
+
+    # login(request, user)
 
     return Response({
         'profile_picture': f"{settings.MEDIA_URL}{user_profile.profile_picture.name}",
         'nickname': login,
-        'access': tokens['access'],  # Return the JWT access token
-        'refresh': tokens['refresh'],  # Optional: Return the refresh token
+        'access': tokens['access'],  
+        'refresh': tokens['refresh'], 
     })
