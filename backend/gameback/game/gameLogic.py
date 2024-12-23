@@ -432,7 +432,7 @@ class remotGameLogic:
         return level
     def increaseLevelLoser(self, level, games_played):
         pass
-    def post_result(self, result,token, level,id):
+    def post_result(self, result,token, level,id,score):
         url = f"http://web:8000/profile/update/{result}/"
         headers = {
             'Accept': 'application/json',
@@ -441,7 +441,8 @@ class remotGameLogic:
         print("id1: ", id)
         data = {
             'level': level,
-            'user_id': id
+            'user_id': id,
+            'score': score
         }
         response = requests.post(url, headers=headers, data=data)
         try:
@@ -460,21 +461,21 @@ class remotGameLogic:
     def sendResultDataBase(self,winner):
         print('sending result to database')
         if(winner == "left"):
-            print("winner1 : ", self.player1_Name)
-            print("loser1 : ", self.player2_Name)
+            print("winner1 : ", self.player1_Name , ",score: " , self.leftPlayerScore)
+            print("loser1 : ", self.player2_Name , ",score: " , self.rightPlayerScore)
             self.player1_total_wins += 1
             winnerLevel = self.increaseLevelWiner(self.player1_level, self.player1_total_wins)
             loserLevel = self.increaseLevelLoser(self.player2_level, self.player2_total_wins)
             print("Token: ", self.player1_token)
             print("Player1: ", self.player1)
             print("name1: ", self.player1_Name)
-            self.post_result('win', self.player1_token, winnerLevel, self.player1)
+            self.post_result('win', self.player1_token, winnerLevel, self.player1, self.leftPlayerScore)
             print("Token: ", self.player2_token)
             print("Player2: ", self.player2)
-            self.post_result('lose', self.player2_token, loserLevel, self.player2)
+            self.post_result('lose', self.player2_token, loserLevel, self.player2, self.rightPlayerScore)
         elif (winner == "right"):
-            print("winner2 : ", self.player2_Name)
-            print("loser2 : ", self.player1_Name)
+            print("winner2 : ", self.player2_Name , ",score: " , self.rightPlayerScore)
+            print("loser2 : ", self.player1_Name , ",score: " , self.leftPlayerScore)
             self.player2_total_wins += 1
             winnerLevel = self.increaseLevelWiner(self.player2_level, self.player2_total_wins)
             loserLevel = self.increaseLevelLoser(self.player1_level, self.player1_total_wins)
@@ -482,28 +483,28 @@ class remotGameLogic:
             print("Player2: ", self.player2)
             print("name2: ", self.player2_Name)
             
-            self.post_result('win', self.player2_token, winnerLevel, self.player2)
+            self.post_result('win', self.player2_token, winnerLevel, self.player2, self.rightPlayerScore)
             print("Token: ", self.player1_token)
             print("Player1: ", self.player1)
-            self.post_result('lose', self.player1_token, loserLevel, self.player1)
+            self.post_result('lose', self.player1_token, loserLevel, self.player1, self.leftPlayerScore)
             
         else:
             if winner == self.player1_Name:
-                print("winner3 : ", self.player1_Name)
-                print("loser3 : ", self.player2_Name)
+                print("winner3 : ", self.player1_Name , ",score: " , self.leftPlayerScore)
+                print("loser3 : ", self.player2_Name , ",score: " , self.rightPlayerScore)
                 self.player1_total_wins += 1
                 winnerLevel = self.increaseLevelWiner(self.player1_level, self.player1_total_wins)
                 loserLevel = self.increaseLevelLoser(self.player2_level, self.player2_total_wins)
-                self.post_result('win', self.player1_token, winnerLevel, self.player1)
-                self.post_result('lose', self.player2_token, loserLevel, self.player2)
+                self.post_result('win', self.player1_token, winnerLevel, self.player1 , self.leftPlayerScore)
+                self.post_result('lose', self.player2_token, loserLevel, self.player2, self.rightPlayerScore)
             elif winner == self.player2_Name:
-                print("winner : ", self.player2_Name)
-                print("loser : ", self.player1_Name)
+                print("winner : ", self.player2_Name , ",score: " , self.rightPlayerScore)
+                print("loser : ", self.player1_Name , ",score: " , self.leftPlayerScore)
                 self.player2_total_wins += 1
                 winnerLevel = self.increaseLevelWiner(self.player2_level, self.player2_total_wins)
                 loserLevel = self.increaseLevelLoser(self.player1_level, self.player1_total_wins)
-                self.post_result('win', self.player2_token, winnerLevel, self.player2)
-                self.post_result('lose', self.player1_token, loserLevel, self.player1)
+                self.post_result('win', self.player2_token, winnerLevel, self.player2, self.rightPlayerScore)
+                self.post_result('lose', self.player1_token, loserLevel, self.player1, self.leftPlayerScore)
     
     def calculation(self):
         if(self.begin):

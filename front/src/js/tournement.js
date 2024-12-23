@@ -4,7 +4,13 @@ function tournament(players) {
   // Create the main container
   const flexContainer = document.createElement("div");
   // clear the body from the previous elements
-  document.body.innerHTML = "";
+  const appElement = document.getElementById("app");
+  [...document.body.children].forEach(node => {
+    console.log(node, appElement);
+    if (node !== appElement) {
+      node.remove();
+    }
+  });
   // let flexchecker = document.getElementsByClassName('flex-container');
   // let flexchecker2 = document.getElementsByClassName('flex-container-finale');
   // if(flexchecker.length > 0)
@@ -212,7 +218,12 @@ function OneVsOne(players) {
   const flexContainer = document.createElement("div");
   flexContainer.className = "flex-container-finale";
   // clear the body from the previous elements
-  document.body.innerHTML = "";
+  const appElement = document.getElementById("app");
+  [...document.body.children].forEach(node => {
+    if (node !== appElement) {
+      node.remove();
+    }
+  });
   // let flexchecker = document.getElementsByClassName('flex-container');
   // let flexchecker2 = document.getElementsByClassName('flex-container-finale');
   // if (flexchecker.length > 0) {

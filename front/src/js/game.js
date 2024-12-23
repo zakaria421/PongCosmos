@@ -17,6 +17,49 @@ export function initGamePage(mode) {
     } else if (mode === "tournament") {
       gametype = "tournament";
     }
+    else if(mode === "playWithFriend")
+    {
+      console.log("playWithFriend");
+      gametype = "playWithFriend";
+    }
+    function handleBeforeUnload() {
+      console.error("change body style");
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        console.error("close socket before unload");
+        socket.close();
+      }
+      if (gametype === "tournament") {
+        
+          document.querySelectorAll(".flex-container").forEach(element => element.remove());
+        console.log(document.body.classList.remove("body-style"));
+      }
+      window.removeEventListener("resize", sendNewSize);
+      window.removeEventListener("keyup", handleKeyEvent);
+      window.removeEventListener("keydown", handleKeyEvent);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("popstate", handlePopState);
+    }
+    function handlePopState() {
+      console.error("change body style");
+
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        console.error("close socket on back button");
+        socket.close();
+      }
+      if (gametype === "tournament") {
+        // document.getElementsByClassName("flex-container").remove();
+        document.querySelectorAll(".flex-container").forEach(element => element.remove());
+        console.log(document.body.classList.remove("body-style"));
+      }
+      if (typeof sendNewSize === "function" && typeof handleKeyEvent === "function") {
+        console.log("sendNewSize is defined");
+        window.removeEventListener("resize", sendNewSize);
+        window.removeEventListener("keyup", handleKeyEvent);
+        window.removeEventListener("keydown", handleKeyEvent);
+      }
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("popstate", handlePopState);
+    }
 
     firstwindow();
     function gameOver(winner) {
@@ -85,6 +128,17 @@ export function initGamePage(mode) {
       document.body.appendChild(win_dow);
     }
     function firstwindow() {
+      // add event listener to close the socket on beforeunload and popstate
+      if(gametype === "remote" || gametype === "playWithFriend" || gametype === "tournament" )
+        {
+          window.addEventListener("beforeunload", handleBeforeUnload);
+        }
+    
+        // Close the socket on back button navigation
+        window.addEventListener("popstate", handlePopState);
+    
+        
+      // start
       let div = document.createElement("div");
       div.id = "window";
       if (gametype === "local" && gameMode === "bot") {
@@ -163,7 +217,7 @@ export function initGamePage(mode) {
         inDiv.appendChild(button);
         div.appendChild(inDiv);
         document.body.appendChild(div);
-      } else if (gametype === "remote") {
+      } else if (gametype === "remote" || gametype === "playWithFriend") {
         secondwindow();
       } else if (gametype === "tournament") {
         console.log("PLOP");
@@ -192,7 +246,7 @@ export function initGamePage(mode) {
 
       if (gametype === "local") {
         socket = new WebSocket("ws://localhost:8001/ws/pingPong/local");
-      } else if (gametype === "remote") {
+      } else if (gametype === "remote" || gametype === "playWithFriend") {
         // Use backticks for string interpolation
         socket = new WebSocket("ws://localhost:8001/ws/pingPong/remote/");
       } else if (gametype === "tournament") {
@@ -213,7 +267,19 @@ export function initGamePage(mode) {
           );
 
           creatloadingscreen();
-        } else if (gametype === "local") {
+        }
+        else if (gametype === "playWithFriend") {
+          socket.send(
+            JSON.stringify({
+              message: "Hello, server!",
+              token: localStorage.getItem('jwtToken'),
+              type: "playWithFriend",
+            })
+          );
+          creatloadingscreen();
+
+        }
+        else if (gametype === "local") {
           const token = localStorage.getItem('jwtToken');
           if (gameMode === "bot") {
             socket.send(
@@ -268,7 +334,7 @@ export function initGamePage(mode) {
             playerName[1] = data.players[1];
           }
         }
-        if(gametype === "remote")
+        if(gametype === "remote" || gametype === "playWithFriend")
         {
           if(data.message === "remote-id")
           {
@@ -278,7 +344,7 @@ export function initGamePage(mode) {
         }
         if (data.event === "draw") {
 
-          if (gametype === "remote") {
+          if (gametype === "remote" || gametype === "playWithFriend") {
             document.getElementById("window").remove();
           } else if (gametype === "tournament") {
             document.body.classList.remove("body-style");
@@ -297,17 +363,26 @@ export function initGamePage(mode) {
           if (gametype === "tournament") {
             firstInstructions = true;
           }
-          if (gametype === "local") {
-            window.removeEventListener("resize", sendNewSize);
-            window.removeEventListener("keyup", handleKeyEvent);
-            window.removeEventListener("keydown", handleKeyEvent);
-            gameOver(data.winner);
-          } else if (gametype === "remote") {
-            window.removeEventListener("resize", sendNewSize);
-            window.removeEventListener("keyup", handleKeyEvent);
-            window.removeEventListener("keydown", handleKeyEvent);
-            gameOver(data.winner);
-          }
+              window.removeEventListener("resize", sendNewSize);
+              window.removeEventListener("keyup", handleKeyEvent);
+              window.removeEventListener("keydown", handleKeyEvent);
+              window.removeEventListener("beforeunload", handleBeforeUnload);
+              window.removeEventListener("popstate", handlePopState);
+              gameOver(data.winner);
+
+          // if (gametype === "local") {
+          //   window.removeEventListener("resize", sendNewSize);
+          //   window.removeEventListener("keyup", handleKeyEvent);
+          //   window.removeEventListener("keydown", handleKeyEvent);
+          //   window.removeEventListener("beforeunload", handleBeforeUnload);
+          //   window.removeEventListener("popstate", handlePopState);
+          //   gameOver(data.winner);
+          // } else if (gametype === "remote" || gametype === "playWithFriend") {
+          //   window.removeEventListener("resize", sendNewSize);
+          //   window.removeEventListener("keyup", handleKeyEvent);
+          //   window.removeEventListener("keydown", handleKeyEvent);
+          //   gameOver(data.winner);
+          // }
         }
         if (data.event === "winner") {
           window.removeEventListener("resize", sendNewSize);
@@ -343,7 +418,7 @@ export function initGamePage(mode) {
           };
           gameData.startTheGame = data.startTheGame;
           gameData.firstInstructions = data.firstInstructions;
-          if (gametype === "remote") {
+          if (gametype === "remote" || gametype === "playWithFriend") {
             gameData.theCounter = data.theCounter;
           }
         } else {
@@ -435,7 +510,7 @@ export function initGamePage(mode) {
           rightPlayerP.innerText = playerName[1].toUpperCase();
           leftPlayerP.innerText = playerName[0].toUpperCase();
         }
-        else if (gametype === "remote") {
+        else if (gametype === "remote" || gametype === "playWithFriend") {
           rightPlayerP.innerText = data.player2_Name;
           leftPlayerP.innerText = data.player1_Name;
         }
@@ -466,7 +541,7 @@ export function initGamePage(mode) {
         let leftLetters = document.createElement("img");
         if (gametype === "local" || gametype === "tournament")
           leftLetters.src = "./src/assets/resources/letters.svg";
-        else if (gametype === "remote")
+        else if (gametype === "remote" || gametype === "playWithFriend")
           leftLetters.src = "./src/assets/resources/arrows.svg";
         leftLetters.className = "movement-icon";
         let rightArrows = document.createElement("img");
@@ -493,7 +568,8 @@ export function initGamePage(mode) {
         rightPlayer.appendChild(rightkeys);
 
         //add canvas-remote to the canvas
-        if (gametype === "remote") canvas.classList.add("canvas-remotely");
+        if (gametype === "remote" || gametype === "playWithFriend")
+          canvas.classList.add("canvas-remotely");
 
         // Append both player containers to the main div
         div.appendChild(leftPlayer);
@@ -753,7 +829,7 @@ export function initGamePage(mode) {
             }
             if (!gameData.firstInstructions && firstInstructions)
               animationMovementButton();
-          } else if (gametype === "remote") {
+          } else if (gametype === "remote" || gametype === "playWithFriend") {
             if (!gameData.startTheGame) {
               game.shadowBlur = 10;
               game.shadowColor = "#BC00DD";
@@ -858,26 +934,52 @@ export function initGamePage(mode) {
       }
 
       let keys = {};
-      if(gametype === "remote")
-      {
-        window.addEventListener("beforeunload", () => {
-          if (socket.readyState === WebSocket.OPEN) {
-              console.log('close socket before unload');
-              socket.close();
-          }
-      });
+  
+      // if(gametype === "remote" || gametype === "playWithFriend" || gametype === "tournament" )
+      // {
+      //   window.addEventListener("beforeunload", handleBeforeUnload);
+      // }
       
-      // Close the socket on back button navigation
-      window.addEventListener("popstate", () => {
-          if (socket.readyState === WebSocket.OPEN) {
-              console.log('close socket on back button');
-              socket.close();
-          }
-      });
-      }
+      // // Close the socket on back button navigation
+      // window.addEventListener("popstate", handlePopState);
       window.addEventListener("resize", sendNewSize);
       window.addEventListener("keyup", handleKeyEvent);
       window.addEventListener("keydown", handleKeyEvent);
+      // function handleBeforeUnload() {
+      //   console.error("change body style");
+      //   if (socket.readyState === WebSocket.OPEN) {
+      //     console.error("close socket before unload");
+      //     socket.close();
+      //   }
+      //   if (gametype === "tournament") {
+          
+      //       document.querySelectorAll(".flex-container").forEach(element => element.remove());
+      //     console.log(document.body.classList.remove("body-style"));
+      //   }
+      //   window.removeEventListener("resize", sendNewSize);
+      //   window.removeEventListener("keyup", handleKeyEvent);
+      //   window.removeEventListener("keydown", handleKeyEvent);
+      //   window.removeEventListener("beforeunload", handleBeforeUnload);
+      //   window.removeEventListener("popstate", handlePopState);
+      // }
+      // function handlePopState() {
+      //   console.error("change body style");
+
+      //   if (socket.readyState === WebSocket.OPEN) {
+      //     console.error("close socket on back button");
+      //     socket.close();
+      //   }
+      //   if (gametype === "tournament") {
+      //     // document.getElementsByClassName("flex-container").remove();
+      //     document.querySelectorAll(".flex-container").forEach(element => element.remove());
+      //     console.log(document.body.classList.remove("body-style"));
+      //   }
+      //   window.removeEventListener("resize", sendNewSize);
+      //   window.removeEventListener("keyup", handleKeyEvent);
+      //   window.removeEventListener("keydown", handleKeyEvent);
+      //   window.removeEventListener("beforeunload", handleBeforeUnload);
+      //   window.removeEventListener("popstate", handlePopState);
+      // }
       function handleKeyEvent(event) {
         if (gametype === "local" || gametype === "tournament") {
           if (["ArrowUp", "ArrowDown", "w", "s"].includes(event.key)) {
@@ -912,7 +1014,7 @@ export function initGamePage(mode) {
               }
             }
           }
-        } else if (gametype === "remote") {
+        } else if (gametype === "remote" || gametype === "playWithFriend") {
           if (["ArrowUp", "ArrowDown"].includes(event.key)) {
             if (socket.readyState === WebSocket.OPEN) {
               keys[event.key] = event.type === "keydown";
@@ -938,7 +1040,7 @@ export function initGamePage(mode) {
               })
             );
           }
-        } else if (gametype === "remote") {
+        } else if (gametype === "remote" || gametype === "playWithFriend") {
           if (socket.readyState === WebSocket.OPEN) {
             keys = { ArrowUp: false, ArrowDown: false };
             socket.send(
@@ -991,7 +1093,7 @@ export function initGamePage(mode) {
             }, 500); // Duration should match the CSS transition duration (0.5s)
           }
           firstInstructions = false;
-        } else if (gametype === "remote") {
+        } else if (gametype === "remote" || gametype === "playWithFriend") {
           if (
             leftkeys &&
             rightkeys &&
@@ -1027,8 +1129,10 @@ export function initGamePage(mode) {
       }
     }
   }
+
   
   if (mode) {
+    console.log("mode", mode);
     if (mode == 'Remote 1v1')
       game('remote');
     else if (mode == 'Tournament')
@@ -1037,6 +1141,8 @@ export function initGamePage(mode) {
       game('bot');
     else if (mode == '1v1')
       game('local');
+    else if (mode == 'Invite friend')
+      game('playWithFriend');
   } else {
     alert('No mode specified');
   }
