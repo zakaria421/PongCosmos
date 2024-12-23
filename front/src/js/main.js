@@ -2,20 +2,43 @@ const contentDiv = document.getElementById('app');
 // const divs = document.getElementById("window");
 window.addEventListener('DOMContentLoaded', function () {
   const hash = window.location.hash.slice(1);
-  console.log("TMS7 KOLO");
   const [page, query] = hash.split('?');
   const mode = new URLSearchParams(query).get('mode');
-  console.log(mode, "hhhhhhhhhhhhhhhhh");
   loadPage(page || 'landing', mode);
 });
 
-function loadPage(page, mode = null) {
+async function loadPage(page, mode = null) {
   const token = localStorage.getItem("jwtToken");
-  console.log("TOKEN : ", token);
-  if (!token && page !== 'landing')
+  if (!token && page !== 'landing') {
     page = 'login';
-  else if (token && (page === 'login' || page === 'landing'))
-    page = 'home';
+  }
+  try {
+    if (token || page === 'landing') {
+      let response = await fetch("http://0.0.0.0:8000/TokenVerification/", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        method: "GET",
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        const bool = userData.bool;
+        if (bool && (page === 'login' || page === 'landing')) {
+          page = 'home';
+        }
+      } else {
+        if (page !== 'login') page = 'login';
+        localStorage.removeItem('jwtToken');
+      }
+    }
+  } catch (err) {
+    console.error("Error fetching user data:", err);
+    if (page !== 'login') page = 'login';
+    localStorage.removeItem('jwtToken');
+  }
+
 
   const existingLink = document.getElementById('page-style');
   if (existingLink) {
@@ -72,14 +95,16 @@ function loadPage(page, mode = null) {
 
 function initializePageScripts(page, mode) {
   console.log("in initializePageScripts");
+  // cleanUpCurrentPage();
+
   const body = document.body;
   const firstChild = body.firstElementChild;
   const appElement = document.getElementById("app");
   // Loop through body children and remove all except the first child and the one with id="app"
   Array.from(body.children).forEach((child) => {
-      if (child !== firstChild && child !== appElement) {
-        body.removeChild(child);
-      }
+    if (child !== firstChild && child !== appElement) {
+      body.removeChild(child);
+    }
   });
   // Remove existing script if necessary
   const existingScript = document.getElementById('dynamic-script');
@@ -124,16 +149,16 @@ function initializePageScripts(page, mode) {
         module.initProfilPage();
       });
       break;
-      case 'game':
-        import('./game.js').then(module => {
-          module.initGamePage(mode);
-        });
-        break;
-      case 'otheruser':
-        import('./otheruser.js').then(module => {
-          module.initOtherUserPage(mode);
-        });
-        break;
+    case 'game':
+      import('./game.js').then(module => {
+        module.initGamePage(mode);
+      });
+      break;
+    case 'otheruser':
+      import('./otheruser.js').then(module => {
+        module.initOtherUserPage(mode);
+      });
+      break;
     default:
       console.log('No script found for this page');
   }
@@ -178,7 +203,7 @@ function handleRouting() {
 
   const modeToGet = queryParams.get('mode');
 
-   if (queryParams.has('code')) {
+  if (queryParams.has('code')) {
     queryParams.delete('code');
     const cleanedUrl = `${window.location.origin}/${window.location.pathname}#${page}?${queryParams.toString()}`;
 

@@ -60,16 +60,23 @@
     <div id="user-container" class="user-container position-relative profil">
       <!-- Placeholder for dynamic user profile button -->
       <div id="user-profile-button"></div>
+      
       <!-- Dropdown Menu -->
       <div id="user-menu" class="user-menu hidden position-absolute bg-white rounded shadow">
-        <ul class="list-unstyled mb-0">
-          <li>
-            <a href="#" id="view-profile" class="dropdown-item px-3 py-2">View Profile</a>
-          </li>
-          <li>
-            <a href="#" id="log-out" class="dropdown-item px-3 py-2">Log Out</a>
-          </li>
-        </ul>
+        <div class="dropdown-item px-3 py-2">
+          <div id="view-profile" class="menu-item">View Profile</div>
+        </div>
+        <div class="dropdown-item px-3 py-2">
+          <div id="enable-2fa" class="menu-item">2FA authentication
+            <label class="switch">
+              <input id="2fa-switch" class="input" type="checkbox">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+        <div class="dropdown-item px-3 py-2">
+          <div id="log-out" class="menu-item">Log Out</div>
+        </div>
       </div>
     </div>
   </div>

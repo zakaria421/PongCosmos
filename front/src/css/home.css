@@ -574,10 +574,10 @@ body {
   display: block !important;
 }
 
-#user-menu a {
+/* Style for the dropdown items */
+#user-menu .dropdown-item {
   display: block;
   padding: 8px 12px;
-  text-decoration: none;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -585,10 +585,12 @@ body {
   color: white;
 }
 
-#user-menu a:hover {
+/* Hover effect for dropdown items */
+#user-menu .dropdown-item:hover {
   background-color: hsl(210, 14%, 25%);
 }
 
+/* Media query for small screens */
 @media (max-width: 450px) {
   .users-container {
     display: none;

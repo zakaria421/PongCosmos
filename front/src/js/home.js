@@ -189,6 +189,8 @@ export function initHomePage() {
   const friendRequestBadge = document.getElementById("friendRequestBadge");
   const friendRequestsContainer = document.querySelector(".friend-requests-container");
 
+  const switchCheckbox = document.getElementById("2fa-switch");
+
   let userData;
   let socket = null;
   let currentRoomId = null;
@@ -210,6 +212,7 @@ export function initHomePage() {
         userData = await response.json();
         console.log("user data = ", userData);
         let profilePicture = "http://0.0.0.0:8000/" + userData.profile_picture;
+        switchCheckbox.checked = userData.is_2fa_enabled;
         updateUserDisplay(userData, profilePicture);
         attachUserMenuListeners();
       } else {
@@ -256,26 +259,7 @@ export function initHomePage() {
         console.log("Viewing profile...");
         navigateTo("profil"); // Redirect to profile page
       }
-
-      if (event.target.closest("#enable-2fa")) {
-        event.preventDefault();
-        console.log("Enabling 2FA...");
-        try {
-          const response = await fetch(`http://0.0.0.0:8000/2fa/enable/`, {
-            method: "POST",
-            headers: {
-              "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
-              "Content-Type": "application/json",
-            },
-          });
-          if (response.ok) {
-            console.log("2FA auth done");
-          }
-        } catch (error) {
-          console.error("ERROR ", error)
-        }
-      }
-
+      
       if (event.target.closest("#log-out")) {
         event.preventDefault();
         console.log("Logging out...");
@@ -283,6 +267,36 @@ export function initHomePage() {
         navigateTo("landing"); // Redirect to landing page
       }
     });
+
+document.addEventListener("change", async (event) => {
+  if (event.target.classList.contains("input")) {
+    const checkbox = event.target;
+    const isChecked = checkbox.checked;
+    const action = isChecked ? "enable" : "disable";
+
+    try {
+      console.log("ACXTION ; ", action);
+      const response = await fetch(`http://0.0.0.0:8000/2fa/${action}/`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        console.log(`2FA ${action}d successfully.`);
+      } else {
+        console.error("Request failed. Reverting switch state.");
+        checkbox.checked = !isChecked; // Revert state if request fails
+      }
+    } catch (error) {
+      console.error("Error occurred:", error);
+      checkbox.checked = !isChecked; // Revert state if an error occurs
+    }
+  }
+});
+
   }
 
 

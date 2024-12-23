@@ -2,6 +2,7 @@ import { navigateTo } from "./main.js";
 
 export function initProfilPage() {
   let token = localStorage.getItem("jwtToken");
+  const switchCheckbox = document.getElementById("2fa-switch");
   let isEditing = false;
 
   const friendsContainer = document.getElementById("friendsContainer");
@@ -323,6 +324,7 @@ function placeCaretAtEnd(el) {
         console.log(userData);
         // Decrypt the profile picture and update the user display
         let profilePicture = "http://0.0.0.0:8000/" + userData.profile_picture;
+        switchCheckbox.checked = userData.is_2fa_enabled;
         console.log(profilePicture);
         updateUserDisplay(userData, profilePicture);
         document.getElementById("profileName").textContent = userData.nickname;
@@ -501,50 +503,80 @@ function placeCaretAtEnd(el) {
     //   });
     // }
      // Function to attach event listeners when elements exist
-function attachUserMenuListeners() {
-  const userContainer = document.getElementById("toggler");
-  const userMenu = document.getElementById("user-menu");
-  console.log(userMenu, userContainer);
-  if (userContainer && userMenu) {
-    // Toggle dropdown visibility when clicking on the user container
-    userContainer.addEventListener("click", (event) => {
-      // Prevent click propagation to stop closing the menu immediately
-      // event.stopPropagation();
-
-      // Toggle visibility of the dropdown menu
-      userMenu.classList.toggle("visible");
-
-      // If the menu is now visible, we need to show it
-      if (userMenu.classList.contains("visible")) {
-        userMenu.classList.remove("hidden");
+     function attachUserMenuListeners() {
+      const userContainer = document.getElementById("toggler");
+      const userMenu = document.getElementById("user-menu");
+      console.log(userMenu, "WWAAAAAAWW", userContainer);
+      if (userContainer && userMenu) {
+        // Toggle dropdown visibility when clicking on the user container
+        userContainer.addEventListener("click", (event) => {
+          // Prevent click propagation to stop closing the menu immediately
+          // event.stopPropagation();
+  
+          // Toggle visibility of the dropdown menu
+          userMenu.classList.toggle("visible");
+  
+          // If the menu is now visible, we need to show it
+          if (userMenu.classList.contains("visible")) {
+            userMenu.classList.remove("hidden");
+          }
+        });
+  
+        // Close dropdown menu when clicking outside of the user container
+        window.addEventListener("click", (event) => {
+          if (!userMenu.contains(event.target) && !userContainer.contains(event.target)) {
+            userMenu.classList.remove("visible");
+            userMenu.classList.add("hidden");
+          }
+        });
       }
-    });
-
-    // Close dropdown menu when clicking outside of the user container
-    window.addEventListener("click", (event) => {
-      if (!userMenu.contains(event.target) && !userContainer.contains(event.target)) {
-        userMenu.classList.remove("visible");
-        userMenu.classList.add("hidden");
+  
+      // Delegated event listener for "View Profile" and "Log Out" clicks
+      document.body.addEventListener("click", async (event) => {
+        if (event.target.closest("#view-profile")) {
+          event.preventDefault();
+          console.log("Viewing profile...");
+          navigateTo("profil"); // Redirect to profile page
+        }
+        
+        if (event.target.closest("#log-out")) {
+          event.preventDefault();
+          console.log("Logging out...");
+          localStorage.removeItem('jwtToken'); // Clear session storage
+          navigateTo("landing"); // Redirect to landing page
+        }
+      });
+  
+  document.addEventListener("change", async (event) => {
+    if (event.target.classList.contains("input")) {
+      const checkbox = event.target;
+      const isChecked = checkbox.checked;
+      const action = isChecked ? "enable" : "disable";
+  
+      try {
+        console.log("ACXTION ; ", action);
+        const response = await fetch(`http://0.0.0.0:8000/2fa/${action}/`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
+            "Content-Type": "application/json",
+          },
+        });
+  
+        if (response.ok) {
+          console.log(`2FA ${action}d successfully.`);
+        } else {
+          console.error("Request failed. Reverting switch state.");
+          checkbox.checked = !isChecked; // Revert state if request fails
+        }
+      } catch (error) {
+        console.error("Error occurred:", error);
+        checkbox.checked = !isChecked; // Revert state if an error occurs
       }
-    });
-  }
-
-  // Delegated event listener for "View Profile" and "Log Out" clicks
-  document.body.addEventListener("click", (event) => {
-    if (event.target.closest("#view-profile")) {
-      event.preventDefault();
-      console.log("Viewing profile...");
-      navigateTo("profil"); // Redirect to profile page
-    }
-
-    if (event.target.closest("#log-out")) {
-      event.preventDefault();
-      console.log("Logging out...");
-      localStorage.removeItem('jwtToken'); // Clear session storage
-      navigateTo("landing"); // Redirect to landing page
     }
   });
-}
+  
+    }
   // }
   /******************************************************************************** */
 }

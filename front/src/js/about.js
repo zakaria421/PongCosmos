@@ -1,6 +1,7 @@
 import { navigateTo } from "./main.js";
 
 export function initAboutPage() {
+  const switchCheckbox = document.getElementById("2fa-switch");
   async function fetchUserData() {
     let token = localStorage.getItem("jwtToken");
     console.log(token);
@@ -17,6 +18,7 @@ export function initAboutPage() {
         console.log(userData);
         // Decrypt the profile picture and update the user display
         let profilePicture = "http://0.0.0.0:8000/" + userData.profile_picture;
+        switchCheckbox.checked = userData.is_2fa_enabled;
         console.log(profilePicture, userData);
         updateUserDisplay(userData, profilePicture);
         attachUserMenuListeners();
@@ -66,101 +68,101 @@ export function initAboutPage() {
 
   const developerCards = document.getElementById("developer-cards");
 
-const developers = [
-  {
-    name: "John Doe",
-    role: "Frontend Developer",
-    description: "Specializes in React and UI/UX design.",
-    image: "https://i.pravatar.cc/160?img=3",
-    github: "https://github.com/johndoe",
-    linkedin: "https://linkedin.com/in/johndoe"
-  },
-  {
-    name: "Jane Smith",
-    role: "Backend Developer",
-    description: "Loves building APIs and databases.",
-    image: "https://i.pravatar.cc/160?img=3",
-    github: "https://github.com/janesmith",
-    linkedin: "https://linkedin.com/in/janesmith"
-  },
-  {
-    name: "Jane Smith",
-    role: "Backend Developer",
-    description: "Loves building APIs and databases.",
-    image: "https://i.pravatar.cc/160?img=3",
-    github: "https://github.com/janesmith",
-    linkedin: "https://linkedin.com/in/janesmith"
-  },
-  {
-    name: "Jane Smith",
-    role: "Backend Developer",
-    description: "Loves building APIs and databases.",
-    image: "https://i.pravatar.cc/160?img=3",
-    github: "https://github.com/janesmith",
-    linkedin: "https://linkedin.com/in/janesmith"
-  }
-  // Add more developers as needed
-];
+  const developers = [
+    {
+      name: "John Doe",
+      role: "Frontend Developer",
+      description: "Specializes in React and UI/UX design.",
+      image: "https://i.pravatar.cc/160?img=3",
+      github: "https://github.com/johndoe",
+      linkedin: "https://linkedin.com/in/johndoe"
+    },
+    {
+      name: "Jane Smith",
+      role: "Backend Developer",
+      description: "Loves building APIs and databases.",
+      image: "https://i.pravatar.cc/160?img=3",
+      github: "https://github.com/janesmith",
+      linkedin: "https://linkedin.com/in/janesmith"
+    },
+    {
+      name: "Jane Smith",
+      role: "Backend Developer",
+      description: "Loves building APIs and databases.",
+      image: "https://i.pravatar.cc/160?img=3",
+      github: "https://github.com/janesmith",
+      linkedin: "https://linkedin.com/in/janesmith"
+    },
+    {
+      name: "Jane Smith",
+      role: "Backend Developer",
+      description: "Loves building APIs and databases.",
+      image: "https://i.pravatar.cc/160?img=3",
+      github: "https://github.com/janesmith",
+      linkedin: "https://linkedin.com/in/janesmith"
+    }
+    // Add more developers as needed
+  ];
 
-developers.forEach((developer) => {
-  const card = document.createElement("div");
-  card.classList.add("col-md-6", "col-lg-3", "developer-card", "mx-auto");
+  developers.forEach((developer) => {
+    const card = document.createElement("div");
+    card.classList.add("col-md-6", "col-lg-3", "developer-card", "mx-auto");
 
-  // Card inner wrapper
-  const cardInner = document.createElement("div");
-  cardInner.classList.add("developer-card-inner");
+    // Card inner wrapper
+    const cardInner = document.createElement("div");
+    cardInner.classList.add("developer-card-inner");
 
-  // Card front
-  const cardFront = document.createElement("div");
-  cardFront.classList.add("developer-card-front");
+    // Card front
+    const cardFront = document.createElement("div");
+    cardFront.classList.add("developer-card-front");
 
-  const image = document.createElement("img");
-  image.src = developer.image;
-  image.alt = developer.name;
-  image.classList.add("img-fluid", "rounded-circle"); // Ensure responsive image
+    const image = document.createElement("img");
+    image.src = developer.image;
+    image.alt = developer.name;
+    image.classList.add("img-fluid", "rounded-circle"); // Ensure responsive image
 
-  const name = document.createElement("h3");
-  name.textContent = developer.name;
+    const name = document.createElement("h3");
+    name.textContent = developer.name;
 
-  const role = document.createElement("p");
-  role.textContent = developer.role;
+    const role = document.createElement("p");
+    role.textContent = developer.role;
 
-  cardFront.appendChild(image);
-  cardFront.appendChild(name);
-  cardFront.appendChild(role);
+    cardFront.appendChild(image);
+    cardFront.appendChild(name);
+    cardFront.appendChild(role);
 
-  // Card back
-  const cardBack = document.createElement("div");
-  cardBack.classList.add("developer-card-back");
+    // Card back
+    const cardBack = document.createElement("div");
+    cardBack.classList.add("developer-card-back");
 
-  const description = document.createElement("p");
-  description.textContent = developer.description;
+    const description = document.createElement("p");
+    description.textContent = developer.description;
 
-  const socialIcons = document.createElement("div");
-  socialIcons.classList.add("social-icons");
+    const socialIcons = document.createElement("div");
+    socialIcons.classList.add("social-icons");
 
-  const githubLink = document.createElement("a");
-  githubLink.href = developer.github;
-  githubLink.target = "_blank";
-  githubLink.innerHTML = `<i class="fab fa-github"></i>`;
+    const githubLink = document.createElement("a");
+    githubLink.href = developer.github;
+    githubLink.target = "_blank";
+    githubLink.innerHTML = `<i class="fab fa-github"></i>`;
 
-  const linkedinLink = document.createElement("a");
-  linkedinLink.href = developer.linkedin;
-  linkedinLink.target = "_blank";
-  linkedinLink.innerHTML = `<i class="fab fa-linkedin"></i>`;
+    const linkedinLink = document.createElement("a");
+    linkedinLink.href = developer.linkedin;
+    linkedinLink.target = "_blank";
+    linkedinLink.innerHTML = `<i class="fab fa-linkedin"></i>`;
 
-  socialIcons.appendChild(githubLink);
-  socialIcons.appendChild(linkedinLink);
+    socialIcons.appendChild(githubLink);
+    socialIcons.appendChild(linkedinLink);
 
-  cardBack.appendChild(description);
-  cardBack.appendChild(socialIcons);
+    cardBack.appendChild(description);
+    cardBack.appendChild(socialIcons);
 
-  // Combine front and back into card
-  cardInner.appendChild(cardFront);
-  cardInner.appendChild(cardBack);
-  card.appendChild(cardInner);
-  developerCards.appendChild(card);
-});
+    // Combine front and back into card
+    cardInner.appendChild(cardFront);
+    cardInner.appendChild(cardBack);
+    card.appendChild(cardInner);
+    developerCards.appendChild(card);
+  });
 
 
   /******************************************************************************** */
@@ -207,7 +209,7 @@ developers.forEach((developer) => {
   function attachUserMenuListeners() {
     const userContainer = document.getElementById("toggler");
     const userMenu = document.getElementById("user-menu");
-    console.log(userMenu, userContainer);
+    console.log(userMenu, "WWAAAAAAWW", userContainer);
     if (userContainer && userMenu) {
       // Toggle dropdown visibility when clicking on the user container
       userContainer.addEventListener("click", (event) => {
@@ -233,7 +235,7 @@ developers.forEach((developer) => {
     }
 
     // Delegated event listener for "View Profile" and "Log Out" clicks
-    document.body.addEventListener("click", (event) => {
+    document.body.addEventListener("click", async (event) => {
       if (event.target.closest("#view-profile")) {
         event.preventDefault();
         console.log("Viewing profile...");
@@ -247,6 +249,36 @@ developers.forEach((developer) => {
         navigateTo("landing"); // Redirect to landing page
       }
     });
+
+    document.addEventListener("change", async (event) => {
+      if (event.target.classList.contains("input")) {
+        const checkbox = event.target;
+        const isChecked = checkbox.checked;
+        const action = isChecked ? "enable" : "disable";
+        console.log(action);
+        try {
+          console.log("ACXTION ; ", action);
+          const response = await fetch(`http://0.0.0.0:8000/2fa/${action}/`, {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (response.ok) {
+            console.log(`2FA ${action}d successfully.`);
+          } else {
+            console.error("Request failed. Reverting switch state.");
+            checkbox.checked = !isChecked; // Revert state if request fails
+          }
+        } catch (error) {
+          console.error("Error occurred:", error);
+          checkbox.checked = !isChecked; // Revert state if an error occurs
+        }
+      }
+    });
+
   }
   // }
   /******************************************************************************** */

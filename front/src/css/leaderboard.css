@@ -475,6 +475,7 @@ html {
 /*-------------------------------------------------------*/
 
 /* Dropdown Menu Styling */
+/* Dropdown Menu Styling */
 #user-menu {
   display: none; /* Hidden by default */
   position: absolute; /* Position it below the user-container */
@@ -486,7 +487,8 @@ html {
   z-index: 1000; /* Ensure it appears above other elements */
   top: 90%; /* Positioned below the user button */
   right: 0;
-  min-width: 100%;
+  min-width: 230px;
+  overflow: hidden;
 }
 
 /* Initially hide the menu */
@@ -499,19 +501,71 @@ html {
   display: block !important;
 }
 
-#user-menu a {
+/* Style for the dropdown items */
+#user-menu .dropdown-item {
   display: block;
   padding: 8px 12px;
-  text-decoration: none;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: white;
 }
 
-#user-menu a:hover {
+/* Hover effect for dropdown items */
+#user-menu .dropdown-item:hover {
   background-color: hsl(210, 14%, 25%);
 }
 
+/* Media query for small screens */
 @media (max-width: 450px) {
   .users-container {
     display: none;
   }
+}
+
+/* ------ */
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+  margin: 0 2px;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 40px;
+}
+
+.input {
+  display: none !important;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white !important;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: var(--colors-cyan) !important;
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px);
 }

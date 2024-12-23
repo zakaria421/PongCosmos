@@ -64,34 +64,34 @@ services:
         - PYTHONUNBUFFERED=1
         - PYTHONDONTWRITEBYTECODE=1
 
-  chat:
-      build: ./ChatBackend
-      command: ["./wait-for-it.sh", "redis:6379", "--", "daphne", "-b", "0.0.0.0", "-p", "8002", "chatapp.asgi:application"]
-      ports:
-        - "8002:8002"
-      networks:
-        - my-net
-      volumes:
-        - ./ChatBackend:/app
-      depends_on:
-        - redis
-        - db
-      environment:
-        - REDIS_HOST=redis
-        - REDIS_PORT=6379
-        - DJANGO_SETTINGS_MODULE=chatapp.settings
-        - DB_NAME=ft_transcandencedb
-        - DB_USER=othmane
-        - DB_PASSWORD=otitebah1234
-        - DB_HOST=db
-        - DB_PORT=5432
+  # chat:
+  #     build: ./ChatBackend
+  #     command: ["./wait-for-it.sh", "redis:6379", "--", "daphne", "-b", "0.0.0.0", "-p", "8002", "chatapp.asgi:application"]
+  #     ports:
+  #       - "8002:8002"
+  #     networks:
+  #       - my-net
+  #     volumes:
+  #       - ./ChatBackend:/app
+  #     depends_on:
+  #       - redis
+  #       - db
+  #     environment:
+  #       - REDIS_HOST=redis
+  #       - REDIS_PORT=6379
+  #       - DJANGO_SETTINGS_MODULE=chatapp.settings
+  #       - DB_NAME=ft_transcandencedb
+  #       - DB_USER=othmane
+  #       - DB_PASSWORD=otitebah1234
+  #       - DB_HOST=db
+  #       - DB_PORT=5432
 
-  redis:
-    image: redis:6
-    ports:
-      - "6379:6379"
-    networks:
-    - my-net
+  # redis:
+  #   image: redis:6
+  #   ports:
+  #     - "6379:6379"
+  #   networks:
+  #   - my-net
 
   gethnode:
     build: ./geth
