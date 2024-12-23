@@ -363,21 +363,22 @@ export function initGamePage(mode) {
           if (gametype === "tournament") {
             firstInstructions = true;
           }
-              window.removeEventListener("resize", sendNewSize);
-              window.removeEventListener("keyup", handleKeyEvent);
-              window.removeEventListener("keydown", handleKeyEvent);
-              window.removeEventListener("beforeunload", handleBeforeUnload);
-              window.removeEventListener("popstate", handlePopState);
-              gameOver(data.winner);
+              // window.removeEventListener("resize", sendNewSize);
+              // window.removeEventListener("keyup", handleKeyEvent);
+              // window.removeEventListener("keydown", handleKeyEvent);
+              // window.removeEventListener("beforeunload", handleBeforeUnload);
+              // window.removeEventListener("popstate", handlePopState);
+              // gameOver(data.winner);
 
-          // if (gametype === "local") {
-          //   window.removeEventListener("resize", sendNewSize);
-          //   window.removeEventListener("keyup", handleKeyEvent);
-          //   window.removeEventListener("keydown", handleKeyEvent);
-          //   window.removeEventListener("beforeunload", handleBeforeUnload);
-          //   window.removeEventListener("popstate", handlePopState);
-          //   gameOver(data.winner);
-          // } else if (gametype === "remote" || gametype === "playWithFriend") {
+          if (gametype === "local" || gametype === "remote" || gametype === "playWithFriend" ) {
+            window.removeEventListener("resize", sendNewSize);
+            window.removeEventListener("keyup", handleKeyEvent);
+            window.removeEventListener("keydown", handleKeyEvent);
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+            window.removeEventListener("popstate", handlePopState);
+            gameOver(data.winner);
+          }
+          //  else if (gametype === "remote" || gametype === "playWithFriend") {
           //   window.removeEventListener("resize", sendNewSize);
           //   window.removeEventListener("keyup", handleKeyEvent);
           //   window.removeEventListener("keydown", handleKeyEvent);
