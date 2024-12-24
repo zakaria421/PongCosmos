@@ -16,7 +16,10 @@ export function initHomePage() {
               <div class="users-container" draggable="false">
                 <img src="./src/assets/home/border.png" alt="" class="users-border" draggable="false">
                 <img src="${profilePicture}" alt="Profile Image" class="rounded-circle users" id="profilePicture" draggable="false">
-              </div>
+                <p class="level text-white text-decoration-none" draggable="false">
+                  <strong draggable="false">${userData.level}</strong>
+                </p>
+                </div>
 
               <!-- User Name -->
               <div class="UserProfile" draggable="false">

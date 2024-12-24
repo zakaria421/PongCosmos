@@ -455,22 +455,16 @@ html {
   color: #ffffff;
 }
 
-.level {
+.levels {
   color: white;
   font-weight: bold;
   font-size: 10px;
   position: inherit;
-  top: 73%;
+  top: 73.5%;
+  left: 0.5%;
   z-index: 1;
 }
-.level {
-  color: white;
-  font-weight: bold;
-  font-size: 10px;
-  position: inherit;
-  top: 73%;
-  z-index: 1;
-}
+
 /*-------------------------------------------------------*/
 /*-------------------------------------------------------*/
 
@@ -526,13 +520,28 @@ html {
 
 /* ------ */
 
+#enable-2fa {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+
+#enable-2fa .menu-item {
+  text-align: center;
+  font-size: 1rem;
+}
+
+
 .switch {
   position: relative;
   display: inline-block;
   width: 40px;
   height: 20px;
-  margin: 0 2px;
+  margin: 0;
 }
+
 
 .slider {
   position: absolute;

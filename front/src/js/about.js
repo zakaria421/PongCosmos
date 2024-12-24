@@ -50,7 +50,10 @@ export function initAboutPage() {
             <div class="users-container">
               <img src="./src/assets/home/border.png" alt="" class="users-border">
               <img src="${profilePicture}" alt="Profile Image" class="rounded-circle users" id="profilePicture">
-            </div>
+              <p class="level text-white text-decoration-none" draggable="false">
+                  <strong draggable="false">${userData.level}</strong>
+                </p>
+              </div>
 
             <!-- User Name -->
             <div class="UserProfile">
