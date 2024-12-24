@@ -268,29 +268,71 @@ html {
 
 /* General styles for the cards */
 .main-container {
-  height: calc(100vh - 200px); /* Adjust this if the navbar height changes */
+  height: calc(100vh - 160px); /* Adjusting to a little bit more space */
+  min-height: 500px; /* Minimum height to prevent it from shrinking too much */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
   padding: 0 1.5rem;
+  text-align: center;
+  overflow: hidden;
+}
+
+@media (max-width: 1024px) {
+  .main-container {
+    height: calc(100vh - 160px);
+  }
+}
+
+@media (max-width: 767px) {
+  .main-container {
+    height: auto; /* Allow the height to adjust on small screens */
+    min-height: 400px; /* Prevent it from being too small */
+  }
+}
+
+.cards-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  margin-top: 2rem;
+  position: relative;
 }
 
 #developer-cards {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+  justify-content: center;
   gap: 1.5rem;
-  margin-top: 2rem; /* Adds space from the top to avoid overlap with the navbar */
+  width: 100%;
+  height: 100%;
+  max-width: 1200px;
+  position: relative;
+  margin-top: 0;
+  overflow: hidden;
 }
 
+/* Developer Card Styling */
 .developer-card {
   perspective: 1000px;
   margin: 10px;
+  margin-top: 30px;
   flex: 1 1 22%;
   min-height: 350px;
   max-height: 450px;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+  border: 5px solid transparent;
+  position: relative;
+  transition: all 0.3s ease;
 }
 
+/* Front and back styling with the spin animation */
 .developer-card-inner {
   position: relative;
   width: 100%;
@@ -303,19 +345,16 @@ html {
   transform: rotateY(180deg);
 }
 
-/* Front and back styling with the spin animation */
 .developer-card-front,
 .developer-card-back {
   position: absolute;
   width: 100%;
-  height: 100%;
   backface-visibility: hidden;
   border-radius: 15px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  animation: spin 3s linear infinite; /* Spin animation for both front and back */
 }
 
 .developer-card-front {
@@ -323,9 +362,9 @@ html {
   color: white;
   padding: 20px;
   text-align: center;
+  height: 350px;
 }
 
-/* Developer image styling */
 .developer-card-front img {
   width: 120px;
   height: 120px;
@@ -334,12 +373,12 @@ html {
   box-shadow: 4px 4px 10px rgba(27, 227, 227, 0.4);
 }
 
-/* Back side of the card */
 .developer-card-back {
   background: var(--colors-body);
+  height: 350px;
   color: #fff;
   transform: rotateY(180deg);
-  /* box-shadow: 8px 8px 15px #64e3f4, -8px -8px 15px #d553f3; */
+  box-shadow: 8px 8px 15px #64e3f4, -8px -8px 15px #d553f3;
 }
 
 .developer-card-back p {
@@ -375,11 +414,7 @@ html {
 }
 
 /* Front side of the card ::before and ::after */
-.developer-card-front::after,
-.developer-card-front::before
-/* .developer-card-back::before,
-.developer-card-back::after  */
-{
+.developer-card-front::before {
   content: '';
   position: absolute;
   height: 100%;
@@ -389,40 +424,45 @@ html {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: -1;
-  padding: 200px;
   border-radius: 10px;
   animation: spin 3s linear infinite;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
-.developer-card-front::before
-/* , .developer-card-back::before  */
-{
+.developer-card-front::before {
   filter: blur(1.5rem);
   opacity: 0.5;
 }
 
 /* Media queries for responsiveness */
 @media (max-width: 1024px) {
+  #developer-cards {
+    justify-content: center;
+    margin-top: 1rem;
+  }
+
   .developer-card {
-    flex: 1 1 45%; /* Two cards per row on medium screens */
-    min-height: 350px;
-    max-height: 450px;
+    flex: 1 1 45%;
+    /* min-height: 300px; */
+    max-height: 400px;
+    margin: 5px;
   }
 }
 
 @media (max-width: 767px) {
   .developer-card {
-    flex: 1 1 100%; /* Cards take full width on smaller screens */
-    min-height: 300px;
-    max-height: 400px;
+    flex: 1 1 100%;
+    /* min-height: 250px; */
+    max-height: 350px;
+    margin: 5px;
   }
 
   #developer-cards {
-    margin-top: 5rem; /* Adjust top margin on smaller screens to prevent overlap with navbar */
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
   }
 }
-
 
 /*-------------------------------------------------------*/
 

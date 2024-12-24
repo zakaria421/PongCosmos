@@ -4,6 +4,10 @@
     box-sizing: border-box !important;
 }
 
+h1 {
+  font-size: calc(1.3rem + 1vw);;
+}
+
 body{
     display: flex !important;
     align-items: center !important;

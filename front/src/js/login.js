@@ -47,11 +47,11 @@ export function initLoginPage() {
       if (passwordInput[i].type === "password") {
         passwordInput[i].type = "text";
         passwordToggleBtn[i].innerHTML =
-          '<i class="bi bi-eye" style="color: black;"></i>';
+          '<i class="bi bi-eye" style="color: white;"></i>';
       } else {
         passwordInput[i].type = "password";
         passwordToggleBtn[i].innerHTML =
-          '<i class="bi bi-eye-slash" style="color: black;"></i>';
+          '<i class="bi bi-eye-slash" style="color: white;"></i>';
       }
     }
 

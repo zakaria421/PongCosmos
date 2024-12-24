@@ -14,33 +14,8 @@ async function loadPage(page, mode = null) {
   if (!token && page !== 'landing') {
     page = 'login';
   }
-  // try {
-  //   if (token || page === 'landing') {
-  //     let response = await fetch("http://0.0.0.0:8000/TokenVerification/", {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //         "Content-Type": "application/json",
-  //       },
-  //       method: "GET",
-  //     });
-
-  //     if (response.ok) {
-  //       const userData = await response.json();
-  //       const bool = userData.bool;
-  //       if (bool && (page === 'login' || page === 'landing')) {
-  //         page = 'home';
-  //       }
-  //     } else {
-  //       if (page !== 'login') page = 'login';
-  //       localStorage.removeItem('jwtToken');
-  //     }
-  //   }
-  // } catch (err) {
-  //   console.error("Error fetching user data:", err);
-  //   if (page !== 'login') page = 'login';
-  //   localStorage.removeItem('jwtToken');
-  // }
-
+  else if (token && (page === 'landing' || page === 'login'))
+    page = 'home';
 
   const existingLink = document.getElementById('page-style');
   if (existingLink) {

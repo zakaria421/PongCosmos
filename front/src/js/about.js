@@ -120,7 +120,7 @@ export function initAboutPage() {
 
   developers.forEach((developer) => {
     const card = document.createElement("div");
-    card.classList.add("col-md-6", "col-lg-3", "developer-card", "mx-auto");
+    card.classList.add("col-md-6", "col-lg-3", "developer-card", "mx-auto", "mb-3");
 
     // Card inner wrapper
     const cardInner = document.createElement("div");
