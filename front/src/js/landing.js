@@ -3,7 +3,7 @@ import { eventRegistry } from "./main.js";
 import { syncSession } from "./main.js";
 
 export function initLandingPage() {
-  document.querySelectorAll('img, p, a').forEach(function(element) {
+  document.querySelectorAll('img, p, a, div, button').forEach(function(element) {
     element.setAttribute('draggable', 'false');
   });
   console.log("LANDING PAGE");
@@ -35,11 +35,10 @@ async function fetchOAuthCode(authCode) {
       const token = rewind.access;
       const bool = rewind.twoFa;
       if (bool) {
-        document.getElementById("qrcode").style.display = "block";
+        // document.getElementById("qrcode").style.display = "block";
         const QR = rewind.qr_code;
         let image = "data:image/jpg;base64," + QR;
-        console.log(image);
-        document.getElementById("QR").src = image;
+        showQRCodeModal(image);
 
         const qrcElement = document.getElementById('qrc');
           async function handleri(event) {
@@ -56,12 +55,13 @@ async function fetchOAuthCode(authCode) {
                 }),
               });
               if (response.ok) {
-                alert("2FA verification successful!");
+                // alert("2FA verification successful!");
                 let rewind = await response.json();
                 const token = rewind.access;
                 localStorage.setItem("jwtToken", token);
                 syncSession();
                 hideSpinner();
+                hideQRCodeModal();
                 navigateTo("home");
               } else {
                 alert("Failed to verify 2FA. Please try again.");
@@ -77,24 +77,23 @@ async function fetchOAuthCode(authCode) {
             eventType: "click",
             handler: handleri
           });
-
-        if (response.ok) {
-          console.log("2FA auth done");
-        }
       } else {
         localStorage.setItem("jwtToken", token);
         syncSession();
         hideSpinner();
+        hideQRCodeModal();
         navigateTo("home");
       }
     } else {
       console.error("Failed to initiate authentication");
       hideSpinner();
+      hideQRCodeModal();
     }
   }
   catch (error) {
     console.error("Login failed:", error);
     hideSpinner();
+    hideQRCodeModal();
   }
 }
 
@@ -107,4 +106,18 @@ function showSpinner() {
 function hideSpinner() {
   const spinner = document.getElementById("spinnerContainer");
   spinner.classList.add("d-none");
+}
+
+function showQRCodeModal(imageSrc) {
+  const qrcode = document.getElementById("qrcode");
+  qrcode.style.display = "flex";
+  document.body.classList.add("modal-active");
+  const qrImage = document.getElementById("QR");
+  qrImage.src = imageSrc;
+}
+
+function hideQRCodeModal() {
+  const qrcode = document.getElementById("qrcode");
+  document.body.classList.remove("modal-active");
+  qrcode.style.display = "none";
 }

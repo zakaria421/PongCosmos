@@ -3,9 +3,9 @@ import { eventRegistry } from "./main.js";
 import { syncSession } from "./main.js";
 
 export function initProfilPage() {
-  document.querySelectorAll('img, p, a').forEach(function(element) {
-    element.setAttribute('draggable', 'false');
-  });
+  document.querySelectorAll('img, p, a, div, button').forEach(function(element) {
+  element.setAttribute('draggable', 'false');
+});
   let token = localStorage.getItem("jwtToken");
   const switchCheckbox = document.getElementById("2fa-switch");
   let isEditing = false;
@@ -371,7 +371,7 @@ function placeCaretAtEnd(el) {
 
             <!-- User Name -->
             <div class="UserProfile">
-              <p class="text-white text-decoration-none">
+              <p class="text-white text-decoration-none" id="profileN">
                 <strong>${userData.nickname}</strong>
               </p>
             </div>
@@ -426,7 +426,8 @@ function placeCaretAtEnd(el) {
           .then((response) => response.json())
           .then((userData) => {
             document.getElementById("profileName").textContent = userData.nickname;
-            fetchUserData();
+            document.getElementById("profileN").textContent = userData.nickname;
+// //////////////////////////////////////////////////
             console.log("Profile updated successfully:", userData);
           })
           .catch((error) => console.error("Error updating profile:", error));

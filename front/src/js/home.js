@@ -4,7 +4,7 @@ import { eventRegistry } from "./main.js";
 import { syncSession } from "./main.js";
 
 export function initHomePage() {
-  document.querySelectorAll('img, p, a', 'div', 'button').forEach(function(element) {
+  document.querySelectorAll('img, p, a, div, button').forEach(function(element) {
     element.setAttribute('draggable', 'false');
   });
   function renderUser(userData, profilePicture) {
@@ -20,7 +20,7 @@ export function initHomePage() {
 
               <!-- User Name -->
               <div class="UserProfile" draggable="false">
-                <p class="text-white text-decoration-none" draggable="false">
+                <p class="text-white text-decoration-none" draggable="false" id="profileN">
                   <strong draggable="false">${userData.nickname}</strong>
                 </p>
               </div>

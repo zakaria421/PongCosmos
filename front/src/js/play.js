@@ -3,7 +3,7 @@ import { eventRegistry } from "./main.js";
 import { syncSession } from "./main.js";
 
 export function initPlayPage() {
-  document.querySelectorAll('img, p, a').forEach(function(element) {
+  document.querySelectorAll('img, p, a, div, button').forEach(function(element) {
     element.setAttribute('draggable', 'false');
   });
   const modeItems = document.querySelectorAll(".mode-item");
@@ -159,7 +159,7 @@ export function initPlayPage() {
 
             <!-- User Name -->
             <div class="UserProfile">
-              <p class="text-white text-decoration-none">
+              <p class="text-white text-decoration-none" id="profileN">
                 <strong>${userData.nickname}</strong>
               </p>
             </div>

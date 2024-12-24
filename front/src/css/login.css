@@ -308,3 +308,109 @@ body{
         width: 800px !important;
     }
   }
+
+/* Overlay styling */
+#qrcode {
+    display: none; /* Hidden by default */
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--colors-body);
+    background-image: 
+      radial-gradient(circle at top left, rgb(213, 5, 255) 1%, transparent 40%),
+      radial-gradient(circle at bottom left, rgb(15, 195, 231) 1%, transparent 40%);
+    z-index: 9999; /* Ensure it is on top */
+    overflow: hidden; /* Prevent scrolling */
+  }
+  
+  /* Modal content box styling */
+  .modal-content {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 400px; /* Limit the width */
+    width: 90%; /* Responsive width */
+    padding: 20px;
+    position: relative;
+  }
+  
+  /* Modal header styles */
+  .modal-header {
+    display: flex;
+    flex-direction: column; /* Center the title vertically */
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #ddd; /* Add a separator below the header */
+  }
+  
+  .modal-title {
+    margin: 0;
+    font-size: 1.5rem; /* Larger font for title */
+    font-weight: 700;
+  }
+  
+  .btn-close {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    color: #aaa;
+    cursor: pointer;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+  }
+  
+  /* Input field styling */
+  .form-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-radius: 5px;
+    padding: 15px !important; /* Increased padding */
+    font-size: 1rem;
+    margin: 20px 0 !important; /* Add more margin for spacing */
+    border: 1px solid #ddd;
+    width: 100%;
+  }
+  
+  /* Submit button styling */
+  button#qrc {
+    border-radius: 0px;
+    padding: 15px 20px !important; /* Increased padding for better aesthetics */
+    width: 100%; /* Full-width button */
+    font-size: 1.1rem;
+    font-weight: 600;
+    background-color: black; /* Black background */
+    color: white; /* White text */
+    border: none;
+    transition: all 0.3s ease; /* Add smooth hover effect */
+  }
+  
+  button#qrc:hover {
+    background-color: #333; /* Slightly lighter black on hover */
+    transform: scale(1.02); /* Slight enlargement on hover */
+  }
+  
+  /* Responsive styles */
+  @media (max-width: 576px) {
+    #qrcode {
+        padding: 10px;
+    }
+  
+    .modal-content {
+        margin: 0 15px;
+    }
+  }
+  
+  /* Hide the main page content when modal is active */
+  body.modal-active > *:not(#qrcode) {
+    visibility: none; /* Use display to completely hide content */
+  }
+  

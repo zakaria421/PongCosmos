@@ -3,7 +3,7 @@ import { eventRegistry } from "./main.js";
 import { syncSession } from "./main.js";
 
 export function initAboutPage() {
-  document.querySelectorAll('img, p, a').forEach(function(element) {
+  document.querySelectorAll('img, p, a, div, button').forEach(function(element) {
     element.setAttribute('draggable', 'false');
   });
   const switchCheckbox = document.getElementById("2fa-switch");
@@ -54,7 +54,7 @@ export function initAboutPage() {
 
             <!-- User Name -->
             <div class="UserProfile">
-              <p class="text-white text-decoration-none">
+              <p class="text-white text-decoration-none" id="profileN">
                 <strong>${userData.nickname}</strong>
               </p>
             </div>

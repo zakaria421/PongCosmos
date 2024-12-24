@@ -4,7 +4,7 @@ import { eventRegistry } from "./main.js";
 
 // Get the password input and toggle button
 export function initLoginPage() {
-  document.querySelectorAll('img, p, a').forEach(function(element) {
+  document.querySelectorAll('img, p, a, div, button').forEach(function(element) {
     element.setAttribute('draggable', 'false');
   });
   const passwordInput = document.getElementsByClassName("passwordInput");
@@ -127,18 +127,12 @@ export function initLoginPage() {
         const bool = rewind.twoFa;
         console.log("TOKEENEENENENEN e", token);
         if (bool) {
-          document.getElementById("qrcode").style.display = "block";
+          // document.getElementById("qrcode").style.display = "block";
           const QR = rewind.qr_code;
           let image = "data:image/jpg;base64," + QR;
-          console.log(image);
-          document.getElementById("QR").src = image;
+          showQRCodeModal(image);
           async function handlef(event) {
             event.preventDefault();
-            eventRegistry.push({
-              element: document.getElementById('qrc'),
-              eventType: "click",
-              handler: handlef
-            });
             try {
               console.log("COOODE : : : :" + document.querySelector('#qrcode input[type="text"]').value);
               const response = await fetch(`http://0.0.0.0:8000/2fa/verify/`, {
@@ -153,11 +147,12 @@ export function initLoginPage() {
               });
 
               if (response.ok) {
-                alert("2FA verification successful!");
+                // alert("2FA verification successful!");
                 let rewind = await response.json();
                 const token = rewind.access;
                 localStorage.setItem("jwtToken", token);
                 syncSession();
+                hideQRCodeModal();
                 navigateTo("home");
               } else {
                 alert("Failed to verify 2FA. Please try again.");
@@ -173,10 +168,6 @@ export function initLoginPage() {
               eventType: "click",
               handler: handlef
             });
-
-          if (response.ok) {
-            console.log("2FA auth done");
-          }
         }
         else {
           localStorage.setItem("jwtToken", token);
@@ -254,4 +245,18 @@ export function initLoginPage() {
     handler: checkWindowSize
   });
   checkWindowSize();
+
+  function showQRCodeModal(imageSrc) {
+    const qrcode = document.getElementById("qrcode");
+    qrcode.style.display = "flex";
+    document.body.classList.add("modal-active");
+    const qrImage = document.getElementById("QR");
+    qrImage.src = imageSrc;
+  }
+  
+  function hideQRCodeModal() {
+    const qrcode = document.getElementById("qrcode");
+    document.body.classList.remove("modal-active");
+    qrcode.style.display = "none";
+  }
 }
