@@ -1,5 +1,7 @@
 // document.addEventListener("DOMContentLoaded", function () {
 import { navigateTo } from "./main.js";
+import { eventRegistry } from "./main.js";
+import { syncSession } from "./main.js";
 
 export function initHomePage() {
   function renderUser(userData, profilePicture) {
@@ -56,8 +58,13 @@ export function initHomePage() {
   const mobileFriendsToggle = document.getElementById("mobileFriendsToggle");
 
   // const closeAddFriend = document.getElementById('closeAddFriend');
-  closeFriendList.addEventListener("click", () => {
+  closeFriendList.addEventListener("click", function handlerZ() {
     friendListSection.classList.remove("active");
+    eventRegistry.push({
+      element: closeFriendList,
+      eventType: "click",
+      handler: handlerZ
+    });
   });
 
   // Friend Selection
@@ -116,9 +123,14 @@ export function initHomePage() {
   //   addFriendContainer.classList.add("d-none");
   // }); //*request to be sent to the backend request sent*
 
-  mobileFriendsToggle.addEventListener("click", () => {
+  mobileFriendsToggle.addEventListener("click", function handlerT() {
     friendListSection.classList.toggle("active");
     mobileFriendsToggle.style.zIndex = 10;
+    eventRegistry.push({
+      element: mobileFriendsToggle,
+      eventType: "click",
+      handler: handlerT
+    });
   });
 
   // Add event listener to "Play" button
@@ -131,32 +143,52 @@ export function initHomePage() {
   /******************************************************************************** */
   const homebtn = document.getElementsByClassName("home");
   if (homebtn[0]) {
-    homebtn[0].addEventListener("click", function (event) {
+    homebtn[0].addEventListener("click", function handleA(event) {
       event.preventDefault();
+      eventRegistry.push({
+        element: homebtn[0],
+        eventType: "click",
+        handler: handleA
+      });
       navigateTo("home");
     });
   }
 
   const homeButton = document.getElementById("home");
   if (homeButton) {
-    homeButton.addEventListener("click", function (event) {
+    homeButton.addEventListener("click", function handleB(event) {
       event.preventDefault();
+      eventRegistry.push({
+        element: homeButton,
+        eventType: "click",
+        handler: handleB
+      });
       navigateTo("home");
     });
   }
 
   const leaderboardButton = document.getElementById("leaderboard");
   if (leaderboardButton) {
-    leaderboardButton.addEventListener("click", function (event) {
+    leaderboardButton.addEventListener("click", function HandleC(event) {
       event.preventDefault();
+      eventRegistry.push({
+        element: leaderboardButton,
+        eventType: "click",
+        handler: HandleC
+      });
       navigateTo("leaderboard");
     });
   }
 
   const aboutButton = document.getElementById("about");
   if (aboutButton) {
-    aboutButton.addEventListener("click", function (event) {
+    aboutButton.addEventListener("click", function handleD(event) {
       event.preventDefault();
+      eventRegistry.push({
+        element: aboutButton,
+        eventType: "click",
+        handler: handleD
+      });
       navigateTo("about");
     });
   }
@@ -199,7 +231,7 @@ export function initHomePage() {
   async function fetchUserData() {
     // let token = localStorage.getItem("jwtToken");
     let token = localStorage.getItem("jwtToken");
-    console.log("TOEKN  in home page : ",token);
+    console.log("TOEKN  in home page : ", token);
     try {
       let response = await fetch("http://0.0.0.0:8000/userinfo/", {
         headers: {
@@ -217,9 +249,15 @@ export function initHomePage() {
         attachUserMenuListeners();
       } else {
         console.error("Failed to fetch user data:", response.statusText);
+        localStorage.removeItem('jwtToken');
+        syncSession();
+        navigateTo("login");
       }
     } catch (err) {
       console.error("Error fetching user data:", err);
+      // localStorage.removeItem('jwtToken');
+      // syncSession();
+      // navigateTo("login");
     }
   }
 
@@ -230,7 +268,12 @@ export function initHomePage() {
     console.log(userMenu, "WWAAAAAAWW", userContainer);
     if (userContainer && userMenu) {
       // Toggle dropdown visibility when clicking on the user container
-      userContainer.addEventListener("click", (event) => {
+      userContainer.addEventListener("click", function handleE(event) {
+        eventRegistry.push({
+          element: userContainer,
+          eventType: "click",
+          handler: handleE
+        });
         // Prevent click propagation to stop closing the menu immediately
         // event.stopPropagation();
 
@@ -244,7 +287,12 @@ export function initHomePage() {
       });
 
       // Close dropdown menu when clicking outside of the user container
-      window.addEventListener("click", (event) => {
+      window.addEventListener("click", function handleF(event) {
+        eventRegistry.push({
+          element: window,
+          eventType: "click",
+          handler: handleF
+        });
         if (!userMenu.contains(event.target) && !userContainer.contains(event.target)) {
           userMenu.classList.remove("visible");
           userMenu.classList.add("hidden");
@@ -253,49 +301,64 @@ export function initHomePage() {
     }
 
     // Delegated event listener for "View Profile" and "Log Out" clicks
-    document.body.addEventListener("click", async (event) => {
-      if (event.target.closest("#view-profile")) {
-        event.preventDefault();
+    document.body.addEventListener("click", async function handleG(event) {
+      eventRegistry.push({
+        element: document.body,
+        eventType: "click",
+        handler: handleG
+      });
+
+      const clickedItem = event.target.closest('.dropdown-item');
+
+      if (!clickedItem) return;
+
+      // Check which specific dropdown item was clicked
+      if (clickedItem.querySelector("#view-profile")) {
         console.log("Viewing profile...");
-        navigateTo("profil"); // Redirect to profile page
+        navigateTo("profil");
       }
-      
-      if (event.target.closest("#log-out")) {
-        event.preventDefault();
+
+      if (clickedItem.querySelector("#log-out")) {
         console.log("Logging out...");
-        localStorage.removeItem('jwtToken'); // Clear session storage
-        navigateTo("landing"); // Redirect to landing page
+        localStorage.removeItem('jwtToken');
+        syncSession();
+        navigateTo("landing");
       }
     });
 
-document.addEventListener("change", async (event) => {
-  if (event.target.classList.contains("input")) {
-    const checkbox = event.target;
-    const isChecked = checkbox.checked;
-    const action = isChecked ? "enable" : "disable";
-
-    try {
-      console.log("ACXTION ; ", action);
-      const response = await fetch(`http://0.0.0.0:8000/2fa/${action}/`, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
-          "Content-Type": "application/json",
-        },
+    document.addEventListener("change", async function handleH(event) {
+      eventRegistry.push({
+        element: document,
+        eventType: "change",
+        handler: handleH
       });
+      if (event.target.classList.contains("input")) {
+        const checkbox = event.target;
+        const isChecked = checkbox.checked;
+        const action = isChecked ? "enable" : "disable";
 
-      if (response.ok) {
-        console.log(`2FA ${action}d successfully.`);
-      } else {
-        console.error("Request failed. Reverting switch state.");
-        checkbox.checked = !isChecked; // Revert state if request fails
+        try {
+          console.log("ACTION : ", action);
+          const response = await fetch(`http://0.0.0.0:8000/2fa/${action}/`, {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (response.ok) {
+            console.log(`2FA ${action}d successfully.`);
+          } else {
+            console.error("Request failed. Reverting switch state.");
+            checkbox.checked = !isChecked; // Revert state if request fails
+          }
+        } catch (error) {
+          console.error("Error occurred:", error);
+          checkbox.checked = !isChecked; // Revert state if an error occurs
+        }
       }
-    } catch (error) {
-      console.error("Error occurred:", error);
-      checkbox.checked = !isChecked; // Revert state if an error occurs
-    }
-  }
-});
+    });
 
   }
 
@@ -387,7 +450,6 @@ document.addEventListener("change", async (event) => {
     // console.log("Message appended to chat:", messageElement);
   }
 
-console.log("pllllllllllllllllllllllllllllllllllllll");
   // Friend selection logic to initiate chat
   const friendItems = document.querySelectorAll(".friend-item");
   friendItems.forEach((friend) => {
@@ -571,6 +633,8 @@ console.log("pllllllllllllllllllllllllllllllllllllll");
       }
     } catch (err) {
       console.error("Error fetching friend requests:", err);
+      // localStorage.removeItem('jwtToken');
+      // syncSession();
     }
   }
 
@@ -891,8 +955,8 @@ console.log("pllllllllllllllllllllllllllllllllllllll");
   // To get the other user profil
   // Add an event listener to the entire chat-user-info container
   document.getElementById("chatUserInfo").addEventListener("click", function () {
-  // Get the content of the #chatUserName
-  const userName = document.getElementById("chatUserName").textContent.trim();
-  navigateTo("otheruser", {name: userName})
-});
+    // Get the content of the #chatUserName
+    const userName = document.getElementById("chatUserName").textContent.trim();
+    navigateTo("otheruser", { name: userName })
+  });
 }

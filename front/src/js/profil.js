@@ -1,4 +1,6 @@
 import { navigateTo } from "./main.js";
+import { eventRegistry } from "./main.js";
+import { syncSession } from "./main.js";
 
 export function initProfilPage() {
   let token = localStorage.getItem("jwtToken");
@@ -90,7 +92,12 @@ export function initProfilPage() {
   const bio = document.getElementById("profileBio");
   const maxLength = 100;
 
-  bio.addEventListener("input", () => {
+  bio.addEventListener("input", function handleP() {
+    eventRegistry.push({
+      element: bio,
+      eventType: "input",
+      handler: handleP
+    });
     // Trim extra characters if exceeded
     if (bio.textContent.length > maxLength) {
       bio.textContent = bio.textContent.slice(0, maxLength);
@@ -333,9 +340,15 @@ function placeCaretAtEnd(el) {
         attachUserMenuListeners();
       } else {
         console.error("Failed to fetch user data:", response.statusText);
+        localStorage.removeItem('jwtToken');
+        syncSession();
+        navigateTo("login");
       }
     } catch (err) {
       console.error("Error fetching user data:", err);
+      // localStorage.removeItem('jwtToken');
+      // syncSession();
+      // navigateTo("login");
     }
   }
 
@@ -376,9 +389,12 @@ function placeCaretAtEnd(el) {
   console.log("displayed twice for some reason: ");
   fetchUserData();
   // Edit profile logic
-  document
-    .getElementById("editProfileBtn")
-    .addEventListener("click", function () {
+  document.getElementById("editProfileBtn").addEventListener("click", function handleGHJK() {
+      eventRegistry.push({
+        element: document.getElementById("editProfileBtn"),
+        eventType: "click",
+        handler: handleGHJK
+      });
       isEditing = !isEditing;
 
       if (isEditing) {
@@ -429,7 +445,12 @@ function placeCaretAtEnd(el) {
   // Image upload logic
   document
     .getElementById("profileImage")
-    .addEventListener("click", function () {
+    .addEventListener("click", function handlePL() {
+      eventRegistry.push({
+        element: document.getElementById("profileImage"),
+        eventType: "click",
+        handler: handlePL
+      });
       console.log("Image clicked");
       if (isEditing) {
         document.getElementById("fileInput").click();
@@ -438,8 +459,13 @@ function placeCaretAtEnd(el) {
 
   document
     .getElementById("fileInput")
-    .addEventListener("change", function (event) {
+    .addEventListener("change", function handlePLs(event) {
       event.preventDefault();
+      eventRegistry.push({
+        element: document.getElementById("fileInput"),
+        eventType: "change",
+        handler: handlePLs
+      });
       console.log("File input changed");
       let formData = new FormData();
       const file = event.target.files[0];
@@ -465,32 +491,52 @@ function placeCaretAtEnd(el) {
   /******************************************************************************** */
   const homebtn = document.getElementsByClassName("home");
   if (homebtn[0]) {
-    homebtn[0].addEventListener("click", function (event) {
+    homebtn[0].addEventListener("click", function handleA(event) {
       event.preventDefault();
+      eventRegistry.push({
+        element: homebtn[0],
+        eventType: "click",
+        handler: handleA
+      });
       navigateTo("home");
     });
   }
-  
+
   const homeButton = document.getElementById("home");
   if (homeButton) {
-    homeButton.addEventListener("click", function (event) {
+    homeButton.addEventListener("click", function handleB(event) {
       event.preventDefault();
+      eventRegistry.push({
+        element: homeButton,
+        eventType: "click",
+        handler: handleB
+      });
       navigateTo("home");
     });
   }
 
   const leaderboardButton = document.getElementById("leaderboard");
   if (leaderboardButton) {
-    leaderboardButton.addEventListener("click", function (event) {
+    leaderboardButton.addEventListener("click", function HandleC(event) {
       event.preventDefault();
+      eventRegistry.push({
+        element: leaderboardButton,
+        eventType: "click",
+        handler: HandleC
+      });
       navigateTo("leaderboard");
     });
   }
 
   const aboutButton = document.getElementById("about");
   if (aboutButton) {
-    aboutButton.addEventListener("click", function (event) {
+    aboutButton.addEventListener("click", function handleD(event) {
       event.preventDefault();
+      eventRegistry.push({
+        element: aboutButton,
+        eventType: "click",
+        handler: handleD
+      });
       navigateTo("about");
     });
   }
@@ -509,7 +555,12 @@ function placeCaretAtEnd(el) {
       console.log(userMenu, "WWAAAAAAWW", userContainer);
       if (userContainer && userMenu) {
         // Toggle dropdown visibility when clicking on the user container
-        userContainer.addEventListener("click", (event) => {
+        userContainer.addEventListener("click", function handleGH(event){
+          eventRegistry.push({
+            element: userContainer,
+            eventType: "click",
+            handler: handleGH
+          });
           // Prevent click propagation to stop closing the menu immediately
           // event.stopPropagation();
   
@@ -523,7 +574,12 @@ function placeCaretAtEnd(el) {
         });
   
         // Close dropdown menu when clicking outside of the user container
-        window.addEventListener("click", (event) => {
+        window.addEventListener("click", function handleSm(event){
+          eventRegistry.push({
+            element: window,
+            eventType: "click",
+            handler: handleSm
+          });
           if (!userMenu.contains(event.target) && !userContainer.contains(event.target)) {
             userMenu.classList.remove("visible");
             userMenu.classList.add("hidden");
@@ -532,22 +588,36 @@ function placeCaretAtEnd(el) {
       }
   
       // Delegated event listener for "View Profile" and "Log Out" clicks
-      document.body.addEventListener("click", async (event) => {
-        if (event.target.closest("#view-profile")) {
-          event.preventDefault();
-          console.log("Viewing profile...");
-          navigateTo("profil"); // Redirect to profile page
-        }
-        
-        if (event.target.closest("#log-out")) {
-          event.preventDefault();
-          console.log("Logging out...");
-          localStorage.removeItem('jwtToken'); // Clear session storage
-          navigateTo("landing"); // Redirect to landing page
-        }
+      document.body.addEventListener("click", async function handleJk(event) {
+        eventRegistry.push({
+          element: document.body,
+          eventType: "click",
+          handler: handleJk
+        });
+        const clickedItem = event.target.closest('.dropdown-item');
+
+      if (!clickedItem) return;
+
+      // Check which specific dropdown item was clicked
+      if (clickedItem.querySelector("#view-profile")) {
+        console.log("Viewing profile...");
+        navigateTo("profil");
+      }
+
+      if (clickedItem.querySelector("#log-out")) {
+        console.log("Logging out...");
+        localStorage.removeItem('jwtToken');
+        syncSession();
+        navigateTo("landing");
+      }
       });
   
-  document.addEventListener("change", async (event) => {
+  document.addEventListener("change", async function handlejks(event){
+    eventRegistry.push({
+      element: document,
+      eventType: "change",
+      handler: handlejks
+    });
     if (event.target.classList.contains("input")) {
       const checkbox = event.target;
       const isChecked = checkbox.checked;

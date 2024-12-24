@@ -1,4 +1,7 @@
 import { navigateTo } from "./main.js";
+import { syncSession } from "./main.js";
+import { eventRegistry } from "./main.js";
+
 // Get the password input and toggle button
 export function initLoginPage() {
   const passwordInput = document.getElementsByClassName("passwordInput");
@@ -14,17 +17,32 @@ export function initLoginPage() {
   const registerBtn = document.getElementById("register");
   const loginBtn = document.getElementById("login");
 
-  registerBtn.addEventListener("click", () => {
+  registerBtn.addEventListener("click", function handleM() {
+    eventRegistry.push({
+      element: registerBtn,
+      eventType: "click",
+      handler: handleM
+    });
     container.classList.add("active");
   });
 
-  loginBtn.addEventListener("click", () => {
+  loginBtn.addEventListener("click", function handleB() {
+    eventRegistry.push({
+      element: loginBtn,
+      eventType: "click",
+      handler: handleB
+    });
     container.classList.remove("active");
   });
 
   // Add event listener to toggle button
   for (let i = 0; i < passwordToggleBtn.length; i++) {
-    passwordToggleBtn[i].addEventListener("click", function () {
+    passwordToggleBtn[i].addEventListener("click", function handleC() {
+      eventRegistry.push({
+        element: passwordToggleBtn[i],
+        eventType: "click",
+        handler: handleC
+      });
       // console.log("Toggle button clicked");
       // Toggle password visibility
       if (passwordInput[i].type === "password") {
@@ -40,8 +58,13 @@ export function initLoginPage() {
   }
   document
     .getElementById("signUpForm")
-    .addEventListener("submit", async function (event) {
+    .addEventListener("submit", async function handleD(event) {
       event.preventDefault(); // Prevent the default signUp submission
+      eventRegistry.push({
+        element: document.getElementById("signUpForm"),
+        eventType: "submit",
+        handler: handleD
+      });
       if (passwordSimilar1.value != passwordSimilar2.value) {
         alert("Password does not meet the requirements.");
         return;
@@ -74,8 +97,13 @@ export function initLoginPage() {
 
   document
     .getElementById("loginForm")
-    .addEventListener("submit", async function (event) {
+    .addEventListener("submit", async function handleE(event) {
       event.preventDefault(); // Prevent the default signUp submission
+      eventRegistry.push({
+        element: document.getElementById("loginForm"),
+        eventType: "submit",
+        handler: handleE
+      });
       const formData = new FormData(this);
       // console.log(formData.get("nickname"));
       // console.log(formData.get("password"));
@@ -102,8 +130,13 @@ export function initLoginPage() {
             let image = "data:image/jpg;base64," + QR;
             console.log(image);
             document.getElementById("QR").src = image;
-            document.getElementById('qrc').addEventListener("click", async function (event) {
+            document.getElementById('qrc').addEventListener("click", async function handleF(event) {
               event.preventDefault();
+              eventRegistry.push({
+                element: document.getElementById('qrc'),
+                eventType: "click",
+                handler: handleF
+              });
               try {
                 console.log("COOODE : : : :" + document.querySelector('#qrcode input[type="text"]').value);
                 const response = await fetch(`http://0.0.0.0:8000/2fa/verify/`, {
@@ -122,6 +155,7 @@ export function initLoginPage() {
                   let rewind = await response.json();
                   const token = rewind.access;
                   localStorage.setItem("jwtToken", token);
+                  syncSession();
                   navigateTo("home");
                 } else {
                   alert("Failed to verify 2FA. Please try again.");
@@ -138,6 +172,7 @@ export function initLoginPage() {
           }
           else {
             localStorage.setItem("jwtToken", token);
+            syncSession();
             navigateTo("home");
           }
         }
@@ -161,15 +196,25 @@ const toSigninButton = document.getElementById("to-signin");
 
 // signUpForm.style.display = "none";
 
-toSignupButton.addEventListener("click", (e) => {
+toSignupButton.addEventListener("click", function handleG(e) {
   e.preventDefault();
+  eventRegistry.push({
+    element: toSignupButton,
+    eventType: "click",
+    handler: handleG
+  });
   signUpForm.style.display = "block";
   signInForm.style.display = "none";
 });
 
 // Toggle to show sign-in form
-toSigninButton.addEventListener("click", (e) => {
+toSigninButton.addEventListener("click", function handleH(e) {
   e.preventDefault();
+  eventRegistry.push({
+    element: toSigninButton,
+    eventType: "click",
+    handler: handleH
+  });
   signInForm.style.display = "block";
   signUpForm.style.display = "none";
 });
@@ -185,6 +230,10 @@ function checkWindowSize() {
 }
 
 window.addEventListener("resize", checkWindowSize);
-
+eventRegistry.push({
+  element: window,
+  eventType: "resize",
+  handler: checkWindowSize
+});
 checkWindowSize();
 }

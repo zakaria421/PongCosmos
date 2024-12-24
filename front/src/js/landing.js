@@ -1,4 +1,6 @@
 import { navigateTo } from "./main.js";
+import { eventRegistry } from "./main.js";
+import { syncSession } from "./main.js";
 
 export function initLandingPage() {
   console.log("LANDING PAGE");
@@ -29,48 +31,59 @@ async function fetchOAuthCode(authCode) {
       const rewind = await response.json();
       const token = rewind.access;
       const bool = rewind.twoFa;
-      console.log("TOKEENEENENENEN e", token);
       if (bool) {
         document.getElementById("qrcode").style.display = "block";
         const QR = rewind.qr_code;
         let image = "data:image/jpg;base64," + QR;
         console.log(image);
         document.getElementById("QR").src = image;
-        document.getElementById('qrc').addEventListener("click", async function (event) {
-          event.preventDefault();
-          try {
-            console.log("COOODE : : : :" + document.querySelector('#qrcode input[type="text"]').value);
-            const response = await fetch(`http://0.0.0.0:8000/2fa/verify/`, {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                otp: document.querySelector('#qrcode input[type="text"]').value,
-              }),
+
+        const qrcElement = document.getElementById('qrc');
+        if (!qrcElement.getAttribute('data-listener-attached')) {
+          qrcElement.addEventListener("click", async function handlerI(event) {
+            eventRegistry.push({
+              element: qrcElement,
+              eventType: "click",
+              handler: handlerI
             });
-            if (response.ok) {
-              alert("2FA verification successful!");
-              let rewind = await response.json();
-              const token = rewind.access;
-              localStorage.setItem("jwtToken", token);
-              hideSpinner();
-              navigateTo("home");
-            } else {
-              alert("Failed to verify 2FA. Please try again.");
+            event.preventDefault();
+            try {
+              console.log("COOODE : : : :" + document.querySelector('#qrcode input[type="text"]').value);
+              const response = await fetch(`http://0.0.0.0:8000/2fa/verify/`, {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  otp: document.querySelector('#qrcode input[type="text"]').value,
+                }),
+              });
+              if (response.ok) {
+                alert("2FA verification successful!");
+                let rewind = await response.json();
+                const token = rewind.access;
+                localStorage.setItem("jwtToken", token);
+                syncSession();
+                hideSpinner();
+                navigateTo("home");
+              } else {
+                alert("Failed to verify 2FA. Please try again.");
+              }
+            } catch (error) {
+              console.error("Error:", error);
+              alert("An error occurred while verifying 2FA.");
             }
-          } catch (error) {
-            console.error("Error:", error);
-            alert("An error occurred while verifying 2FA.");
-          }
-        });
+          });
+          qrcElement.setAttribute('data-listener-attached', 'true');
+        }
 
         if (response.ok) {
           console.log("2FA auth done");
         }
       } else {
         localStorage.setItem("jwtToken", token);
+        syncSession();
         hideSpinner();
         navigateTo("home");
       }

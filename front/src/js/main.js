@@ -1,43 +1,45 @@
 const contentDiv = document.getElementById('app');
+export const eventRegistry = [];
+
 // const divs = document.getElementById("window");
 window.addEventListener('DOMContentLoaded', function () {
   const hash = window.location.hash.slice(1);
   const [page, query] = hash.split('?');
   const mode = new URLSearchParams(query).get('mode');
   loadPage(page || 'landing', mode);
-});
+}, { once: true });
 
 async function loadPage(page, mode = null) {
   const token = localStorage.getItem("jwtToken");
   if (!token && page !== 'landing') {
     page = 'login';
   }
-  try {
-    if (token || page === 'landing') {
-      let response = await fetch("http://0.0.0.0:8000/TokenVerification/", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        method: "GET",
-      });
+  // try {
+  //   if (token || page === 'landing') {
+  //     let response = await fetch("http://0.0.0.0:8000/TokenVerification/", {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //         "Content-Type": "application/json",
+  //       },
+  //       method: "GET",
+  //     });
 
-      if (response.ok) {
-        const userData = await response.json();
-        const bool = userData.bool;
-        if (bool && (page === 'login' || page === 'landing')) {
-          page = 'home';
-        }
-      } else {
-        if (page !== 'login') page = 'login';
-        localStorage.removeItem('jwtToken');
-      }
-    }
-  } catch (err) {
-    console.error("Error fetching user data:", err);
-    if (page !== 'login') page = 'login';
-    localStorage.removeItem('jwtToken');
-  }
+  //     if (response.ok) {
+  //       const userData = await response.json();
+  //       const bool = userData.bool;
+  //       if (bool && (page === 'login' || page === 'landing')) {
+  //         page = 'home';
+  //       }
+  //     } else {
+  //       if (page !== 'login') page = 'login';
+  //       localStorage.removeItem('jwtToken');
+  //     }
+  //   }
+  // } catch (err) {
+  //   console.error("Error fetching user data:", err);
+  //   if (page !== 'login') page = 'login';
+  //   localStorage.removeItem('jwtToken');
+  // }
 
 
   const existingLink = document.getElementById('page-style');
@@ -58,7 +60,6 @@ async function loadPage(page, mode = null) {
   // Extract query parameters from the URL hash
   const modeToSend = getQueryParamsFromUrl();
   console.log(page, "in LoadPage");
-  console.log(modeToSend, "in LoadPage");
 
   if (page === 'landing' || page === 'login') {
     // Clear the content area and load the landing or login page
@@ -87,6 +88,7 @@ async function loadPage(page, mode = null) {
       .then(response => response.text())
       .then(html => {
         contentDiv.innerHTML = html;
+        console.log("INITIAT SCRIPT :", page)
         initializePageScripts(page, modeToSend);
       })
       .catch(() => contentDiv.innerHTML = '<h1>404 Page Not Found</h1>');
@@ -95,6 +97,7 @@ async function loadPage(page, mode = null) {
 
 function initializePageScripts(page, mode) {
   console.log("in initializePageScripts");
+  removeAllEventListeners();
   // cleanUpCurrentPage();
 
   const body = document.body;
@@ -112,6 +115,8 @@ function initializePageScripts(page, mode) {
     existingScript.remove();
   }
 
+  // const clonedContentDiv = contentDiv.cloneNode(true); // False will not clone child nodes, just the div itself
+  // contentDiv.parentNode.replaceChild(clonedContentDiv, contentDiv);
   // Dynamically import the relevant module based on the page
   switch (page) {
     case 'home':
@@ -214,9 +219,44 @@ function handleRouting() {
   loadPage(page || 'landing', modeToGet);
 }
 
-// Add a single event listener for routing
-window.addEventListener('hashchange', handleRouting);
-window.addEventListener('popstate', (event) => {
-  // Ensure proper routing on back/forward navigation
-  handleRouting(event);
+// // Add a single event listener for routing
+// window.addEventListener('hashchange', handleRouting);
+// window.addEventListener('popstate', (event) => {
+//   // Ensure proper routing on back/forward navigation
+//   handleRouting(event);
+// });
+
+if (!window._listenersAdded) {
+  window.addEventListener('hashchange', handleRouting);
+  window.addEventListener('popstate', (event) => {
+    handleRouting(event);
+  });
+  window._listenersAdded = true;
+}
+
+export function removeAllEventListeners() {
+  console.log(eventRegistry.length, "THEIR LENGTH");
+  eventRegistry.forEach(({ element, eventType, handler }) => {
+    console.log(element, eventType, handler);
+    element.removeEventListener(eventType, handler);
+  });
+  eventRegistry.length = 0;
+  console.log(eventRegistry, "ALL DELETED");
+}
+
+// Sync session in all tabs
+export function syncSession() {
+  localStorage.setItem('sessionSync', Date.now());
+}
+
+// Listen for `storage` changes in other tabs
+window.addEventListener('storage', (event) => {
+  if (event.key === 'jwtToken' || event.key === 'sessionSync') {
+      const jwtToken = localStorage.getItem('jwtToken');
+      if (jwtToken) {
+          console.log(`Logged in as user: ${jwtToken}`);
+      } else {
+          console.log('Logged out');
+      }
+  }
 });
