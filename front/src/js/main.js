@@ -97,7 +97,6 @@ async function loadPage(page, mode = null) {
 
 function initializePageScripts(page, mode) {
   console.log("in initializePageScripts");
-  removeAllEventListeners();
   // cleanUpCurrentPage();
 
   const body = document.body;
@@ -110,6 +109,7 @@ function initializePageScripts(page, mode) {
     }
   });
   // Remove existing script if necessary
+  removeAllEventListeners();
   const existingScript = document.getElementById('dynamic-script');
   if (existingScript) {
     existingScript.remove();
@@ -235,12 +235,15 @@ if (!window._listenersAdded) {
 }
 
 export function removeAllEventListeners() {
+  console.log("---------------------");
+
   console.log(eventRegistry.length, "THEIR LENGTH");
   eventRegistry.forEach(({ element, eventType, handler }) => {
-    console.log(element, eventType, handler);
     element.removeEventListener(eventType, handler);
   });
   eventRegistry.length = 0;
+  // eventRegistry = [];
+  console.log("---------------------");
   console.log(eventRegistry, "ALL DELETED");
 }
 

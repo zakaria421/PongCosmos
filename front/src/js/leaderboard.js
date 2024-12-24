@@ -3,6 +3,9 @@ import { eventRegistry } from "./main.js";
 import { syncSession } from "./main.js";
 
 export function initLeaderboardPage() {
+  document.querySelectorAll('img, p, a').forEach(function(element) {
+    element.setAttribute('draggable', 'false');
+  });
   const switchCheckbox = document.getElementById("2fa-switch");
   /*------------------------------------- NEW CODE ADDED -------------- */
   function renderUser(userData, profilePicture) {
@@ -13,7 +16,7 @@ export function initLeaderboardPage() {
             <div id="toggler">
             <div class="users-container">
               <img src="./src/assets/home/border.png" alt="" class="users-border">
-              <img src="${profilePicture}" alt="Profile Image" class="rounded-circle users">
+              <img src="${profilePicture}" alt="Profile Image" class="rounded-circle users" id="profilePicture">
             </div>
 
             <!-- User Name -->
@@ -227,53 +230,57 @@ export function initLeaderboardPage() {
   /******************************************************************************** */
   const homebtn = document.getElementsByClassName("home");
   if (homebtn[0]) {
-    homebtn[0].addEventListener("click", function handleA(event) {
+    function handlea(event) {
       event.preventDefault();
-      eventRegistry.push({
-        element: homebtn[0],
-        eventType: "click",
-        handler: handleA
-      });
       navigateTo("home");
+    };
+    homebtn[0].addEventListener("click", handlea);
+    eventRegistry.push({
+      element: homebtn[0],
+      eventType: "click",
+      handler: handlea
     });
   }
 
   const homeButton = document.getElementById("home");
   if (homeButton) {
-    homeButton.addEventListener("click", function handleB(event) {
+    function handleb(event) {
       event.preventDefault();
-      eventRegistry.push({
-        element: homeButton,
-        eventType: "click",
-        handler: handleB
-      });
       navigateTo("home");
+    };
+    homeButton.addEventListener("click", handleb);
+    eventRegistry.push({
+      element: homeButton,
+      eventType: "click",
+      handler: handleb
     });
   }
 
   const leaderboardButton = document.getElementById("leaderboard");
   if (leaderboardButton) {
-    leaderboardButton.addEventListener("click", function HandleC(event) {
+    function Handlec(event) {
       event.preventDefault();
-      eventRegistry.push({
-        element: leaderboardButton,
-        eventType: "click",
-        handler: HandleC
-      });
       navigateTo("leaderboard");
+    };
+    leaderboardButton.addEventListener("click", Handlec);
+    eventRegistry.push({
+      element: leaderboardButton,
+      eventType: "click",
+      handler: Handlec
     });
   }
 
   const aboutButton = document.getElementById("about");
   if (aboutButton) {
-    aboutButton.addEventListener("click", function handleD(event) {
+    function handled(event) {
       event.preventDefault();
-      eventRegistry.push({
-        element: aboutButton,
-        eventType: "click",
-        handler: handleD
-      });
       navigateTo("about");
+    };
+    aboutButton.addEventListener("click", handled);
+    eventRegistry.push({
+      element: aboutButton,
+      eventType: "click",
+      handler: handled
     });
   }
   // if (document.getElementsByClassName("profil")) {
@@ -291,98 +298,96 @@ export function initLeaderboardPage() {
       const userMenu = document.getElementById("user-menu");
       console.log(userMenu, "WWAAAAAAWW", userContainer);
       if (userContainer && userMenu) {
-        // Toggle dropdown visibility when clicking on the user container
-        userContainer.addEventListener("click", function handleX(event) {
-          eventRegistry.push({
-            element: userContainer,
-            eventType: "click",
-            handler: handleX
-          });
-          // Prevent click propagation to stop closing the menu immediately
-          // event.stopPropagation();
-  
-          // Toggle visibility of the dropdown menu
+        function handlej(event) {
           userMenu.classList.toggle("visible");
-  
-          // If the menu is now visible, we need to show it
           if (userMenu.classList.contains("visible")) {
             userMenu.classList.remove("hidden");
           }
+        }
+        userContainer.addEventListener("click", handlej);
+        eventRegistry.push({
+          element: userContainer,
+          eventType: "click",
+          handler: handlej
         });
   
         // Close dropdown menu when clicking outside of the user container
-        window.addEventListener("click", function handleY(event) {
-          eventRegistry.push({
-            element: window,
-            eventType: "click",
-            handler: handleY
-          });
+        function handlek(event) {
           if (!userMenu.contains(event.target) && !userContainer.contains(event.target)) {
             userMenu.classList.remove("visible");
             userMenu.classList.add("hidden");
           }
+        }
+        window.addEventListener("click", handlek);
+        eventRegistry.push({
+          element: window,
+          eventType: "click",
+          handler: handlek
         });
       }
   
       // Delegated event listener for "View Profile" and "Log Out" clicks
-      document.body.addEventListener("click", async function handleRR(event){
-        eventRegistry.push({
-          element: document.body,
-          eventType: "click",
-          handler: handleRR
-        });
+      async function handlel(event) {
+        
         const clickedItem = event.target.closest('.dropdown-item');
-
-      if (!clickedItem) return;
-
-      // Check which specific dropdown item was clicked
-      if (clickedItem.querySelector("#view-profile")) {
-        console.log("Viewing profile...");
-        navigateTo("profil");
+  
+        if (!clickedItem) return;
+  
+        // Check which specific dropdown item was clicked
+        if (clickedItem.querySelector("#view-profile")) {
+          console.log("Viewing profile...");
+          navigateTo("profil");
+        }
+  
+        if (clickedItem.querySelector("#log-out")) {
+          console.log("Logging out...");
+          localStorage.removeItem('jwtToken');
+          syncSession();
+          navigateTo("landing");
+        }
       }
-
-      if (clickedItem.querySelector("#log-out")) {
-        console.log("Logging out...");
-        localStorage.removeItem('jwtToken');
-        syncSession();
-        navigateTo("landing");
-      }
+      document.body.addEventListener("click", handlel);
+      eventRegistry.push({
+        element: document.body,
+        eventType: "click",
+        handler: handlel
       });
   
-  document.addEventListener("change", async function handlexa(event) {
-    eventRegistry.push({
-      element: document,
-      eventType: "change",
-      handler: handlexa
-    });
-    if (event.target.classList.contains("input")) {
-      const checkbox = event.target;
-      const isChecked = checkbox.checked;
-      const action = isChecked ? "enable" : "disable";
-  
-      try {
-        console.log("ACXTION ; ", action);
-        const response = await fetch(`http://0.0.0.0:8000/2fa/${action}/`, {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
-            "Content-Type": "application/json",
-          },
-        });
-  
-        if (response.ok) {
-          console.log(`2FA ${action}d successfully.`);
-        } else {
-          console.error("Request failed. Reverting switch state.");
-          checkbox.checked = !isChecked; // Revert state if request fails
+      async function handlehone(event) {
+        console.log("change event INSIDE");
+          if (event.target.classList.contains("input")) {
+            const checkbox = event.target;
+            const isChecked = checkbox.checked;
+            const action = isChecked ? "enable" : "disable";
+    
+            try {
+              console.log("ACTION : ", action);
+              const response = await fetch(`http://0.0.0.0:8000/2fa/${action}/`, {
+                method: "POST",
+                headers: {
+                  "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
+                  "Content-Type": "application/json",
+                },
+              });
+    
+              if (response.ok) {
+                console.log(`2FA ${action}d successfully.`);
+              } else {
+                console.error("Request failed. Reverting switch state.");
+                checkbox.checked = !isChecked; // Revert state if request fails
+              }
+            } catch (error) {
+              console.error("Error occurred:", error);
+              checkbox.checked = !isChecked; // Revert state if an error occurs
+            }
+          }
         }
-      } catch (error) {
-        console.error("Error occurred:", error);
-        checkbox.checked = !isChecked; // Revert state if an error occurs
-      }
-    }
-  });
-  
+        document.addEventListener("change", handlehone);
+        eventRegistry.push({
+          element: document,
+          eventType: "change",
+          handler: handlehone
+        });
     }
   // }
   /******************************************************************************** */

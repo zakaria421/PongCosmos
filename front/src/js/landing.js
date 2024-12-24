@@ -3,6 +3,9 @@ import { eventRegistry } from "./main.js";
 import { syncSession } from "./main.js";
 
 export function initLandingPage() {
+  document.querySelectorAll('img, p, a').forEach(function(element) {
+    element.setAttribute('draggable', 'false');
+  });
   console.log("LANDING PAGE");
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -39,16 +42,9 @@ async function fetchOAuthCode(authCode) {
         document.getElementById("QR").src = image;
 
         const qrcElement = document.getElementById('qrc');
-        if (!qrcElement.getAttribute('data-listener-attached')) {
-          qrcElement.addEventListener("click", async function handlerI(event) {
-            eventRegistry.push({
-              element: qrcElement,
-              eventType: "click",
-              handler: handlerI
-            });
+          async function handleri(event) {
             event.preventDefault();
             try {
-              console.log("COOODE : : : :" + document.querySelector('#qrcode input[type="text"]').value);
               const response = await fetch(`http://0.0.0.0:8000/2fa/verify/`, {
                 method: "POST",
                 headers: {
@@ -74,9 +70,13 @@ async function fetchOAuthCode(authCode) {
               console.error("Error:", error);
               alert("An error occurred while verifying 2FA.");
             }
+          }
+          qrcElement.addEventListener("click", handleri);
+          eventRegistry.push({
+            element: qrcElement,
+            eventType: "click",
+            handler: handleri
           });
-          qrcElement.setAttribute('data-listener-attached', 'true');
-        }
 
         if (response.ok) {
           console.log("2FA auth done");

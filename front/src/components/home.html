@@ -1,45 +1,44 @@
 <!-- Navbar -->
-<nav class="navbar navbar-expand-lg">
+<nav class="navbar navbar-expand-lg" draggable="false">
   <!-- fluid to be added later on -->
-  <div class="container-fluid">
+  <div class="container-fluid" draggable="false">
     <!-- Logo -->
-    <a href="" class="home"
-      ><img class="image" src="src/assets/home/logo.svg" alt="logopng"
+    <a href="" class="home" draggable="false"
+      ><img class="image" src="src/assets/home/logo.svg" alt="logopng" draggable="false"
     /></a>
     <!-- SideBar -->
     <div
       class="sidebar offcanvas offcanvas-start shows"
       tabindex="-1"
       id="offcanvasNavbar"
-      aria-labelledby="offcanvasNavbarLabel"
-    >
+      aria-labelledby="offcanvasNavbarLabel" draggable="false">
       <!-- SideBar Header -->
-      <div class="offcanvas-header border-bottom shadow-none">
-        <a href=""
-          ><img class="image" src="src/assets/home/logo.svg" alt="logopng"
+      <div class="offcanvas-header border-bottom shadow-none" draggable="false">
+        <a href="" draggable="false"
+          ><img class="image" src="src/assets/home/logo.svg" alt="logopng" draggable="false"
         /></a>
         <button
           type="button"
           class="btn-close btn-close-white"
           data-bs-dismiss="offcanvas"
           aria-label="Close"
-        ></button>
+          draggable="false"></button>
       </div>
       <!-- SideBar Body -->
-      <div class="offcanvas-body justify-content-center">
-        <ul class="navbar-nav">
+      <div class="offcanvas-body justify-content-center" draggable="false">
+        <ul class="navbar-nav" draggable="false">
           <!-- justify-content-center fs-6 flex-grow-1 pe-3 gap-2 -->
           <li class="nav-item p-3">
-            <a class="nav-link fonts" href="" id="home"><strong>Home</strong></a>
+            <a class="nav-link fonts" href="" id="home" draggable="false"><strong>Home</strong></a>
           </li>
           <li class="nav-item p-3">
             <a class="nav-link fonts" href="" id="leaderboard"
-              ><strong>Leaderboard</strong></a
+            draggable="false"><strong>Leaderboard</strong></a
             >
           </li>
           <li class="nav-item p-3">
-            <a class="nav-link fonts" href="" id="about"
-              ><strong>About Us</strong></a
+            <a class="nav-link fonts" href="" id="about" draggable="false"
+              ><strong draggable="false">About Us</strong></a
             >
           </li>
         </ul>
@@ -53,29 +52,30 @@
       data-bs-target="#offcanvasNavbar"
       aria-controls="offcanvasNavbar"
       aria-label="Toggle navigation"
+      draggable="false"
     >
-      <span class="navbar-toggler-icon"></span> <!--style="color: var(--colors-cyan) !important;"-->
+      <span class="navbar-toggler-icon" draggable="false"></span> <!--style="color: var(--colors-cyan) !important;"-->
     </button>
     <!-- USER PROFILE -->
-    <div id="user-container" class="user-container position-relative profil">
+    <div id="user-container" class="user-container position-relative profil" draggable="false">
       <!-- Placeholder for dynamic user profile button -->
-      <div id="user-profile-button"></div>
+      <div id="user-profile-button" draggable="false"></div>
       
       <!-- Dropdown Menu -->
-      <div id="user-menu" class="user-menu hidden position-absolute bg-white rounded shadow">
-        <div class="dropdown-item px-3 py-2">
-          <div id="view-profile" class="menu-item">View Profile</div>
+      <div id="user-menu" class="user-menu hidden position-absolute bg-white rounded shadow" draggable="false">
+        <div class="dropdown-item px-3 py-2" draggable="false">
+          <div id="view-profile" class="menu-item" draggable="false">View Profile</div>
         </div>
-        <div class="dropdown-item px-3 py-2">
-          <div id="enable-2fa" class="menu-item">2FA authentication
-            <label class="switch">
-              <input id="2fa-switch" class="input" type="checkbox">
-              <span class="slider"></span>
+        <div class="dropdown-item px-3 py-2" draggable="false">
+          <div id="enable-2fa" class="menu-item" draggable="false">2FA authentication
+            <label class="switch" draggable="false">
+              <input id="2fa-switch" class="input" type="checkbox" draggable="false">
+              <span class="slider" draggable="false"></span>
             </label>
           </div>
         </div>
-        <div class="dropdown-item px-3 py-2">
-          <div id="log-out" class="menu-item">Log Out</div>
+        <div class="dropdown-item px-3 py-2" draggable="false">
+          <div id="log-out" class="menu-item" draggable="false">Log Out</div>
         </div>
       </div>
     </div>
@@ -83,77 +83,77 @@
   </div>
 </nav>
 
-<div class="main-container">
-  <div class="row g-4">
+<div class="main-container" draggable="false">
+  <div class="row g-4" draggable="false">
     <!-- Friend List -->
-    <div class="col-lg-3" id="friendListSection"> <!--style="box-shadow: 0 4px 8px #C8AA6E; border-radius: 16px;"-->
-      <div class="section-card">
-        <div class="friend-header">
-          <h5>Friends</h5>
-          <div class="friend-actions">
-            <div class="friend-requests-container d-none"></div>
-              <button class="btn btn-outline-primary btn-sm customBtn" id="searchBtn">
-                  <i class="bi bi-search"></i>
+    <div class="col-lg-3" id="friendListSection" draggable="false"> <!--style="box-shadow: 0 4px 8px #C8AA6E; border-radius: 16px;"-->
+      <div class="section-card" draggable="false">
+        <div class="friend-header" draggable="false">
+          <h5 draggable="false">Friends</h5>
+          <div class="friend-actions" draggable="false">
+            <div class="friend-requests-container d-none" draggable="false"></div>
+              <button class="btn btn-outline-primary btn-sm customBtn" id="searchBtn" draggable="false">
+                  <i class="bi bi-search" draggable="false"></i>
               </button>
-              <button class="btn btn-outline-primary btn-sm customBtn" id="addFriendBtn">
-                  <i class="bi bi-person-plus"></i>
+              <button class="btn btn-outline-primary btn-sm customBtn" id="addFriendBtn" draggable="false">
+                  <i class="bi bi-person-plus" draggable="false"></i>
               </button>
-              <button id="friendRequestButton" class="btn btn-outline-danger btn-sm position-relative">
+              <button id="friendRequestButton" class="btn btn-outline-danger btn-sm position-relative" draggable="false">
                   Requests
-                  <span id="friendRequestBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                  <span id="friendRequestBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" draggable="false">
                       0
                   </span>
               </button>
-              <button class="btn btn-outline-danger btn-sm d-lg-none" id="closeFriendList">
-                  <i class="bi bi-x-lg"></i>
+              <button class="btn btn-outline-danger btn-sm d-lg-none" id="closeFriendList" draggable="false">
+                  <i class="bi bi-x-lg draggable="false""></i>
               </button>
           </div>
       </div>
 
         <!-- Search Input -->
-        <div class="search-container d-none mb-3">
-          <div class="input-group">
-            <input  type="text" class="form-control" id="searchInput" placeholder="Search friends..." />
-              <button class="btn btn-outline-secondary customBtn" id="closeSearch">
-                <i class="bi bi-x"></i>
+        <div class="search-container d-none mb-3" draggable="false">
+          <div class="input-group" draggable="false">
+            <input  type="text" class="form-control" id="searchInput" placeholder="Search friends..." draggable="false"/>
+              <button class="btn btn-outline-secondary customBtn" id="closeSearch" draggable="false">
+                <i class="bi bi-x" draggable="false"></i>
               </button>
             </div>
           </div>
           
           <!-- Add Friend Input -->
-          <div class="add-friend-container d-none mb-3">
-            <div class="input-group">
-              <input type="text" class="form-control" id="addFriendInput" placeholder="Enter friend's username" />
-            <button class="btn btn-primary" id="addFriendButton" style="background-color: var(--colors-cyan); border: 1px solid var(--colors-cyan)">Add</button> <!--style="background-color: var(--colors-cyan); border: 1px solid var(--colors-cyan)"-->
+          <div class="add-friend-container d-none mb-3" draggable="false">
+            <div class="input-group" draggable="false">
+              <input type="text" class="form-control" id="addFriendInput" placeholder="Enter friend's username" draggable="false"/>
+            <button class="btn btn-primary" id="addFriendButton" style="background-color: var(--colors-cyan); border: 1px solid var(--colors-cyan)" draggable="false">Add</button> <!--style="background-color: var(--colors-cyan); border: 1px solid var(--colors-cyan)"-->
           </div>
-          <div id="addFriendResult"></div>
-          <div id="friendRequestResult"></div>          
+          <div id="addFriendResult" draggable="false"></div>
+          <div id="friendRequestResult" draggable="false"></div>          
         </div>
 
-        <div class="friend-list">
+        <div class="friend-list" draggable="false">
           <!-- the friend liiiist will be here  -->
         </div>
       </div>
     </div>
 
     <!-- Middle Section -->
-    <div class="col-lg-6">
-      <div class="section-card">
-        <div id="defaultContent" class="content-center">
-          <h2 style="color: var(--colors-cyan);">Welcome, Summoners,</h2>
-          <p class="lead">
+    <div class="col-lg-6" draggable="false">
+      <div class="section-card" draggable="false">
+        <div id="defaultContent" class="content-center" draggable="false">
+          <h2 style="color: var(--colors-cyan);" draggable="false">Welcome, Summoners,</h2>
+          <p class="lead" draggable="false">
             to the ultimate Ping Pong experience! Immerse yourself in a world
             where skill meets precision, and every game is a battle for glory.
             Whether you're here to challenge the leaderboard, engage with fellow
             enthusiasts, or simply enjoy a match.
           </p>
-          <button class="btn btn-primary btn-lg play-button" id="confirmButton">
-            <i class="bi bi-play-fill"></i> Play Now
+          <button class="btn btn-primary btn-lg play-button" id="confirmButton" draggable="false">
+            <i class="bi bi-play-fill" draggable="false"></i> Play Now
           </button>
         </div>
 
-        <div id="chatWindow" class="d-none">
-          <div class="chat-header">
+        <div id="chatWindow" class="d-none" draggable="false">
+          <div class="chat-header" draggable="false">
             <div class="chat-user-info" id="chatUserInfo">
               <img src="" id="chatUserAvatar" class="rounded-circle" />
               <span id="chatUserName"></span>

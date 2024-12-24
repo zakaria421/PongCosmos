@@ -4,27 +4,30 @@ import { eventRegistry } from "./main.js";
 import { syncSession } from "./main.js";
 
 export function initHomePage() {
+  document.querySelectorAll('img, p, a', 'div', 'button').forEach(function(element) {
+    element.setAttribute('draggable', 'false');
+  });
   function renderUser(userData, profilePicture) {
     return `
-        <button class="user btn p-2 no-border">
-          <div class="d-flex align-items-center gap-2">
+        <button class="user btn p-2 no-border" draggable="false">
+          <div class="d-flex align-items-center gap-2" draggable="false">
             <!-- Profile Image -->
-            <div id="toggler">
-              <div class="users-container">
-                <img src="./src/assets/home/border.png" alt="" class="users-border">
-                <img src="${profilePicture}" alt="Profile Image" class="rounded-circle users">
+            <div id="toggler" draggable="false">
+              <div class="users-container" draggable="false">
+                <img src="./src/assets/home/border.png" alt="" class="users-border" draggable="false">
+                <img src="${profilePicture}" alt="Profile Image" class="rounded-circle users" id="profilePicture" draggable="false">
               </div>
 
               <!-- User Name -->
-              <div class="UserProfile">
-                <p class="text-white text-decoration-none">
-                  <strong>${userData.nickname}</strong>
+              <div class="UserProfile" draggable="false">
+                <p class="text-white text-decoration-none" draggable="false">
+                  <strong draggable="false">${userData.nickname}</strong>
                 </p>
               </div>
             </div>
             <!-- Notification Icon -->
-            <div class="Notifications">
-              <i class="bi bi-bell-fill text-white"></i>
+            <div class="Notifications" draggable="false">
+              <i class="bi bi-bell-fill text-white" draggable="false"></i>
             </div>
           </div>
         </button>
@@ -58,13 +61,14 @@ export function initHomePage() {
   const mobileFriendsToggle = document.getElementById("mobileFriendsToggle");
 
   // const closeAddFriend = document.getElementById('closeAddFriend');
-  closeFriendList.addEventListener("click", function handlerZ() {
+  function handlerz() {
     friendListSection.classList.remove("active");
-    eventRegistry.push({
-      element: closeFriendList,
-      eventType: "click",
-      handler: handlerZ
-    });
+  }
+  closeFriendList.addEventListener("click", handlerz);
+  eventRegistry.push({
+    element: closeFriendList,
+    eventType: "click",
+    handler: handlerz
   });
 
   // Friend Selection
@@ -123,15 +127,16 @@ export function initHomePage() {
   //   addFriendContainer.classList.add("d-none");
   // }); //*request to be sent to the backend request sent*
 
-  mobileFriendsToggle.addEventListener("click", function handlerT() {
+  function handlert() {
     friendListSection.classList.toggle("active");
     mobileFriendsToggle.style.zIndex = 10;
+  }
+  mobileFriendsToggle.addEventListener("click", handlert);
     eventRegistry.push({
       element: mobileFriendsToggle,
       eventType: "click",
-      handler: handlerT
+      handler: handlert
     });
-  });
 
   // Add event listener to "Play" button
   // const playButton = document.getElementById("confirmButton");
@@ -143,53 +148,57 @@ export function initHomePage() {
   /******************************************************************************** */
   const homebtn = document.getElementsByClassName("home");
   if (homebtn[0]) {
-    homebtn[0].addEventListener("click", function handleA(event) {
+    function handlea(event) {
       event.preventDefault();
-      eventRegistry.push({
-        element: homebtn[0],
-        eventType: "click",
-        handler: handleA
-      });
       navigateTo("home");
+    };
+    homebtn[0].addEventListener("click", handlea);
+    eventRegistry.push({
+      element: homebtn[0],
+      eventType: "click",
+      handler: handlea
     });
   }
 
   const homeButton = document.getElementById("home");
   if (homeButton) {
-    homeButton.addEventListener("click", function handleB(event) {
+    function handleb(event) {
       event.preventDefault();
-      eventRegistry.push({
-        element: homeButton,
-        eventType: "click",
-        handler: handleB
-      });
       navigateTo("home");
+    };
+    homeButton.addEventListener("click", handleb);
+    eventRegistry.push({
+      element: homeButton,
+      eventType: "click",
+      handler: handleb
     });
   }
 
   const leaderboardButton = document.getElementById("leaderboard");
   if (leaderboardButton) {
-    leaderboardButton.addEventListener("click", function HandleC(event) {
+    function handlec(event) {
       event.preventDefault();
-      eventRegistry.push({
-        element: leaderboardButton,
-        eventType: "click",
-        handler: HandleC
-      });
       navigateTo("leaderboard");
+    };
+    leaderboardButton.addEventListener("click", handlec);
+    eventRegistry.push({
+      element: leaderboardButton,
+      eventType: "click",
+      handler: handlec
     });
   }
 
   const aboutButton = document.getElementById("about");
   if (aboutButton) {
-    aboutButton.addEventListener("click", function handleD(event) {
+    function handled(event) {
       event.preventDefault();
-      eventRegistry.push({
-        element: aboutButton,
-        eventType: "click",
-        handler: handleD
-      });
       navigateTo("about");
+    };
+    aboutButton.addEventListener("click", handled);
+    eventRegistry.push({
+      element: aboutButton,
+      eventType: "click",
+      handler: handled
     });
   }
   // if (document.getElementsByClassName("profil")) {
@@ -267,47 +276,37 @@ export function initHomePage() {
     const userMenu = document.getElementById("user-menu");
     console.log(userMenu, "WWAAAAAAWW", userContainer);
     if (userContainer && userMenu) {
-      // Toggle dropdown visibility when clicking on the user container
-      userContainer.addEventListener("click", function handleE(event) {
-        eventRegistry.push({
-          element: userContainer,
-          eventType: "click",
-          handler: handleE
-        });
-        // Prevent click propagation to stop closing the menu immediately
-        // event.stopPropagation();
-
-        // Toggle visibility of the dropdown menu
+      function handlej(event) {
         userMenu.classList.toggle("visible");
-
-        // If the menu is now visible, we need to show it
         if (userMenu.classList.contains("visible")) {
           userMenu.classList.remove("hidden");
         }
+      }
+      userContainer.addEventListener("click", handlej);
+      eventRegistry.push({
+        element: userContainer,
+        eventType: "click",
+        handler: handlej
       });
 
       // Close dropdown menu when clicking outside of the user container
-      window.addEventListener("click", function handleF(event) {
-        eventRegistry.push({
-          element: window,
-          eventType: "click",
-          handler: handleF
-        });
+      function handlek(event) {
         if (!userMenu.contains(event.target) && !userContainer.contains(event.target)) {
           userMenu.classList.remove("visible");
           userMenu.classList.add("hidden");
         }
+      }
+      window.addEventListener("click", handlek);
+      eventRegistry.push({
+        element: window,
+        eventType: "click",
+        handler: handlek
       });
     }
 
     // Delegated event listener for "View Profile" and "Log Out" clicks
-    document.body.addEventListener("click", async function handleG(event) {
-      eventRegistry.push({
-        element: document.body,
-        eventType: "click",
-        handler: handleG
-      });
-
+    async function handlel(event) {
+      
       const clickedItem = event.target.closest('.dropdown-item');
 
       if (!clickedItem) return;
@@ -324,44 +323,50 @@ export function initHomePage() {
         syncSession();
         navigateTo("landing");
       }
+    }
+    document.body.addEventListener("click", handlel);
+    eventRegistry.push({
+      element: document.body,
+      eventType: "click",
+      handler: handlel
     });
 
-    document.addEventListener("change", async function handleH(event) {
+    async function handlehone(event) {
+      console.log("change event INSIDE");
+        if (event.target.classList.contains("input")) {
+          const checkbox = event.target;
+          const isChecked = checkbox.checked;
+          const action = isChecked ? "enable" : "disable";
+  
+          try {
+            console.log("ACTION : ", action);
+            const response = await fetch(`http://0.0.0.0:8000/2fa/${action}/`, {
+              method: "POST",
+              headers: {
+                "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
+                "Content-Type": "application/json",
+              },
+            });
+  
+            if (response.ok) {
+              console.log(`2FA ${action}d successfully.`);
+            } else {
+              console.error("Request failed. Reverting switch state.");
+              checkbox.checked = !isChecked; // Revert state if request fails
+            }
+          } catch (error) {
+            console.error("Error occurred:", error);
+            checkbox.checked = !isChecked; // Revert state if an error occurs
+          }
+        }
+      }
+      document.addEventListener("change", handlehone);
       eventRegistry.push({
         element: document,
         eventType: "change",
-        handler: handleH
+        handler: handlehone
       });
-      if (event.target.classList.contains("input")) {
-        const checkbox = event.target;
-        const isChecked = checkbox.checked;
-        const action = isChecked ? "enable" : "disable";
-
-        try {
-          console.log("ACTION : ", action);
-          const response = await fetch(`http://0.0.0.0:8000/2fa/${action}/`, {
-            method: "POST",
-            headers: {
-              "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
-              "Content-Type": "application/json",
-            },
-          });
-
-          if (response.ok) {
-            console.log(`2FA ${action}d successfully.`);
-          } else {
-            console.error("Request failed. Reverting switch state.");
-            checkbox.checked = !isChecked; // Revert state if request fails
-          }
-        } catch (error) {
-          console.error("Error occurred:", error);
-          checkbox.checked = !isChecked; // Revert state if an error occurs
-        }
-      }
-    });
-
   }
-
 
 
   function connectWebSocket(username, friendId) {

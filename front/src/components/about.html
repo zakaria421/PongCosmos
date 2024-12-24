@@ -1,45 +1,44 @@
 <!-- Navbar -->
-<nav class="navbar navbar-expand-lg">
+<nav class="navbar navbar-expand-lg" draggable="false">
   <!-- fluid to be added later on -->
-  <div class="container-fluid">
+  <div class="container-fluid" draggable="false">
     <!-- Logo -->
-    <a href="" class="home"
-      ><img class="image" src="src/assets/home/logo.svg" alt="logopng"
+    <a href="" class="home" draggable="false"
+      ><img class="image" src="src/assets/home/logo.svg" alt="logopng" draggable="false"
     /></a>
     <!-- SideBar -->
     <div
       class="sidebar offcanvas offcanvas-start shows"
       tabindex="-1"
       id="offcanvasNavbar"
-      aria-labelledby="offcanvasNavbarLabel"
-    >
+      aria-labelledby="offcanvasNavbarLabel" draggable="false">
       <!-- SideBar Header -->
-      <div class="offcanvas-header border-bottom shadow-none">
-        <a href=""
-          ><img class="image" src="src/assets/home/logo.svg" alt="logopng"
+      <div class="offcanvas-header border-bottom shadow-none" draggable="false">
+        <a href="" draggable="false"
+          ><img class="image" src="src/assets/home/logo.svg" alt="logopng" draggable="false"
         /></a>
         <button
           type="button"
           class="btn-close btn-close-white"
           data-bs-dismiss="offcanvas"
           aria-label="Close"
-        ></button>
+          draggable="false"></button>
       </div>
       <!-- SideBar Body -->
-      <div class="offcanvas-body justify-content-center">
-        <ul class="navbar-nav">
+      <div class="offcanvas-body justify-content-center" draggable="false">
+        <ul class="navbar-nav" draggable="false">
           <!-- justify-content-center fs-6 flex-grow-1 pe-3 gap-2 -->
           <li class="nav-item p-3">
-            <a class="nav-link fonts" href="" id="home"><strong>Home</strong></a>
+            <a class="nav-link fonts" href="" id="home" draggable="false"><strong>Home</strong></a>
           </li>
           <li class="nav-item p-3">
             <a class="nav-link fonts" href="" id="leaderboard"
-              ><strong>Leaderboard</strong></a
+            draggable="false"><strong>Leaderboard</strong></a
             >
           </li>
           <li class="nav-item p-3">
-            <a class="nav-link fonts" href="" id="about"
-              ><strong>About Us</strong></a
+            <a class="nav-link fonts" href="" id="about" draggable="false"
+              ><strong draggable="false">About Us</strong></a
             >
           </li>
         </ul>
@@ -53,32 +52,34 @@
       data-bs-target="#offcanvasNavbar"
       aria-controls="offcanvasNavbar"
       aria-label="Toggle navigation"
+      draggable="false"
     >
-      <span class="navbar-toggler-icon" style="color: var(--colors-cyan) !important;"></span>
+      <span class="navbar-toggler-icon" draggable="false"></span> <!--style="color: var(--colors-cyan) !important;"-->
     </button>
     <!-- USER PROFILE -->
-    <div id="user-container" class="user-container position-relative profil">
+    <div id="user-container" class="user-container position-relative profil" draggable="false">
       <!-- Placeholder for dynamic user profile button -->
-      <div id="user-profile-button"></div>
+      <div id="user-profile-button" draggable="false"></div>
       
       <!-- Dropdown Menu -->
-      <div id="user-menu" class="user-menu hidden position-absolute bg-white rounded shadow">
-        <div class="dropdown-item px-3 py-2">
-          <div id="view-profile" class="menu-item">View Profile</div>
+      <div id="user-menu" class="user-menu hidden position-absolute bg-white rounded shadow" draggable="false">
+        <div class="dropdown-item px-3 py-2" draggable="false">
+          <div id="view-profile" class="menu-item" draggable="false">View Profile</div>
         </div>
-        <div class="dropdown-item px-3 py-2">
-          <div id="enable-2fa" class="menu-item">2FA authentication
-            <label class="switch">
-              <input id="2fa-switch" class="input" type="checkbox">
-              <span class="slider"></span>
+        <div class="dropdown-item px-3 py-2" draggable="false">
+          <div id="enable-2fa" class="menu-item" draggable="false">2FA authentication
+            <label class="switch" draggable="false">
+              <input id="2fa-switch" class="input" type="checkbox" draggable="false">
+              <span class="slider" draggable="false"></span>
             </label>
           </div>
         </div>
-        <div class="dropdown-item px-3 py-2">
-          <div id="log-out" class="menu-item">Log Out</div>
+        <div class="dropdown-item px-3 py-2" draggable="false">
+          <div id="log-out" class="menu-item" draggable="false">Log Out</div>
         </div>
       </div>
     </div>
+    
   </div>
 </nav>
 
