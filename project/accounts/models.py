@@ -16,7 +16,7 @@ profilePics = [
 class UserProfile(models.Model):
     user                    = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user_profile')
     id                      = models.AutoField(primary_key=True)
-    nickname                = models.CharField(max_length=30, unique=True, blank=True, null=True)
+    nickname                = models.CharField(max_length=10, unique=True, blank=True, null=True)
     profile_picture         = models.ImageField(upload_to="images/", default=random.choice(profilePics), blank=True, null=True)
     mimeType                = models.CharField(max_length=50, default="image/jpg")
     email                   = models.EmailField(max_length=255, blank=True, null=True)
@@ -24,10 +24,24 @@ class UserProfile(models.Model):
     friends                 = models.ManyToManyField(User, blank=True, related_name='user_friends')
     wins                    = models.IntegerField(default=0)
     losses                  = models.IntegerField(default=0)
-    level                   = models.IntegerField(default=0)
+    level                   = models.FloatField(default=0.0)
     otp_secret              = models.CharField(max_length=32, blank=True, null=True)  # Store OTP secret
     is_2fa_enabled          = models.BooleanField(default=False)
     qrcode                  = models.CharField()
 
     def __str__(self):
         return self.nickname
+    
+class Match(models.Model):
+    match_id                = models.IntegerField()  # Manually managed
+    user                    = models.ForeignKey('UserProfile', on_delete=models.CASCADE, related_name='matches')  # The user who played the match
+    opponent_name           = models.CharField(max_length=255)  # The opponent user
+    score                   = models.IntegerField(default=0)
+    opponent_score          = models.IntegerField(default=0)
+    match_date              = models.DateTimeField(auto_now_add=True)  # Timestamp of when the match was created
+
+    def save(self, *args, **kwargs):
+        if not self.match_id:
+            # Get the count of matches for this user and increment it by 1
+            self.match_id = Match.objects.filter(user=self.user).count() + 1
+        super().save(*args, **kwargs)

@@ -1,10 +1,13 @@
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
+from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny
 from django.shortcuts import get_object_or_404
 from .serializers import UserProfileSerializer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.http import JsonResponse
+from rest_framework import status
 from .models import UserProfile
 from io import BytesIO
 import base64
@@ -116,3 +119,8 @@ class Disable2FAView(APIView):
         user_profile.save()
 
         return Response({"message": "2FA disabled successfully."}, status=200)
+
+
+
+
+

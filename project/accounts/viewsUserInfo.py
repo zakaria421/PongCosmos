@@ -33,8 +33,8 @@ class ProtectedView(APIView):
 
 
 #***************************************************************************************************
-
 @csrf_exempt
+
 def add_friend(request):
     if request.method == "POST":
         data = json.loads(request.body)
@@ -79,19 +79,3 @@ def search_friends(request):
         return JsonResponse({"results": results}, status=200)
     return JsonResponse({"results": []}, status=200)
 
-# def fetch_friend_list(request):
-#     if request.user.is_authenticated:
-#         user_profile = UserProfile.objects.get(user=request.user)
-#         friends = user_profile.friends.all()
-
-#         friends_data = [
-#             {
-#                 "id": friend.id,
-#                 "name": friend.user_profile.nickname,
-#                 "avatar": friend.user_profile.profile_picture.url if friend.user_profile.profile_picture else "",
-#                 "bio": friend.user_profile.bio,
-#             }
-#             for friend in friends
-#         ]
-#         return JsonResponse(friends_data, safe=False)
-#     return JsonResponse({"success": False, "error": "User not authenticated."}, status=401)

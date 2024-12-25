@@ -5,7 +5,7 @@ from .views_signup import RegisterView
 from .viewsUserInfo import ProtectedView
 from .views_changePass import ChangePasswordView
 from .views_PrflUpdate import UserProfileUpdateView, ChangeProfilePictureAPIView
-from .viewsWinLoss import UpdateWinLossView
+from .viewsWinLoss import UpdateWinLossView, matchHistory
 from .views import UserProfileDetailView, Enable2FAView, VerifyOTPView, Disable2FAView
 # from .views import ProxyToChat
 
@@ -20,7 +20,7 @@ urlpatterns = [
     path('profile/update/',UserProfileUpdateView.as_view()),
     path('profile/update/changepassword/',ChangePasswordView.as_view()),
     path('profile/update/picture/',ChangeProfilePictureAPIView.as_view(),),
-    path('profile/update/<str:result>/', UpdateWinLossView.as_view()), #this is the path for the win or loss
+    path('profile/update/<str:result>/', UpdateWinLossView.as_view()), #this is the url for the win or loss
     ####
     path('user-profile/<str:nickname>/', UserProfileDetailView.as_view(), name='user-profile-detail'),
     # *************************************************************************new
@@ -31,7 +31,6 @@ urlpatterns = [
     path("2fa/verify/", VerifyOTPView.as_view(), name="verify_otp"),
     path("2fa/disable/", Disable2FAView.as_view(), name="disable_2fa"),
 
-    # path('2fa/verify/', VerifyOTPView.as_view(), name='verify_otp'),
-    # path('2fa/disable/', Disable2FAView.as_view(), name='disable_2fa'),
+    path('profile/matchHistory/', matchHistory.as_view(), name='user_profile_detail'),
     
 ]
