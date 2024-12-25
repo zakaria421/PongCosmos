@@ -6,9 +6,9 @@ export function initProfilPage() {
   let userName = "";
   let userProfilPicture = "";
   let userId = 0;
-  document.querySelectorAll('img, p, a, div, button').forEach(function(element) {
-  element.setAttribute('draggable', 'false');
-});
+  document.querySelectorAll('img, p, a, div, button').forEach(function (element) {
+    element.setAttribute('draggable', 'false');
+  });
   let token = localStorage.getItem("jwtToken");
   const switchCheckbox = document.getElementById("2fa-switch");
   let isEditing = false;
@@ -111,15 +111,15 @@ export function initProfilPage() {
     }
   });
 
-// Helper function to place caret at the end of contenteditable
-function placeCaretAtEnd(el) {
-  const range = document.createRange();
-  const selection = window.getSelection();
-  range.selectNodeContents(el);
-  range.collapse(false);
-  selection.removeAllRanges();
-  selection.addRange(range);
-}
+  // Helper function to place caret at the end of contenteditable
+  function placeCaretAtEnd(el) {
+    const range = document.createRange();
+    const selection = window.getSelection();
+    range.selectNodeContents(el);
+    range.collapse(false);
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
 
   // Sort friends by status (online first)
   // friends.sort((a, b) => (a.status === "offline") - (b.status === "offline"));
@@ -130,9 +130,8 @@ function placeCaretAtEnd(el) {
       const div = document.createElement("div");
       div.className = "friend-item";
       div.innerHTML = `
-              <img src="http://0.0.0.0:8000/${friend.profile_picture}" alt="${
-        friend.nickname
-      }" class="friend-picture">
+              <img src="http://0.0.0.0:8000/${friend.profile_picture}" alt="${friend.nickname
+        }" class="friend-picture">
               <div>
                   <p class="friend-name">${friend.nickname}</p>
                   <span class="friend-status ${friend.status}">
@@ -283,22 +282,18 @@ function placeCaretAtEnd(el) {
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-12 col-sm-5 d-flex flex-column flex-sm-row align-items-center justify-content-start mb-3 mb-sm-0">
-                        <img src="${
-                          userProfilPicture
-                        }" alt="" class="player-icon mb-2 mb-sm-0 me-sm-2">
-                        <h5 class="player-name ${
-                          playerWon ? "winner" : "loser"
-                        }">${userName}</h5>
+                        <img src="${userProfilPicture
+      }" alt="" class="player-icon mb-2 mb-sm-0 me-sm-2">
+                        <h5 class="player-name ${playerWon ? "winner" : "loser"
+      }">${userName}</h5>
                     </div>
                     <div class="col-12 col-sm-2 text-center mb-3 mb-sm-0">
-                        <div class="score">${match.score} - ${
-      match.opponent_score
-    }</div>
+                        <div class="score">${match.score} - ${match.opponent_score
+      }</div>
                     </div>
                     <div class="col-12 col-sm-5 d-flex flex-column flex-sm-row align-items-center justify-content-end">
-                        <h5 class="enemy-name ${
-                          playerWon ? "loser" : "winner"
-                        } mb-2 mb-sm-0 me-sm-2">${match.opponent_name}</h5>
+                        <h5 class="enemy-name ${playerWon ? "loser" : "winner"
+      } mb-2 mb-sm-0 me-sm-2">${match.opponent_name}</h5>
                         <img src="
                           http://0.0.0.0:8000/${match.opponent_profile_picture}
                         " alt="" class="enemy-icon">
@@ -312,8 +307,9 @@ function placeCaretAtEnd(el) {
   async function displayMatchHistory() {
 
     const matchHistoryContainer = document.getElementById("matchHistory");
-    matchHistoryContainer.innerHTML = "";
-    console.log("WST MATCH HISTORY : " , token);
+    console.log(matchHistoryContainer);
+    // matchHistoryContainer.innerHTML = "";
+    console.log("WST MATCH HISTORY : ", token);
     try {
       let response = await fetch(`http://0.0.0.0:8000/profile/matchHistory?user_id=${userId}`, {
         headers: {
@@ -326,13 +322,21 @@ function placeCaretAtEnd(el) {
         let userData = await response.json();
         console.log(userData);
         let matchDatas = userData.matches;
-        const recentMatches = matchDatas.slice(-10);
-
-        recentMatches.forEach((match) => {
-          const matchCard = createMatchCard(match);
-          matchHistoryContainer.appendChild(matchCard);
-        });
-    }
+        console.log(matchDatas);
+        if (matchDatas.length == 0) {
+          document.getElementById("notyet").style.display = "block";
+        }
+        else {
+          document.getElementById("notyet").style.display = "none";
+          console.log("LENGTH: ", matchDatas.length);
+          const recentMatches = matchDatas.slice(-10);
+          console.log("LENGTH RECENT MATCHES", recentMatches);
+          recentMatches.forEach((match) => {
+            const matchCard = createMatchCard(match);
+            matchHistoryContainer.appendChild(matchCard);
+          });
+        }
+      }
     } catch (err) {
       console.log("error", err);
     }
@@ -416,7 +420,7 @@ function placeCaretAtEnd(el) {
           </div>
         </button>
     `;
-}
+  }
 
 
   function updateUserDisplay(userData, profilePicture) {
@@ -428,73 +432,73 @@ function placeCaretAtEnd(el) {
   fetchUserData();
   // Edit profile logic
   function handlehg() {
-      isEditing = !isEditing;
+    isEditing = !isEditing;
 
-      if (isEditing) {
-        document
-          .getElementById("profileName")
-          .setAttribute("contenteditable", "true");
-        document
-          .getElementById("profileBio")
-          .setAttribute("contenteditable", "true");
-        document.getElementById("profileImage").style.cursor = "pointer";
-        document.getElementById("profileImage").classList.add("editable");
-        document.getElementById("editImageIcon").style.display = "block";
-        this.innerHTML = '<i class="fas fa-save me-2"></i>Save Profile';
+    if (isEditing) {
+      document
+        .getElementById("profileName")
+        .setAttribute("contenteditable", "true");
+      document
+        .getElementById("profileBio")
+        .setAttribute("contenteditable", "true");
+      document.getElementById("profileImage").style.cursor = "pointer";
+      document.getElementById("profileImage").classList.add("editable");
+      document.getElementById("editImageIcon").style.display = "block";
+      this.innerHTML = '<i class="fas fa-save me-2"></i>Save Profile';
 
-        document.getElementById("profileName").focus();
-        const profileName = document.getElementById("profileName");
-        profileName.addEventListener("input", () => {
-          if (profileName.textContent.length > 8) {
-            profileName.textContent = profileName.textContent.slice(0, 8);
-            placeCaretAtEnd(profileName);
-          }
-        });
-        function placeCaretAtEnd(el) {
-          const range = document.createRange();
-          const sel = window.getSelection();
-          range.selectNodeContents(el);
-          range.collapse(false);
-          sel.removeAllRanges();
-          sel.addRange(range);
+      document.getElementById("profileName").focus();
+      const profileName = document.getElementById("profileName");
+      profileName.addEventListener("input", () => {
+        if (profileName.textContent.length > 8) {
+          profileName.textContent = profileName.textContent.slice(0, 8);
+          placeCaretAtEnd(profileName);
         }
-      } else {
-        const updatedName = document.getElementById("profileName").textContent;
-        const updatedBio = document.getElementById("profileBio").textContent;
-
-        fetch("http://0.0.0.0:8000/profile/update/", {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ nickname: updatedName, bio: updatedBio }),
-        })
-          .then((response) => response.json())
-          .then((userData) => {
-            document.getElementById("profileName").textContent = userData.nickname;
-            document.getElementById("profileN").textContent = userData.nickname;
-          })
-          .catch((error) => console.error("Error updating profile:", error));
-
-        document
-          .getElementById("profileName")
-          .setAttribute("contenteditable", "false");
-        document
-          .getElementById("profileBio")
-          .setAttribute("contenteditable", "false");
-        document.getElementById("profileImage").style.cursor = "not-allowed";
-        document.getElementById("profileImage").classList.remove("editable");
-        document.getElementById("editImageIcon").style.display = "none";
-        this.innerHTML = '<i class="fas fa-pencil-alt me-2"></i>Edit Profile';
+      });
+      function placeCaretAtEnd(el) {
+        const range = document.createRange();
+        const sel = window.getSelection();
+        range.selectNodeContents(el);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
       }
+    } else {
+      const updatedName = document.getElementById("profileName").textContent;
+      const updatedBio = document.getElementById("profileBio").textContent;
+
+      fetch("http://0.0.0.0:8000/profile/update/", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ nickname: updatedName, bio: updatedBio }),
+      })
+        .then((response) => response.json())
+        .then((userData) => {
+          document.getElementById("profileName").textContent = userData.nickname;
+          document.getElementById("profileN").textContent = userData.nickname;
+        })
+        .catch((error) => console.error("Error updating profile:", error));
+
+      document
+        .getElementById("profileName")
+        .setAttribute("contenteditable", "false");
+      document
+        .getElementById("profileBio")
+        .setAttribute("contenteditable", "false");
+      document.getElementById("profileImage").style.cursor = "not-allowed";
+      document.getElementById("profileImage").classList.remove("editable");
+      document.getElementById("editImageIcon").style.display = "none";
+      this.innerHTML = '<i class="fas fa-pencil-alt me-2"></i>Edit Profile';
     }
-    document.getElementById("editProfileBtn").addEventListener("click", handlehg);
-    eventRegistry.push({
-      element: document.getElementById("editProfileBtn"),
-      eventType: "click",
-      handler: handlehg
-    });
+  }
+  document.getElementById("editProfileBtn").addEventListener("click", handlehg);
+  eventRegistry.push({
+    element: document.getElementById("editProfileBtn"),
+    eventType: "click",
+    handler: handlehg
+  });
 
   // Image upload logic
   document
@@ -599,110 +603,110 @@ function placeCaretAtEnd(el) {
     });
   }
   // if (document.getElementsByClassName("profil")) {
-    // const profilButton = document.getElementsByClassName("profil");
-    // if (profilButton[0]) {
-    //   profilButton[0].addEventListener("click", function (event) {
-    //     event.preventDefault();
-    //     navigateTo("profil");
-    //   });
-    // }
-     // Function to attach event listeners when elements exist
-     function attachUserMenuListeners() {
-      const userContainer = document.getElementById("toggler");
-      const userMenu = document.getElementById("user-menu");
-      console.log(userMenu, "WWAAAAAAWW", userContainer);
-      if (userContainer && userMenu) {
-        function handlej(event) {
-          userMenu.classList.toggle("visible");
-          if (userMenu.classList.contains("visible")) {
-            userMenu.classList.remove("hidden");
-          }
-        }
-        userContainer.addEventListener("click", handlej);
-        eventRegistry.push({
-          element: userContainer,
-          eventType: "click",
-          handler: handlej
-        });
-  
-        // Close dropdown menu when clicking outside of the user container
-        function handlek(event) {
-          if (!userMenu.contains(event.target) && !userContainer.contains(event.target)) {
-            userMenu.classList.remove("visible");
-            userMenu.classList.add("hidden");
-          }
-        }
-        window.addEventListener("click", handlek);
-        eventRegistry.push({
-          element: window,
-          eventType: "click",
-          handler: handlek
-        });
-      }
-  
-      // Delegated event listener for "View Profile" and "Log Out" clicks
-      async function handlel(event) {
-        
-        const clickedItem = event.target.closest('.dropdown-item');
-  
-        if (!clickedItem) return;
-  
-        // Check which specific dropdown item was clicked
-        if (clickedItem.querySelector("#view-profile")) {
-          console.log("Viewing profile...");
-          navigateTo("profil");
-        }
-  
-        if (clickedItem.querySelector("#log-out")) {
-          console.log("Logging out...");
-          localStorage.removeItem('jwtToken');
-          syncSession();
-          navigateTo("landing");
+  // const profilButton = document.getElementsByClassName("profil");
+  // if (profilButton[0]) {
+  //   profilButton[0].addEventListener("click", function (event) {
+  //     event.preventDefault();
+  //     navigateTo("profil");
+  //   });
+  // }
+  // Function to attach event listeners when elements exist
+  function attachUserMenuListeners() {
+    const userContainer = document.getElementById("toggler");
+    const userMenu = document.getElementById("user-menu");
+    console.log(userMenu, "WWAAAAAAWW", userContainer);
+    if (userContainer && userMenu) {
+      function handlej(event) {
+        userMenu.classList.toggle("visible");
+        if (userMenu.classList.contains("visible")) {
+          userMenu.classList.remove("hidden");
         }
       }
-      document.body.addEventListener("click", handlel);
+      userContainer.addEventListener("click", handlej);
       eventRegistry.push({
-        element: document.body,
+        element: userContainer,
         eventType: "click",
-        handler: handlel
+        handler: handlej
       });
-  
-      async function handlehone(event) {
-        console.log("change event INSIDE");
-          if (event.target.classList.contains("input")) {
-            const checkbox = event.target;
-            const isChecked = checkbox.checked;
-            const action = isChecked ? "enable" : "disable";
-    
-            try {
-              console.log("ACTION : ", action);
-              const response = await fetch(`http://0.0.0.0:8000/2fa/${action}/`, {
-                method: "POST",
-                headers: {
-                  "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
-                  "Content-Type": "application/json",
-                },
-              });
-    
-              if (response.ok) {
-                console.log(`2FA ${action}d successfully.`);
-              } else {
-                console.error("Request failed. Reverting switch state.");
-                checkbox.checked = !isChecked; // Revert state if request fails
-              }
-            } catch (error) {
-              console.error("Error occurred:", error);
-              checkbox.checked = !isChecked; // Revert state if an error occurs
-            }
-          }
+
+      // Close dropdown menu when clicking outside of the user container
+      function handlek(event) {
+        if (!userMenu.contains(event.target) && !userContainer.contains(event.target)) {
+          userMenu.classList.remove("visible");
+          userMenu.classList.add("hidden");
         }
-        document.addEventListener("change", handlehone);
-        eventRegistry.push({
-          element: document,
-          eventType: "change",
-          handler: handlehone
-        });
+      }
+      window.addEventListener("click", handlek);
+      eventRegistry.push({
+        element: window,
+        eventType: "click",
+        handler: handlek
+      });
     }
+
+    // Delegated event listener for "View Profile" and "Log Out" clicks
+    async function handlel(event) {
+
+      const clickedItem = event.target.closest('.dropdown-item');
+
+      if (!clickedItem) return;
+
+      // Check which specific dropdown item was clicked
+      if (clickedItem.querySelector("#view-profile")) {
+        console.log("Viewing profile...");
+        navigateTo("profil");
+      }
+
+      if (clickedItem.querySelector("#log-out")) {
+        console.log("Logging out...");
+        localStorage.removeItem('jwtToken');
+        syncSession();
+        navigateTo("landing");
+      }
+    }
+    document.body.addEventListener("click", handlel);
+    eventRegistry.push({
+      element: document.body,
+      eventType: "click",
+      handler: handlel
+    });
+
+    async function handlehone(event) {
+      console.log("change event INSIDE");
+      if (event.target.classList.contains("input")) {
+        const checkbox = event.target;
+        const isChecked = checkbox.checked;
+        const action = isChecked ? "enable" : "disable";
+
+        try {
+          console.log("ACTION : ", action);
+          const response = await fetch(`http://0.0.0.0:8000/2fa/${action}/`, {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (response.ok) {
+            console.log(`2FA ${action}d successfully.`);
+          } else {
+            console.error("Request failed. Reverting switch state.");
+            checkbox.checked = !isChecked; // Revert state if request fails
+          }
+        } catch (error) {
+          console.error("Error occurred:", error);
+          checkbox.checked = !isChecked; // Revert state if an error occurs
+        }
+      }
+    }
+    document.addEventListener("change", handlehone);
+    eventRegistry.push({
+      element: document,
+      eventType: "change",
+      handler: handlehone
+    });
+  }
   // }
   /******************************************************************************** */
 }

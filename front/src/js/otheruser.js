@@ -3,7 +3,11 @@ import { eventRegistry } from "./main.js";
 import { syncSession } from "./main.js";
 
 export function initOtherUserPage(name) {
-  document.querySelectorAll('img, p, a, div, button').forEach(function(element) {
+  let userName = "";
+  let userProfilPicture = "";
+  let userId = 0;
+  let matches = {};
+  document.querySelectorAll('img, p, a, div, button').forEach(function (element) {
     element.setAttribute('draggable', 'false');
   });
   const switchCheckbox = document.getElementById("2fa-switch");
@@ -91,15 +95,15 @@ export function initOtherUserPage(name) {
   //   },
   // ];
 
-// Helper function to place caret at the end of contenteditable
-function placeCaretAtEnd(el) {
-  const range = document.createRange();
-  const selection = window.getSelection();
-  range.selectNodeContents(el);
-  range.collapse(false);
-  selection.removeAllRanges();
-  selection.addRange(range);
-}
+  // Helper function to place caret at the end of contenteditable
+  function placeCaretAtEnd(el) {
+    const range = document.createRange();
+    const selection = window.getSelection();
+    range.selectNodeContents(el);
+    range.collapse(false);
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
 
   // Sort friends by status (online first)
   // friends.sort((a, b) => (a.status === "offline") - (b.status === "offline"));
@@ -110,9 +114,8 @@ function placeCaretAtEnd(el) {
       const div = document.createElement("div");
       div.className = "friend-item";
       div.innerHTML = `
-              <img src="http://0.0.0.0:8000/${friend.profile_picture}" alt="${
-        friend.nickname
-      }" class="friend-picture">
+              <img src="http://0.0.0.0:8000/${friend.profile_picture}" alt="${friend.nickname
+        }" class="friend-picture">
               <div>
                   <p class="friend-name">${friend.nickname}</p>
                   <span class="friend-status ${friend.status}">
@@ -255,32 +258,28 @@ function placeCaretAtEnd(el) {
   ];
 
   function createMatchCard(match) {
-    const playerWon = match.player.score > match.enemy.score;
+    const playerWon = match.score > match.opponent_score;
     const card = document.createElement("div");
     card.className = "match-card";
     card.innerHTML = `
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-12 col-sm-5 d-flex flex-column flex-sm-row align-items-center justify-content-start mb-3 mb-sm-0">
-                        <img src="${
-                          match.player.icon
-                        }" alt="" class="player-icon mb-2 mb-sm-0 me-sm-2">
-                        <h5 class="player-name ${
-                          playerWon ? "winner" : "loser"
-                        }">${match.player.name}</h5>
+                        <img src="${userProfilPicture
+      }" alt="" class="player-icon mb-2 mb-sm-0 me-sm-2">
+                        <h5 class="player-name ${playerWon ? "winner" : "loser"
+      }">${userName}</h5>
                     </div>
                     <div class="col-12 col-sm-2 text-center mb-3 mb-sm-0">
-                        <div class="score">${match.player.score} - ${
-      match.enemy.score
-    }</div>
+                        <div class="score">${match.score} - ${match.opponent_score
+      }</div>
                     </div>
                     <div class="col-12 col-sm-5 d-flex flex-column flex-sm-row align-items-center justify-content-end">
-                        <h5 class="enemy-name ${
-                          playerWon ? "loser" : "winner"
-                        } mb-2 mb-sm-0 me-sm-2">${match.enemy.name}</h5>
-                        <img src="${
-                          match.enemy.icon
-                        }" alt="" class="enemy-icon">
+                        <h5 class="enemy-name ${playerWon ? "loser" : "winner"
+      } mb-2 mb-sm-0 me-sm-2">${match.opponent_name}</h5>
+                        <img src="
+                          http://0.0.0.0:8000/${match.opponent_profile_picture}
+                        " alt="" class="enemy-icon">
                     </div>
                 </div>
             </div>
@@ -288,20 +287,24 @@ function placeCaretAtEnd(el) {
     return card;
   }
 
-  function displayMatchHistory() {
+  async function displayMatchHistory() {
+    console.log("LENGTH: ", matches.length);
+
     const matchHistoryContainer = document.getElementById("matchHistory");
-    matchHistoryContainer.innerHTML = "";
-
+    // matchHistoryContainer.innerHTML = "";
+    if (matches.length == 0) {
+      document.getElementById("notyet").style.display = "block";
+    }
+    else {
+      document.getElementById("notyet").style.display = "none";
+      const recentMatches = matches.slice(-10);
+      recentMatches.forEach((match) => {
+        const matchCard = createMatchCard(match);
+        matchHistoryContainer.appendChild(matchCard);
+      });
+    }
     // Get the last 10 games from matchData
-    const recentMatches = matchData.slice(-10);
-
-    recentMatches.forEach((match) => {
-      const matchCard = createMatchCard(match);
-      matchHistoryContainer.appendChild(matchCard);
-    });
   }
-
-  displayMatchHistory();
   /**
    * ------------------------------------------------------------------
    */
@@ -360,7 +363,13 @@ function placeCaretAtEnd(el) {
         document.getElementById("losses").textContent = userData.losses;
         document.getElementById("level").textContent = userData.level;
         document.getElementById("levels").textContent += userData.level;
-        renderFriends(userData.friends)
+        userName = userData.nickname;
+        userProfilPicture = profilePicture;
+        userId = userData.id;
+        matches = userData.match_details;
+        renderFriends(userData.friends);
+        displayMatchHistory();
+
       } else {
         alert("User can not be found !");
       }
@@ -398,7 +407,7 @@ function placeCaretAtEnd(el) {
           </div>
         </button>
     `;
-}
+  }
 
 
   function updateUserDisplay(userData, profilePicture) {
@@ -466,112 +475,112 @@ function placeCaretAtEnd(el) {
     });
   }
   // if (document.getElementsByClassName("profil")) {
-    // const profilButton = document.getElementsByClassName("profil");
-    // if (profilButton[0]) {
-    //   profilButton[0].addEventListener("click", function (event) {
-    //     event.preventDefault();
-    //     navigateTo("profil");
-    //   });
-    // }
-     // Function to attach event listeners when elements exist
-     function attachUserMenuListeners() {
-      const userContainer = document.getElementById("toggler");
-      const userMenu = document.getElementById("user-menu");
-      console.log(userMenu, "WWAAAAAAWW", userContainer);
-      if (userContainer && userMenu) {
-        function handlej(event) {
-          userMenu.classList.toggle("visible");
-          if (userMenu.classList.contains("visible")) {
-            userMenu.classList.remove("hidden");
-          }
-        }
-        userContainer.addEventListener("click", handlej);
-        eventRegistry.push({
-          element: userContainer,
-          eventType: "click",
-          handler: handlej
-        });
-  
-        // Close dropdown menu when clicking outside of the user container
-        function handlek(event) {
-          if (!userMenu.contains(event.target) && !userContainer.contains(event.target)) {
-            userMenu.classList.remove("visible");
-            userMenu.classList.add("hidden");
-          }
-        }
-        window.addEventListener("click", handlek);
-        eventRegistry.push({
-          element: window,
-          eventType: "click",
-          handler: handlek
-        });
-      }
-  
-      // Delegated event listener for "View Profile" and "Log Out" clicks
-      async function handlel(event) {
-        
-        const clickedItem = event.target.closest('.dropdown-item');
-  
-        if (!clickedItem) return;
-  
-        // Check which specific dropdown item was clicked
-        if (clickedItem.querySelector("#view-profile")) {
-          console.log("Viewing profile...");
-          navigateTo("profil");
-        }
-  
-        if (clickedItem.querySelector("#log-out")) {
-          console.log("Logging out...");
-          localStorage.removeItem('jwtToken');
-          syncSession();
-          navigateTo("landing");
+  // const profilButton = document.getElementsByClassName("profil");
+  // if (profilButton[0]) {
+  //   profilButton[0].addEventListener("click", function (event) {
+  //     event.preventDefault();
+  //     navigateTo("profil");
+  //   });
+  // }
+  // Function to attach event listeners when elements exist
+  function attachUserMenuListeners() {
+    const userContainer = document.getElementById("toggler");
+    const userMenu = document.getElementById("user-menu");
+    console.log(userMenu, "WWAAAAAAWW", userContainer);
+    if (userContainer && userMenu) {
+      function handlej(event) {
+        userMenu.classList.toggle("visible");
+        if (userMenu.classList.contains("visible")) {
+          userMenu.classList.remove("hidden");
         }
       }
-      document.body.addEventListener("click", handlel);
+      userContainer.addEventListener("click", handlej);
       eventRegistry.push({
-        element: document.body,
+        element: userContainer,
         eventType: "click",
-        handler: handlel
+        handler: handlej
       });
-  
-      async function handlehone(event) {
-        console.log("change event INSIDE");
-          if (event.target.classList.contains("input")) {
-            const checkbox = event.target;
-            const isChecked = checkbox.checked;
-            const action = isChecked ? "enable" : "disable";
-    
-            try {
-              console.log("ACTION : ", action);
-              const response = await fetch(`http://0.0.0.0:8000/2fa/${action}/`, {
-                method: "POST",
-                headers: {
-                  "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
-                  "Content-Type": "application/json",
-                },
-              });
-    
-              if (response.ok) {
-                console.log(`2FA ${action}d successfully.`);
-              } else {
-                console.error("Request failed. Reverting switch state.");
-                checkbox.checked = !isChecked; // Revert state if request fails
-              }
-            } catch (error) {
-              console.error("Error occurred:", error);
-              checkbox.checked = !isChecked; // Revert state if an error occurs
-            }
-          }
+
+      // Close dropdown menu when clicking outside of the user container
+      function handlek(event) {
+        if (!userMenu.contains(event.target) && !userContainer.contains(event.target)) {
+          userMenu.classList.remove("visible");
+          userMenu.classList.add("hidden");
         }
-        document.addEventListener("change", handlehone);
-        eventRegistry.push({
-          element: document,
-          eventType: "change",
-          handler: handlehone
-        });
+      }
+      window.addEventListener("click", handlek);
+      eventRegistry.push({
+        element: window,
+        eventType: "click",
+        handler: handlek
+      });
     }
 
-fetchProfilPlayer();
+    // Delegated event listener for "View Profile" and "Log Out" clicks
+    async function handlel(event) {
+
+      const clickedItem = event.target.closest('.dropdown-item');
+
+      if (!clickedItem) return;
+
+      // Check which specific dropdown item was clicked
+      if (clickedItem.querySelector("#view-profile")) {
+        console.log("Viewing profile...");
+        navigateTo("profil");
+      }
+
+      if (clickedItem.querySelector("#log-out")) {
+        console.log("Logging out...");
+        localStorage.removeItem('jwtToken');
+        syncSession();
+        navigateTo("landing");
+      }
+    }
+    document.body.addEventListener("click", handlel);
+    eventRegistry.push({
+      element: document.body,
+      eventType: "click",
+      handler: handlel
+    });
+
+    async function handlehone(event) {
+      console.log("change event INSIDE");
+      if (event.target.classList.contains("input")) {
+        const checkbox = event.target;
+        const isChecked = checkbox.checked;
+        const action = isChecked ? "enable" : "disable";
+
+        try {
+          console.log("ACTION : ", action);
+          const response = await fetch(`http://0.0.0.0:8000/2fa/${action}/`, {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (response.ok) {
+            console.log(`2FA ${action}d successfully.`);
+          } else {
+            console.error("Request failed. Reverting switch state.");
+            checkbox.checked = !isChecked; // Revert state if request fails
+          }
+        } catch (error) {
+          console.error("Error occurred:", error);
+          checkbox.checked = !isChecked; // Revert state if an error occurs
+        }
+      }
+    }
+    document.addEventListener("change", handlehone);
+    eventRegistry.push({
+      element: document,
+      eventType: "change",
+      handler: handlehone
+    });
+  }
+
+  fetchProfilPlayer();
   // }
   /******************************************************************************** */
 }

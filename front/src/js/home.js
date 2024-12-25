@@ -254,6 +254,7 @@ export function initHomePage() {
       });
       if (response.ok) {
         userData = await response.json();
+        console.log("RESPONSE = ", userData);
         console.log("user data = ", userData);
         let profilePicture = "http://0.0.0.0:8000/" + userData.profile_picture;
         switchCheckbox.checked = userData.is_2fa_enabled;

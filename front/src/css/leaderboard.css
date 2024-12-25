@@ -25,7 +25,7 @@ html {
 }
 
 .fonts {
-  font-size: 1.1rem !important;
+  font-size: 1.2rem !important;
   color: white;
 }
 
@@ -38,10 +38,10 @@ html {
   /* background-color: transparent !important; */
 }
 
-.navbar .image {
+/* .navbar .image {
   height: 3rem !important;
   margin-right: 1rem !important;
-}
+} */
 
 .user {
   margin-left: auto !important;
@@ -59,9 +59,11 @@ html {
 
 .nav-item a {
   font-size: 1rem !important;
-  /* Adjust font size */
   text-align: center !important;
-  /* katcentri f togglebar*/
+}
+
+.shows {
+  background-color: black;
 }
 
 .navbar-toggler {
@@ -69,14 +71,9 @@ html {
   margin-left: 0 !important;
 }
 
-.navbar .sidebar .offcanvas-header .image {
-  height: 40px !important;
-}
-
 .navbar .sidebar .offcanvas-body .nav-link {
-  /* color: #ff0000 !important; */
   padding: 10px !important;
-  margin: 10px !important;
+  margin: 10px;
 }
 
 .navbar .user {

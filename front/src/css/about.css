@@ -92,14 +92,6 @@ html {
   border: none !important;
 }
 
-@media (max-width: 991px) {
-
-  .offcanvas-body,
-  .offcanvas-header {
-    background-color: var(--colors-body);
-  }
-}
-
 @media (max-width: 989px) {
   .contain {
     flex-direction: column;
