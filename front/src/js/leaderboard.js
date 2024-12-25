@@ -99,6 +99,34 @@ export function initLeaderboardPage() {
       wins: 70,
       avatar: "https://i.pravatar.cc/160?img=7",
     },
+    {
+      id: 7,
+      name: "Morgan",
+      level: 30,
+      wins: 70,
+      avatar: "https://i.pravatar.cc/160?img=7",
+    },
+    {
+      id: 7,
+      name: "Morgan",
+      level: 30,
+      wins: 70,
+      avatar: "https://i.pravatar.cc/160?img=7",
+    },
+    {
+      id: 7,
+      name: "Morgan",
+      level: 30,
+      wins: 70,
+      avatar: "https://i.pravatar.cc/160?img=7",
+    },
+    {
+      id: 7,
+      name: "Morgan",
+      level: 30,
+      wins: 70,
+      avatar: "https://i.pravatar.cc/160?img=7",
+    },
   ];
 
   function createPodiumItem(user, place) {
