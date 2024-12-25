@@ -457,7 +457,7 @@ class remotGameLogic:
             print(f"Current progress (loser): Level {level:.1f}.")
 
         return level
-    def post_result(self, result,token, level,id,score,opponent_id,opponent_score):
+    def post_result(self, result,token, level,id,score,opponent_name,opponent_score):
         url = f"http://web:8000/profile/update/{result}/"
         headers = {
             'Accept': 'application/json',
@@ -468,7 +468,7 @@ class remotGameLogic:
             'level': level,
             'user_id': id,
             'score': score,
-            'opponent_id': opponent_id,
+            'opponent_name': opponent_name,
             'opponent_score': opponent_score
         }
         response = requests.post(url, headers=headers, data=data)
@@ -491,28 +491,28 @@ class remotGameLogic:
             self.player1_total_wins += 1
             winnerLevel = self.increaseLevelWiner(self.player1_level, self.player1_total_wins)
             loserLevel = self.increaseLevelLoser(self.player2_level, self.player2_total_wins)
-            self.post_result('win', self.player1_token, winnerLevel, self.player1, self.leftPlayerScore, self.player2, self.rightPlayerScore)
-            self.post_result('lose', self.player2_token, loserLevel, self.player2, self.rightPlayerScore, self.player1, self.leftPlayerScore)
+            self.post_result('win', self.player1_token, winnerLevel, self.player1, self.leftPlayerScore, self.player2_Name, self.rightPlayerScore)
+            self.post_result('lose', self.player2_token, loserLevel, self.player2, self.rightPlayerScore, self.player1_Name, self.leftPlayerScore)
         elif (winner == "right"):
             self.player2_total_wins += 1
             winnerLevel = self.increaseLevelWiner(self.player2_level, self.player2_total_wins)
             loserLevel = self.increaseLevelLoser(self.player1_level, self.player1_total_wins)
-            self.post_result('win', self.player2_token, winnerLevel, self.player2, self.rightPlayerScore, self.player1, self.leftPlayerScore)
-            self.post_result('lose', self.player1_token, loserLevel, self.player1, self.leftPlayerScore, self.player2, self.rightPlayerScore)
+            self.post_result('win', self.player2_token, winnerLevel, self.player2, self.rightPlayerScore, self.player1_Name, self.leftPlayerScore)
+            self.post_result('lose', self.player1_token, loserLevel, self.player1, self.leftPlayerScore, self.player2_Name, self.rightPlayerScore)
             
         else:
             if winner == self.player1_Name:
                 self.player1_total_wins += 1
                 winnerLevel = self.increaseLevelWiner(self.player1_level, self.player1_total_wins)
                 loserLevel = self.increaseLevelLoser(self.player2_level, self.player2_total_wins)
-                self.post_result('win', self.player1_token, winnerLevel, self.player1 , self.leftPlayerScore, self.player2, self.rightPlayerScore)
-                self.post_result('lose', self.player2_token, loserLevel, self.player2, self.rightPlayerScore, self.player1, self.leftPlayerScore)
+                self.post_result('win', self.player1_token, winnerLevel, self.player1 , self.leftPlayerScore, self.player2_Name, self.rightPlayerScore)
+                self.post_result('lose', self.player2_token, loserLevel, self.player2, self.rightPlayerScore, self.player1_Name, self.leftPlayerScore)
             elif winner == self.player2_Name:
                 self.player2_total_wins += 1
                 winnerLevel = self.increaseLevelWiner(self.player2_level, self.player2_total_wins)
                 loserLevel = self.increaseLevelLoser(self.player1_level, self.player1_total_wins)
-                self.post_result('win', self.player2_token, winnerLevel, self.player2, self.rightPlayerScore, self.player1, self.leftPlayerScore)
-                self.post_result('lose', self.player1_token, loserLevel, self.player1, self.leftPlayerScore, self.player2, self.rightPlayerScore)
+                self.post_result('win', self.player2_token, winnerLevel, self.player2, self.rightPlayerScore, self.player1_Name, self.leftPlayerScore)
+                self.post_result('lose', self.player1_token, loserLevel, self.player1, self.leftPlayerScore, self.player2_Name, self.rightPlayerScore)
     
     def calculation(self):
         if(self.begin):
