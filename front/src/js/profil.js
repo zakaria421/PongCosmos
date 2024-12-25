@@ -5,6 +5,7 @@ import { syncSession } from "./main.js";
 export function initProfilPage() {
   let userName = "";
   let userProfilPicture = "";
+  let userId = 0;
   document.querySelectorAll('img, p, a, div, button').forEach(function(element) {
   element.setAttribute('draggable', 'false');
 });
@@ -275,7 +276,7 @@ function placeCaretAtEnd(el) {
   ];
 
   function createMatchCard(match) {
-    const playerWon = match.player.score > match.enemy.score;
+    const playerWon = match.score > match.opponent_score;
     const card = document.createElement("div");
     card.className = "match-card";
     card.innerHTML = `
@@ -314,7 +315,7 @@ function placeCaretAtEnd(el) {
     matchHistoryContainer.innerHTML = "";
     console.log("WST MATCH HISTORY : " , token);
     try {
-      let response = await fetch("http://0.0.0.0:8000/profile/matchHistory/", {
+      let response = await fetch(`http://0.0.0.0:8000/profile/matchHistory?user_id=${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -338,7 +339,6 @@ function placeCaretAtEnd(el) {
     // Get the last 10 games from matchData
   }
 
-  displayMatchHistory();
   /**
    * ------------------------------------------------------------------
    */
@@ -369,8 +369,10 @@ function placeCaretAtEnd(el) {
         document.getElementById("levels").textContent += userData.level;
         userName = userData.nickname;
         userProfilPicture = profilePicture;
+        userId = userData.id;
         renderFriends(userData.friends);
         attachUserMenuListeners();
+        displayMatchHistory();
       } else {
         console.error("Failed to fetch user data:", response.statusText);
         localStorage.removeItem('jwtToken');
