@@ -36,6 +36,7 @@ class pingPongConsumer(AsyncWebsocketConsumer):
             self.nickname = None
             self.level = 0
             self.wins = 0
+            self.losses = 0
             self.token = None
             self.gameType = None
             # await self.channel_layer.group_add(
@@ -269,8 +270,8 @@ class pingPongConsumer(AsyncWebsocketConsumer):
                 rooms_game_logic[self.room_group_name].player2_Name = player2Channel['self'].nickname
                 rooms_game_logic[self.room_group_name].player1_level = self.level
                 rooms_game_logic[self.room_group_name].player2_level = player2Channel['self'].level
-                rooms_game_logic[self.room_group_name].player1_total_wins = self.wins
-                rooms_game_logic[self.room_group_name].player2_total_wins = player2Channel['self'].wins
+                rooms_game_logic[self.room_group_name].player1_total_wins = self.wins + self.losses
+                rooms_game_logic[self.room_group_name].player2_total_wins = player2Channel['self'].wins + player2Channel['self'].losses
                 rooms_game_logic[self.room_group_name].player1_token = self.token
                 rooms_game_logic[self.room_group_name].player2_token = player2Channel['self'].token
                 
@@ -324,6 +325,7 @@ class pingPongConsumer(AsyncWebsocketConsumer):
                 self.nickname = data.get("nickname")
                 self.level = data.get("level")
                 self.wins = data.get("wins")
+                self.losses = data.get("losses")
                 print(data)
 
             else:
