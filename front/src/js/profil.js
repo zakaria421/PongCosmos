@@ -3,6 +3,8 @@ import { eventRegistry } from "./main.js";
 import { syncSession } from "./main.js";
 
 export function initProfilPage() {
+  let userName = "";
+  let userProfilPicture = "";
   document.querySelectorAll('img, p, a, div, button').forEach(function(element) {
   element.setAttribute('draggable', 'false');
 });
@@ -281,24 +283,24 @@ function placeCaretAtEnd(el) {
                 <div class="row align-items-center">
                     <div class="col-12 col-sm-5 d-flex flex-column flex-sm-row align-items-center justify-content-start mb-3 mb-sm-0">
                         <img src="${
-                          match.player.icon
+                          userProfilPicture
                         }" alt="" class="player-icon mb-2 mb-sm-0 me-sm-2">
                         <h5 class="player-name ${
                           playerWon ? "winner" : "loser"
-                        }">${match.player.name}</h5>
+                        }">${userName}</h5>
                     </div>
                     <div class="col-12 col-sm-2 text-center mb-3 mb-sm-0">
-                        <div class="score">${match.player.score} - ${
-      match.enemy.score
+                        <div class="score">${match.score} - ${
+      match.opponent_score
     }</div>
                     </div>
                     <div class="col-12 col-sm-5 d-flex flex-column flex-sm-row align-items-center justify-content-end">
                         <h5 class="enemy-name ${
                           playerWon ? "loser" : "winner"
-                        } mb-2 mb-sm-0 me-sm-2">${match.enemy.name}</h5>
-                        <img src="${
-                          match.enemy.icon
-                        }" alt="" class="enemy-icon">
+                        } mb-2 mb-sm-0 me-sm-2">${match.opponent_name}</h5>
+                        <img src="
+                          http://0.0.0.0:8000/${match.opponent_profile_picture}
+                        " alt="" class="enemy-icon">
                     </div>
                 </div>
             </div>
@@ -306,17 +308,34 @@ function placeCaretAtEnd(el) {
     return card;
   }
 
-  function displayMatchHistory() {
+  async function displayMatchHistory() {
+
     const matchHistoryContainer = document.getElementById("matchHistory");
     matchHistoryContainer.innerHTML = "";
+    console.log("WST MATCH HISTORY : " , token);
+    try {
+      let response = await fetch("http://0.0.0.0:8000/profile/matchHistory/", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        method: "GET",
+      });
+      if (response.ok) {
+        let userData = await response.json();
+        console.log(userData);
+        let matchDatas = userData.matches;
+        const recentMatches = matchDatas.slice(-10);
 
+        recentMatches.forEach((match) => {
+          const matchCard = createMatchCard(match);
+          matchHistoryContainer.appendChild(matchCard);
+        });
+    }
+    } catch (err) {
+      console.log("error", err);
+    }
     // Get the last 10 games from matchData
-    const recentMatches = matchData.slice(-10);
-
-    recentMatches.forEach((match) => {
-      const matchCard = createMatchCard(match);
-      matchHistoryContainer.appendChild(matchCard);
-    });
   }
 
   displayMatchHistory();
@@ -348,6 +367,8 @@ function placeCaretAtEnd(el) {
         document.getElementById("losses").textContent = userData.losses;
         document.getElementById("level").textContent = userData.level;
         document.getElementById("levels").textContent += userData.level;
+        userName = userData.nickname;
+        userProfilPicture = profilePicture;
         renderFriends(userData.friends);
         attachUserMenuListeners();
       } else {
