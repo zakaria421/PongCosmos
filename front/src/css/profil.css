@@ -331,6 +331,8 @@ html {
 .friends-container {
   height: 600px;
   overflow-y: auto;
+  padding: 10px;
+  scrollbar-width: thin;
 }
 
 .friends-section {
@@ -350,6 +352,7 @@ html {
   height: 50px;
   border-radius: 50%;
   margin-right: 10px;
+  object-fit: cover;
 }
 
 .friend-name {
@@ -389,7 +392,7 @@ html {
 /* Custom scrollbar for achievements and friends list */
 .bio::-webkit-scrollbar,
 .friends-container::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 .bio::-webkit-scrollbar-track,
@@ -651,7 +654,7 @@ html {
 }
 
 /* Media query for small screens */
-@media (max-width: 450px) {
+@media (max-width: 600px) {
   .users-container {
     display: none;
   }

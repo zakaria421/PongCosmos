@@ -127,23 +127,25 @@ function placeCaretAtEnd(el) {
       const div = document.createElement("div");
       div.className = "friend-item";
       div.innerHTML = `
-              <img src="${friend.picture}" alt="${
-        friend.name
+              <img src="http://0.0.0.0:8000/${friend.profile_picture}" alt="${
+        friend.nickname
       }" class="friend-picture">
               <div>
-                  <p class="friend-name">${friend.name}</p>
+                  <p class="friend-name">${friend.nickname}</p>
                   <span class="friend-status ${friend.status}">
                       <span class="status-indicator"></span>
-                      ${
-                        friend.status.charAt(0).toUpperCase() +
-                        friend.status.slice(1)
-                      }
+
                   </span>
               </div>
           `;
       friendsContainer.appendChild(div);
     });
   }
+
+  // ${
+  //   friend.status.charAt(0).toUpperCase() +
+  //   friend.status.slice(1)
+  // }
 
   // Match History (last 10 games)
 
@@ -342,6 +344,10 @@ function placeCaretAtEnd(el) {
         document.getElementById("profileName").textContent = userData.nickname;
         document.getElementById("profileBio").textContent = userData.bio;
         document.getElementById("profileImage").src = profilePicture;
+        document.getElementById("wins").textContent = userData.wins;
+        document.getElementById("losses").textContent = userData.losses;
+        document.getElementById("level").textContent = userData.level;
+        document.getElementById("levels").textContent += userData.level;
         renderFriends(userData.friends);
         attachUserMenuListeners();
       } else {
@@ -352,9 +358,9 @@ function placeCaretAtEnd(el) {
       }
     } catch (err) {
       console.error("Error fetching user data:", err);
-      // localStorage.removeItem('jwtToken');
-      // syncSession();
-      // navigateTo("login");
+      localStorage.removeItem('jwtToken');
+      syncSession();
+      navigateTo("login");
     }
   }
 
@@ -414,6 +420,21 @@ function placeCaretAtEnd(el) {
         this.innerHTML = '<i class="fas fa-save me-2"></i>Save Profile';
 
         document.getElementById("profileName").focus();
+        const profileName = document.getElementById("profileName");
+        profileName.addEventListener("input", () => {
+          if (profileName.textContent.length > 8) {
+            profileName.textContent = profileName.textContent.slice(0, 8);
+            placeCaretAtEnd(profileName);
+          }
+        });
+        function placeCaretAtEnd(el) {
+          const range = document.createRange();
+          const sel = window.getSelection();
+          range.selectNodeContents(el);
+          range.collapse(false);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
       } else {
         const updatedName = document.getElementById("profileName").textContent;
         const updatedBio = document.getElementById("profileBio").textContent;
@@ -430,8 +451,6 @@ function placeCaretAtEnd(el) {
           .then((userData) => {
             document.getElementById("profileName").textContent = userData.nickname;
             document.getElementById("profileN").textContent = userData.nickname;
-// //////////////////////////////////////////////////
-            console.log("Profile updated successfully:", userData);
           })
           .catch((error) => console.error("Error updating profile:", error));
 

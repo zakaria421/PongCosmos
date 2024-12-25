@@ -110,17 +110,14 @@ function placeCaretAtEnd(el) {
       const div = document.createElement("div");
       div.className = "friend-item";
       div.innerHTML = `
-              <img src="${friend.picture}" alt="${
-        friend.name
+              <img src="http://0.0.0.0:8000/${friend.profile_picture}" alt="${
+        friend.nickname
       }" class="friend-picture">
               <div>
-                  <p class="friend-name">${friend.name}</p>
+                  <p class="friend-name">${friend.nickname}</p>
                   <span class="friend-status ${friend.status}">
                       <span class="status-indicator"></span>
-                      ${
-                        friend.status.charAt(0).toUpperCase() +
-                        friend.status.slice(1)
-                      }
+
                   </span>
               </div>
           `;
@@ -128,6 +125,10 @@ function placeCaretAtEnd(el) {
     });
   }
 
+  // ${
+  //   friend.status.charAt(0).toUpperCase() +
+  //   friend.status.slice(1)
+  // }
   // Match History (last 10 games)
 
   const matchData = [
@@ -322,15 +323,18 @@ function placeCaretAtEnd(el) {
         switchCheckbox.checked = userData.is_2fa_enabled;
         console.log(profilePicture);
         updateUserDisplay(userData, profilePicture);
-        // document.getElementById("profileName").textContent = userData.nickname;
-        // document.getElementById("profileBio").textContent = userData.bio;
-        // document.getElementById("profileImage").src = profilePicture;
         attachUserMenuListeners();
       } else {
         console.error("Failed to fetch user data:", response.statusText);
+        localStorage.removeItem('jwtToken');
+        syncSession();
+        navigateTo("login");
       }
     } catch (err) {
       console.error("Error fetching user data:", err);
+      localStorage.removeItem('jwtToken');
+      syncSession();
+      navigateTo("login");
     }
   }
 
@@ -352,18 +356,16 @@ function placeCaretAtEnd(el) {
         document.getElementById("profileName").textContent = userData.nickname;
         document.getElementById("profileBio").textContent = userData.bio;
         document.getElementById("profileImage").src = profilePicture;
+        document.getElementById("wins").textContent = userData.wins;
+        document.getElementById("losses").textContent = userData.losses;
+        document.getElementById("level").textContent = userData.level;
+        document.getElementById("levels").textContent += userData.level;
         renderFriends(userData.friends)
       } else {
-        console.error("Failed to fetch user data:", response.statusText);
-        localStorage.removeItem('jwtToken');
-        syncSession();
-        navigateTo("login");
+        alert("User can not be found !");
       }
     } catch (err) {
-      console.error("Error fetching user data:", err);
-      // localStorage.removeItem('jwtToken');
-      // syncSession();
-      // navigateTo("login");
+      alert("User can not be found !");
     }
   }
 

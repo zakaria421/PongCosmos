@@ -175,8 +175,11 @@ export function initLoginPage() {
           navigateTo("home");
         }
       }
+      else {
+        alert("Wrong login ID or password !");
+      }
     } catch (error) {
-      console.error("Error occured: ", error);
+      alert("Wrong login ID or password !");
     }
   }
   document.getElementById("loginForm").addEventListener("submit", handlee);
