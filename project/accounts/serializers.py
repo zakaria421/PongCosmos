@@ -2,9 +2,10 @@ from rest_framework.validators import UniqueValidator
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from .models import UserProfile
+from .models import UserProfile, Match
 from project import settings
-from friendship.serializers import FriendRequestSerializer
+from django.shortcuts import get_object_or_404
+
 
 
 
@@ -33,20 +34,47 @@ class FriendSerializer(serializers.ModelSerializer):
 
 
 # User Profile Serializer
+
 class UserProfileSerializer(serializers.ModelSerializer):
-    profile_picture     = serializers.SerializerMethodField()
-    friends             = FriendSerializer(many=True)  # Use the updated FriendSerializer here
+    profile_picture = serializers.SerializerMethodField()
+    friends = FriendSerializer(many=True)
+    match_details = serializers.SerializerMethodField()
 
     class Meta:
         model = UserProfile
-        fields = ['id', 'nickname', 'profile_picture', 'mimeType', 'email', 
-                  'bio', 'friends', 'level', 'wins', 'losses', 'is_2fa_enabled']
+        fields = [
+            'id', 'nickname', 'profile_picture', 'mimeType', 'email', 
+            'bio', 'friends', 'level', 'wins', 'losses', 'is_2fa_enabled',
+            'match_details'
+        ]
 
     def get_profile_picture(self, obj):
+        """ Return the full URL of the profile picture. """
         if obj.profile_picture:
             return f"{settings.MEDIA_URL}{obj.profile_picture.name}"
         return None
 
+    def get_match_details(self, obj):
+        """ Get match details including the opponent's profile picture. """
+        matches = Match.objects.filter(user=obj).values(
+            'match_id', 'score', 'opponent_score', 'opponent_name', 'match_date'
+        )
+
+        match_details = []
+        for match in matches:
+            # Fetch opponent profile
+            opponent_profile = get_object_or_404(UserProfile, nickname=match['opponent_name'])
+            opponent_profile_picture_url = opponent_profile.profile_picture.url if opponent_profile.profile_picture else None
+            match_details.append({
+                "match_id": match['match_id'],
+                "score": match['score'],
+                "opponent_score": match['opponent_score'],
+                "opponent_name": match['opponent_name'],
+                "opponent_profile_picture": opponent_profile_picture_url,
+                "match_date": match['match_date']
+            })
+        
+        return match_details
 
 # Serializer for registration
 class RegistreSerializer(serializers.ModelSerializer):
