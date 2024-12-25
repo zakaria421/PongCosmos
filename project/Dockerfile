@@ -12,7 +12,7 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Copy static files
-COPY ./accounts/static ./media
+# COPY ./accounts/static ./media
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt

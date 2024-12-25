@@ -38,18 +38,17 @@ class FriendSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     profile_picture = serializers.SerializerMethodField()
     friends = FriendSerializer(many=True)
-    match_details = serializers.SerializerMethodField()
+    # match_details = serializers.SerializerMethodField()
 
     class Meta:
         model = UserProfile
         fields = [
             'id', 'nickname', 'profile_picture', 'mimeType', 'email', 
             'bio', 'friends', 'level', 'wins', 'losses', 'is_2fa_enabled',
-            'match_details'
+            # 'match_details'
         ]
 
     def get_profile_picture(self, obj):
-        """ Return the full URL of the profile picture. """
         if obj.profile_picture:
             return f"{settings.MEDIA_URL}{obj.profile_picture.name}"
         return None
@@ -64,7 +63,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         for match in matches:
             # Fetch opponent profile
             opponent_profile = get_object_or_404(UserProfile, nickname=match['opponent_name'])
-            opponent_profile_picture_url = opponent_profile.profile_picture.url if opponent_profile.profile_picture else None
+            opponent_profile_picture_url = opponent_profile.profile_picture.url
             match_details.append({
                 "match_id": match['match_id'],
                 "score": match['score'],
