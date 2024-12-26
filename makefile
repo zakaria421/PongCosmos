@@ -1,6 +1,7 @@
 # Variables
 DOCKER_COMPOSE_FILE=docker-compose.yml
 GETHDATA_DIR = ./geth/gethdata
+PICTURES = ./accounts
 
 # PROJECT_NAME=my_project  # Replace with your Docker Compose project name
 
@@ -18,6 +19,7 @@ stop:
 
 remove:
 	rm -rf $(GETHDATA_DIR)/*
+	rm -rf $(PICTURES)
 
 purify: remove clean
 

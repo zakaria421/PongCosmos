@@ -173,7 +173,7 @@ CORS_ALLOW_HEADERS = [
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'accounts', 'static')] 
 
-MEDIA_URL = 'media/' #this will serve the uploaded media files via URL
+MEDIA_URL = '/app/media/' #this will serve the uploaded media files via URL
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media') #the directory where the upload files should be stored
 
 

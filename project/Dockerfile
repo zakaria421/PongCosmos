@@ -17,6 +17,10 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+
+# Copy the static images into the container
+COPY ./accounts/static/images/* /app/media/images/
+
 # Copy the rest of the application code
 COPY . .
 
