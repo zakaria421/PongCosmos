@@ -23,11 +23,13 @@ export function initProfilPage() {
   
       if (!response.ok) {
         console.error("Failed to refresh token");
-        return null; // Return null if refresh fails
+        return null;
       }
   
       const data = await response.json();
       const newAccessToken = data.access;
+      localStorage.removeItem("jwtToken");
+      syncSession();
       localStorage.setItem("jwtToken", newAccessToken);
   
       return newAccessToken;
@@ -411,6 +413,18 @@ export function initProfilPage() {
         renderFriends(userData.friends);
         attachUserMenuListeners();
         displayMatchHistory();
+      } else if (response.status === 401) {
+        console.log("Access token expired. Refreshing token...");
+        token = await refreshAccessToken();
+  
+        if (token) {
+          return fetchUserData();
+        } else {
+          console.error("Unable to refresh access token. Please log in again.");
+          localStorage.removeItem("jwtToken");
+          syncSession();
+          navigateTo("login");
+        }
       } else {
         console.error("Failed to fetch user data:", response.statusText);
         localStorage.removeItem('jwtToken');
@@ -465,7 +479,7 @@ export function initProfilPage() {
   console.log("displayed twice for some reason: ");
   fetchUserData();
   // Edit profile logic
-  function handlehg() {
+  async function handlehg() {
     isEditing = !isEditing;
 
     if (isEditing) {
@@ -499,21 +513,7 @@ export function initProfilPage() {
     } else {
       const updatedName = document.getElementById("profileName").textContent;
       const updatedBio = document.getElementById("profileBio").textContent;
-
-      fetch("http://0.0.0.0:8000/profile/update/", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ nickname: updatedName, bio: updatedBio }),
-      })
-        .then((response) => response.json())
-        .then((userData) => {
-          document.getElementById("profileName").textContent = userData.nickname;
-          document.getElementById("profileN").textContent = userData.nickname;
-        })
-        .catch((error) => console.error("Error updating profile:", error));
+      await updateProfile(updatedName, updatedBio);
 
       document
         .getElementById("profileName")
@@ -533,6 +533,38 @@ export function initProfilPage() {
     eventType: "click",
     handler: handlehg
   });
+
+  async function updateProfile(updatedName, updatedBio) {
+    try {
+      const response = await fetch("http://0.0.0.0:8000/profile/update/", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ nickname: updatedName, bio: updatedBio }),
+      });
+  
+      if (response.ok) {
+        const userData = await response.json();
+        document.getElementById("profileName").textContent = userData.nickname;
+        document.getElementById("profileN").textContent = userData.nickname;
+      } else if (response.status === 401) {
+          console.log("Access token expired. Refreshing...");
+          token = await refreshAccessToken();
+          if (token) {
+            await updateProfile(updatedName, updatedBio);
+          } else {
+            console.error("Unable to refresh access token. Please log in again.");
+            localStorage.removeItem("jwtToken");
+            syncSession();
+            navigateTo("login");
+          }
+        }
+      } catch (error) {
+      console.error("Error updating profile:", error);
+    }
+  }
 
   // Image upload logic
   document

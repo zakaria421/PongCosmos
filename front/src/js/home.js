@@ -4,6 +4,43 @@ import { eventRegistry } from "./main.js";
 import { syncSession } from "./main.js";
 
 export function initHomePage() {
+  let token = localStorage.getItem("jwtToken");
+  async function refreshAccessToken() {
+    const refreshToken = localStorage.getItem("refresh");
+  
+    if (!refreshToken) {
+      console.error("No refresh token found.");
+      return null;
+    }
+
+    try {
+      const response = await fetch("http://0.0.0.0:8000/api/token/refresh/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ refresh: refreshToken }),
+      });
+  
+      if (!response.ok) {
+        console.error("Failed to refresh token");
+        return null; // Return null if refresh fails
+      }
+  
+      const data = await response.json();
+      const newAccessToken = data.access;
+      localStorage.removeItem("jwtToken");
+      syncSession();
+      localStorage.setItem("jwtToken", newAccessToken);
+  
+      return newAccessToken;
+    } catch (error) {
+      console.error("Error refreshing access token:", error);
+      localStorage.removeItem("jwtToken");
+      syncSession();
+      navigateTo("login");
+    }
+  }
   document.querySelectorAll('img, p, a, div, button').forEach(function(element) {
     element.setAttribute('draggable', 'false');
   });
@@ -240,10 +277,7 @@ export function initHomePage() {
   let currentRoomId = null;
   let currentFriendId = null;
   // Fetch User Data
-  async function fetchUserData() {
-    // let token = localStorage.getItem("jwtToken");
-    let token = localStorage.getItem("jwtToken");
-    console.log("TOEKN  in home page : ", token);
+  async function fetchUserData() {  
     try {
       let response = await fetch("http://0.0.0.0:8000/userinfo/", {
         headers: {
@@ -252,23 +286,34 @@ export function initHomePage() {
         },
         method: "GET",
       });
+  
       if (response.ok) {
-        userData = await response.json();
-        console.log("RESPONSE = ", userData);
-        console.log("user data = ", userData);
-        let profilePicture = "http://0.0.0.0:8000/" + userData.profile_picture;
+        const userData = await response.json();  
+        const profilePicture = "http://0.0.0.0:8000/" + userData.profile_picture;
         switchCheckbox.checked = userData.is_2fa_enabled;
         updateUserDisplay(userData, profilePicture);
         attachUserMenuListeners();
+      } else if (response.status === 401) {
+        console.log("Access token expired. Refreshing token...");
+        token = await refreshAccessToken();
+  
+        if (token) {
+          return fetchUserData();
+        } else {
+          console.error("Unable to refresh access token. Please log in again.");
+          localStorage.removeItem("jwtToken");
+          syncSession();
+          navigateTo("login");
+        }
       } else {
         console.error("Failed to fetch user data:", response.statusText);
-        localStorage.removeItem('jwtToken');
-        syncSession();
-        navigateTo("login");
+        // localStorage.removeItem("jwtToken");
+        //   syncSession();
+        //   navigateTo("login");
       }
     } catch (err) {
       console.error("Error fetching user data:", err);
-      // localStorage.removeItem('jwtToken');
+      // localStorage.removeItem("jwtToken");
       // syncSession();
       // navigateTo("login");
     }
@@ -461,8 +506,7 @@ export function initHomePage() {
   
     document.body.insertAdjacentHTML("beforeend", modalHTML);
   }
-  
-  
+
   window.respondToInvite = function(inviteId, action) {
     const responsePayload = {
         type: "invite_response",
@@ -482,9 +526,7 @@ export function initHomePage() {
         console.log("Unable to respond to game invitation. WebSocket is not connected.");
     }
   };
-  
-  
-  
+
   function handleInviteResponse(status, senderName) {
     if (status === "accepted") {
         showNotification(`${senderName} accepted your game invitation!`);
@@ -493,9 +535,7 @@ export function initHomePage() {
         showNotification(`${senderName} declined your game invitation.`);
     }
   }
-  
-  
-  
+
   function showNotification(message) {
       // Create notification element
       const notification = document.createElement('div');

@@ -28,6 +28,8 @@ export function initLeaderboardPage() {
   
       const data = await response.json();
       const newAccessToken = data.access;
+      localStorage.removeItem("jwtToken");
+      syncSession();
       localStorage.setItem("jwtToken", newAccessToken);
   
       return newAccessToken;
@@ -260,9 +262,7 @@ export function initLeaderboardPage() {
     handler: renderLeaderboard
   });
   /**------------------------------------------------------------- */
-  async function fetchUserData() {
-    let token = localStorage.getItem("jwtToken");
-    console.log(token);
+  async function fetchUserData() {  
     try {
       let response = await fetch("http://0.0.0.0:8000/userinfo/", {
         headers: {
@@ -271,24 +271,36 @@ export function initLeaderboardPage() {
         },
         method: "GET",
       });
+  
       if (response.ok) {
-        let userData = await response.json();
-        // Decrypt the profile picture and update the user display
-        let profilePicture = "http://0.0.0.0:8000/" + userData.profile_picture;
+        const userData = await response.json();  
+        const profilePicture = "http://0.0.0.0:8000/" + userData.profile_picture;
         switchCheckbox.checked = userData.is_2fa_enabled;
         updateUserDisplay(userData, profilePicture);
         attachUserMenuListeners();
+      } else if (response.status === 401) {
+        console.log("Access token expired. Refreshing token...");
+        token = await refreshAccessToken();
+  
+        if (token) {
+          return fetchUserData();
+        } else {
+          console.error("Unable to refresh access token. Please log in again.");
+          localStorage.removeItem("jwtToken");
+          syncSession();
+          navigateTo("login");
+        }
       } else {
-        console.error("Failed to fetch user data:", response.statusText); // Error handling
-        localStorage.removeItem('jwtToken');
-        syncSession();
-        navigateTo("login");
+        console.error("Failed to fetch user data:", response.statusText);
+        // localStorage.removeItem("jwtToken");
+        //   syncSession();
+        //   navigateTo("login");
       }
     } catch (err) {
       console.error("Error fetching user data:", err);
-      // localStorage.removeItem('jwtToken');
-      //   syncSession();
-      //   navigateTo("login");
+      // localStorage.removeItem("jwtToken");
+      // syncSession();
+      // navigateTo("login");
     }
   }
 
