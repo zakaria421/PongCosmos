@@ -149,6 +149,8 @@ function getQueryParamsFromUrl() {
   const queryString = hash.split('?')[1]; // after '?'
   const urlParams = new URLSearchParams(queryString);
   const modeToGet = urlParams.get('mode');
+  const id = urlParams.get('id') || "";
+  console.log(modeToGet, id);
   if (!modeToGet) {
     const name = urlParams.get('name');
     if (name)

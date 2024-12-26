@@ -3,6 +3,41 @@ import { eventRegistry } from "./main.js";
 import { syncSession } from "./main.js";
 
 export function initOtherUserPage(name) {
+  let token = localStorage.getItem("jwtToken");
+  async function refreshAccessToken() {
+    const refreshToken = localStorage.getItem("refresh");
+  
+    if (!refreshToken) {
+      console.error("No refresh token found.");
+      return null;
+    }
+
+    try {
+      const response = await fetch("http://0.0.0.0:8000/api/token/refresh/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ refresh: refreshToken }),
+      });
+  
+      if (!response.ok) {
+        console.error("Failed to refresh token");
+        return null; // Return null if refresh fails
+      }
+  
+      const data = await response.json();
+      const newAccessToken = data.access;
+      localStorage.setItem("jwtToken", newAccessToken);
+  
+      return newAccessToken;
+    } catch (error) {
+      console.error("Error refreshing access token:", error);
+      localStorage.removeItem("jwtToken");
+      syncSession();
+      navigateTo("login");
+    }
+  }
   let userName = "";
   let userProfilPicture = "";
   let userId = 0;
@@ -11,7 +46,6 @@ export function initOtherUserPage(name) {
     element.setAttribute('draggable', 'false');
   });
   const switchCheckbox = document.getElementById("2fa-switch");
-  let token = localStorage.getItem("jwtToken");
   let isEditing = false;
 
   const friendsContainer = document.getElementById("friendsContainer");

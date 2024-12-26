@@ -33,6 +33,8 @@ async function fetchOAuthCode(authCode) {
 
       const rewind = await response.json();
       const token = rewind.access;
+      const refresh = rewind.refresh;
+      localStorage.setItem("refresh", refresh);
       const bool = rewind.twoFa;
       if (bool) {
         // document.getElementById("qrcode").style.display = "block";

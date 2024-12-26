@@ -124,6 +124,8 @@ export function initLoginPage() {
       if (response.ok) {
         let rewind = await response.json();
         const token = rewind.access;
+        const refresh = rewind.refresh;
+        localStorage.setItem("refresh", refresh);
         const bool = rewind.twoFa;
         console.log("TOKEENEENENENEN e", token);
         if (bool) {
