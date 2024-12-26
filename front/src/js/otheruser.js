@@ -6,7 +6,7 @@ export function initOtherUserPage(name) {
   let token = localStorage.getItem("jwtToken");
   async function refreshAccessToken() {
     const refreshToken = localStorage.getItem("refresh");
-  
+
     if (!refreshToken) {
       console.error("No refresh token found.");
       return null;
@@ -38,96 +38,20 @@ export function initOtherUserPage(name) {
       navigateTo("login");
     }
   }
+
   let userName = "";
   let userProfilPicture = "";
   let userId = 0;
   let matches = {};
+
   document.querySelectorAll('img, p, a, div, button').forEach(function (element) {
     element.setAttribute('draggable', 'false');
   });
+
   const switchCheckbox = document.getElementById("2fa-switch");
   let isEditing = false;
 
   const friendsContainer = document.getElementById("friendsContainer");
-
-  // Mock friends data
-  // const friends = [
-  //   {
-  //     name: "Alice",
-  //     status: "online",
-  //     picture: "https://i.pravatar.cc/160?img=3",
-  //   },
-  //   {
-  //     name: "Bob",
-  //     status: "offline",
-  //     picture: "https://i.pravatar.cc/160?img=3",
-  //   },
-  //   {
-  //     name: "Charlie",
-  //     status: "online",
-  //     picture: "https://i.pravatar.cc/160?img=3",
-  //   },
-  //   {
-  //     name: "David",
-  //     status: "offline",
-  //     picture: "https://i.pravatar.cc/160?img=3",
-  //   },
-  //   {
-  //     name: "Eve",
-  //     status: "online",
-  //     picture: "https://i.pravatar.cc/160?img=3",
-  //   },
-  //   {
-  //     name: "Frank",
-  //     status: "offline",
-  //     picture: "https://i.pravatar.cc/160?img=3",
-  //   },
-  //   {
-  //     name: "54y6",
-  //     status: "offline",
-  //     picture: "https://i.pravatar.cc/160?img=3",
-  //   },
-  //   {
-  //     name: "y",
-  //     status: "offline",
-  //     picture: "https://i.pravatar.cc/160?img=3",
-  //   },
-  //   {
-  //     name: "4",
-  //     status: "offline",
-  //     picture: "https://i.pravatar.cc/160?img=3",
-  //   },
-  //   {
-  //     name: "y",
-  //     status: "offline",
-  //     picture: "https://i.pravatar.cc/160?img=3",
-  //   },
-  //   {
-  //     name: "h",
-  //     status: "offline",
-  //     picture: "https://i.pravatar.cc/160?img=3",
-  //   },
-  //   {
-  //     name: "b",
-  //     status: "offline",
-  //     picture: "https://i.pravatar.cc/160?img=3",
-  //   },
-  //   {
-  //     name: "w",
-  //     status: "offline",
-  //     picture: "https://i.pravatar.cc/160?img=3",
-  //   },
-  //   {
-  //     name: "p",
-  //     status: "offline",
-  //     picture: "https://i.pravatar.cc/160?img=3",
-  //   },
-  //   {
-  //     name: "c",
-  //     status: "offline",
-  //     picture: "https://i.pravatar.cc/160?img=3",
-  //   },
-  // ];
 
   // Helper function to place caret at the end of contenteditable
   function placeCaretAtEnd(el) {
