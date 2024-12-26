@@ -372,11 +372,10 @@ export function initHomePage() {
       });
   }
 
-
-  function connectWebSocket(username, friendId) {
-    const roomId = `${Math.min(userData.id, friendId)}_${Math.max(userData.id, friendId)}`;
+  function connectWebSocket(username, receiverId) {
+    const roomId = `${Math.min(userData.id, receiverId)}_${Math.max(userData.id, receiverId)}`;
     console.log("Connecting to room:", roomId);
-
+  
     if (socket && currentRoomId !== roomId) {
       disconnectWebSocket();
     }
@@ -384,31 +383,152 @@ export function initHomePage() {
       console.log("Already connected to room:", roomId);
       return;
     }
-
-    socket = new WebSocket(`ws://0.0.0.0:8002/ws/chat/${roomId}/`);
-
+    console.log(userData.id, receiverId)
+    socket = new WebSocket(`ws://0.0.0.0:8002/ws/chat/${roomId}/?receiver_id=${roomId}`);
+  
     socket.onopen = () => {
       console.log(`WebSocket connected to room: ${roomId}`);
       socket.send(JSON.stringify({ type: "join", username }));
     };
-
+  
     socket.onmessage = (event) => {
-      console.log("WebSocket message received:", event.data);
-      const data = JSON.parse(event.data);
-
-      if (data.message) {
-        appendMessageToChat(data.username, data.message, data.timestamp);
-      } else {
-        console.error("Invalid message structure:", data);
+      try {
+          console.log("WebSocket message received:", event.data);
+          const data = JSON.parse(event.data);
+        console.log('___DATA___DBG___ : ', data);
+        console.log('___DATA___XXXXXXXX___DBG___ : ', data.sender_id);
+        console.log('___RECEIVER___ID___DBG___ : ', receiverId);
+        console.log('___USER___ID___DBG___ : ', userData.id);
+        if(receiverId !== userData.id){
+          console.log('___DATA___ID___DBG___ : ', data);
+          console.log('___USER___DATA___ID___DBG___00___ : ', userData.id);
+          console.log('___RECEIVER___ID___DBG___00___ : ', receiverId);
+          if (data.type === "game_invite" && data.sender_id !== userData.id) {
+              console.log("Game invitation received", data);
+              showGameInviteModal(data.sender_name, data.invite_id);
+          } else if (data.type === "invite_response") {
+              console.log("Invite response received");
+              handleInviteResponse(data.status, data.sender_name);
+          } else if (data.message) {
+              appendMessageToChat(data.username, data.message, data.timestamp);
+          } else {
+              console.log("Unknown WebSocket data:", data);
+          }
+        }else{
+          console.log("Message received from the server:", data);
+        }
       }
-    };
-
+      catch (error) {
+          console.error("Error processing WebSocket message:", error);
+      }
+  };
+  
+  
     socket.onclose = () => {
       console.log("WebSocket disconnected.");
       currentRoomId = null;
     };
-
+  
     socket.onerror = (error) => console.error("WebSocket error:", error);
+  }
+  function showGameInviteModal(senderName, inviteId) {
+    const modalHTML = `
+          <div class="modal fade show" id="gameInviteModal" tabindex="-1" style="display: block; background: rgba(0,0,0,0.5)">
+              <div class="modal-dialog">
+                  <div class="modal-content" style="background-color: #452c63; color: white; border: 1px solid #720e9e;">
+                      <div class="modal-header" style="border-bottom: 1px solid #720e9e;">
+                          <h5 class="modal-title">Game Invitation</h5>
+                      </div>
+                      <div class="modal-body">
+                          <p>${senderName} has invited you to play a game!</p>
+                      </div>
+                      <div class="modal-footer" style="border-top: 1px solid #720e9e;">
+                          <button class="btn btn-outline-secondary" onclick="respondToInvite(${inviteId}, 'decline')">
+                              Decline
+                          </button>
+                          <button class="btn btn-primary" style="background-color: #DDA0DD; border: 1px solid #4B0082;" onclick="respondToInvite(${inviteId}, 'accept')">
+                              Accept
+                          </button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+        `;
+  
+    // Remove existing modals and add new modal
+    const existingModal = document.getElementById("gameInviteModal");
+    if (existingModal) existingModal.remove();
+  
+    document.body.insertAdjacentHTML("beforeend", modalHTML);
+  }
+  
+  
+  window.respondToInvite = function(inviteId, action) {
+    const responsePayload = {
+        type: "invite_response",
+        invite_id: inviteId,
+        status: action,
+        sender_id: userData.id,
+        sender_name: userData.nickname,
+    };
+  
+    if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify(responsePayload));
+        document.getElementById("gameInviteModal").remove();
+        if (action === "accept") {
+            navigateTo("play");
+        }
+    } else {
+        console.log("Unable to respond to game invitation. WebSocket is not connected.");
+    }
+  };
+  
+  
+  
+  function handleInviteResponse(status, senderName) {
+    if (status === "accepted") {
+        showNotification(`${senderName} accepted your game invitation!`);
+        navigateTo("play");
+    } else if (status === "declined") {
+        showNotification(`${senderName} declined your game invitation.`);
+    }
+  }
+  
+  
+  
+  function showNotification(message) {
+      // Create notification element
+      const notification = document.createElement('div');
+      notification.className = 'custom-notification';
+      notification.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background-color: #800080;
+          color: white;
+          padding: 15px 25px;
+          border-radius: 5px;
+          z-index: 1000;
+          animation: slideIn 0.5s ease-out;
+      `;
+      notification.textContent = message;
+  
+      // Add animation keyframes
+      const style = document.createElement('style');
+      style.textContent = `
+          @keyframes slideIn {
+              from { transform: translateX(100%); opacity: 0; }
+              to { transform: translateX(0); opacity: 1; }
+          }
+      `;
+      document.head.appendChild(style);
+  
+      // Add to document and remove after delay
+      document.body.appendChild(notification);
+      setTimeout(() => {
+          notification.style.animation = 'slideOut 0.5s ease-in';
+          setTimeout(() => notification.remove(), 500);
+      }, 3000);
   }
 
   function disconnectWebSocket() {
@@ -859,106 +979,138 @@ export function initHomePage() {
         // Clear previous messages
         document.getElementById("chat-messages").innerHTML = "";
       });
+
+      const friendId = friendItem.dataset.friendId;
+
+      blockBtn.addEventListener('click', async function() {
+        console.log("Friend ID to block/unblock:", friendId);
+  
+        if (blockBtn.textContent.trim() === 'Block') {
+          await blockUser(friendId);
+          blockBtn.textContent = 'Unblock';
+          blockBtn.classList.remove('btn-danger'); 
+          blockBtn.classList.add('btn-success');
+        } else {
+          await unblockUser(friendId);
+          blockBtn.textContent = 'Block';
+          blockBtn.classList.remove('btn-success');
+          blockBtn.classList.add('btn-danger');
+        }
+      });
+
+
+      const invitePlayBtn = document.getElementById("invitePlayBtn");
+
+      invitePlayBtn.addEventListener("click", () => {
+          // const friendId = document.getElementById("blockBtn").dataset.friendId;
+          if (!friendId) {
+              console.error("Friend ID not found!");
+              showNotification("Unable to initiate game invitation.");
+              return;
+          }
+
+          console.log("Game invite for Friend ID:", friendId);
+          
+          const invitePayload = {
+            type: "game_invite",
+            sender_id: userData.id,
+            sender_name: userData.nickname,
+            receiver_id: parseInt(friendId),
+            invite_id: new Date().getTime(),
+          };
+          
+          console.log("Sending game invite payload:", invitePayload);
+
+          if (socket && socket.readyState === WebSocket.OPEN) {
+              socket.send(JSON.stringify(invitePayload));
+              showNotification("Game invitation sent!");
+          } else {
+              showNotification("WebSocket is not connected. Try again.");
+          }
+      });
+
+      const modalAcceptButton = document.querySelector('#modalAcceptButton');
+      if (modalAcceptButton) {
+          modalAcceptButton.addEventListener('click', function() {
+              respondToInvite(inviteId, 'accept');
+          });
+      }
     });
   }
 
   fetchFriendList();
-
-  const blockBtn = document.getElementById('blockBtn');
-
-  // Add event listener for the block button
-  blockBtn.addEventListener('click', async function () {
-    const friendId = blockBtn.dataset.friendId;
-    console.log("Friend ID:", friendId);
-
-    // Determine if the button says 'Block' or 'Unblock'
-    if (blockBtn.textContent.trim() === 'Block') {
-      await blockUser(friendId);
-      blockBtn.textContent = 'Unblock';
-      blockBtn.classList.remove('btn-danger'); // Red color
-      blockBtn.classList.add('btn-success');   // Green color
-    } else {
-      await unblockUser(friendId);
-      blockBtn.textContent = 'Block';
-      blockBtn.classList.remove('btn-success'); // Green color
-      blockBtn.classList.add('btn-danger');     // Red color
-    }
-  });
-
-  // Function to block a user
   async function blockUser(friendId) {
     const blockerId = userData.id;
-
     console.log("Blocker ID:", blockerId);
     console.log("Friend ID:", friendId);
-
+  
     try {
       const response = await fetch(`http://0.0.0.0:8002/chat/block/${friendId}/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ blocker_id: blockerId }),
       });
-
+  
       const result = await response.json();
       console.log("User Blocked:", result.message);
     } catch (error) {
       console.error('Error blocking user:', error);
     }
   }
-
-  // Function to unblock a user
+  
   async function unblockUser(friendId) {
     const blockerId = userData.id;
-
+  
     console.log("Unblock Function Triggered! Blocker ID:", blockerId, "Friend ID:", friendId);
-
+  
     try {
       const response = await fetch(`http://0.0.0.0:8002/chat/unblock/${friendId}/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ blocker_id: blockerId }),
       });
-
+  
       const result = await response.json();
       console.log("Unblock API Response:", result);
-
-      // Check for response status
+  
       if (result.status === 'unblocked') {
         console.log("User successfully unblocked!");
         blockBtn.textContent = 'Block';
         blockBtn.classList.remove('btn-success');
         blockBtn.classList.add('btn-danger');
       }
+  
     } catch (error) {
       console.error('Error unblocking user:', error);
     }
   }
 
-  // Function to update the block button state when selecting a friend
-  async function updateBlockButtonState(friendId) {
-    const blockerId = userData.id;
 
-    try {
-      // Fetch block status
-      const response = await fetch(`http://0.0.0.0:8002/chat/status/${friendId}/`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      const result = await response.json();
-      if (result.is_blocked) {
-        blockBtn.textContent = 'Unblock';
-        blockBtn.classList.remove('btn-danger'); // Red
-        blockBtn.classList.add('btn-success');   // Green
-      } else {
-        blockBtn.textContent = 'Block';
-        blockBtn.classList.remove('btn-success'); // Green
-        blockBtn.classList.add('btn-danger');     // Red
-      }
-    } catch (error) {
-      console.error('Error fetching block status:', error);
-    }
-  }
+  //  async function updateBlockButtonState(friendId) {
+    //   try {
+    //     const response = await fetch(`http://0.0.0.0:8002/chat/status/${friendId}/`);
+    //     const data = await response.json();
+    
+    //     if (data.is_blocked) {
+    //       blockBtn.textContent = "Unblock";
+    //       blockBtn.classList.remove("btn-danger");
+    //       blockBtn.classList.add("btn-success");
+    //     } else {
+    //       blockBtn.textContent = "Block";
+    //       blockBtn.classList.remove("btn-success");
+    //       blockBtn.classList.add("btn-danger");
+    //     }
+    //   } catch (error) {
+    //     console.error("Error updating block button:", error);
+    //   }
+    // }
+    // const blockBtn = document.getElementById('blockBtn');
+//   if (blockBtn) {
+//     const friendId = blockBtn.dataset.friendId; // Get the friendId from the button's dataset
+//     if (friendId) {
+//       updateBlockButtonState(friendId); // Call the function with the friendId
+//     }
+//   }
 
   // Initial call to set up listeners in case elements are already present
   // To get the other user profil

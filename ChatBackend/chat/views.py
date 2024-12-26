@@ -15,6 +15,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 import json
 
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 # class CreateRoom(APIView):
@@ -111,7 +114,8 @@ def unblock_user(request, friend_id):
             blocker = User.objects.get(id=blocker_id)
             blocked_user = User.objects.get(id=friend_id)
 
-            # Delete the block entry
+            
+            # Delete the block entry    
             deleted, _ = Block.objects.filter(blocker=blocker, blocked_user=blocked_user).delete()
 
             if deleted > 0:
@@ -131,11 +135,9 @@ def unblock_user(request, friend_id):
 def block_status(request, friend_id):
     if request.method == "GET":
         try:
-            blocker = User.objects.get(id=request.user.id)  # Assuming user is authenticated
-            blocked_user = User.objects.get(id=friend_id)
-
-            is_blocked = Block.objects.filter(blocker=blocker, blocked_user=blocked_user).exists()
+            blocker_id = request.user.id  # Assuming the user is authenticated
+            is_blocked = Block.objects.filter(blocker_id=blocker_id, blocked_user_id=friend_id).exists()
             return JsonResponse({"is_blocked": is_blocked}, status=200)
-        except User.DoesNotExist:
-            return JsonResponse({"error": "User not found"}, status=404)
-    return JsonResponse({"error": "Invalid request method"}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    return JsonResponse({"error": "Invalid request method."}, status=400)
