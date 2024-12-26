@@ -7,6 +7,7 @@ from .views_changePass import ChangePasswordView
 from .views_PrflUpdate import UserProfileUpdateView, ChangeProfilePictureAPIView
 from .viewsWinLoss import UpdateWinLossView, matchHistory
 from .views import UserProfileDetailView, Enable2FAView, VerifyOTPView, Disable2FAView
+from .viewsTopplayers import TopPlayersView
 # from .views import ProxyToChat
 
 from . import viewsUserInfo
@@ -32,5 +33,7 @@ urlpatterns = [
     path("2fa/disable/", Disable2FAView.as_view(), name="disable_2fa"),
 
     path('profile/matchHistory/', matchHistory.as_view(), name='user_profile_detail'),
+
+    path('top-players/', TopPlayersView.as_view(), name='top-players'),
     
 ]

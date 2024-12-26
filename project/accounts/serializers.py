@@ -38,7 +38,7 @@ class FriendSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     profile_picture = serializers.SerializerMethodField()
     friends = FriendSerializer(many=True)
-    # match_details = serializers.SerializerMethodField()
+    match_details = serializers.SerializerMethodField()
 
     class Meta:
         model = UserProfile
