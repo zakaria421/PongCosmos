@@ -34,6 +34,6 @@ urlpatterns = [
 
     path('profile/matchHistory/', matchHistory.as_view(), name='user_profile_detail'),
 
-    path('top-players/', TopPlayersView.as_view(), name='top-players'),
+    path('topplayers/', TopPlayersView.as_view(), name='top-players'),
     
 ]
