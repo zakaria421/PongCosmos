@@ -4,6 +4,44 @@
   import { syncSession } from "./main.js";
   
   export function initHomePage() {
+    let token = localStorage.getItem("jwtToken");
+  async function refreshAccessToken() {
+    const refreshToken = localStorage.getItem("refresh");
+  
+    if (!refreshToken) {
+      console.error("No refresh token found.");
+      return null;
+    }
+
+    try {
+      const response = await fetch("http://0.0.0.0:8000/api/token/refresh/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ refresh: refreshToken }),
+      });
+  
+      if (!response.ok) {
+        console.error("Failed to refresh token");
+        return null; // Return null if refresh fails
+      }
+  
+      const data = await response.json();
+      const newAccessToken = data.access;
+      localStorage.removeItem("jwtToken");
+      syncSession();
+      localStorage.setItem("jwtToken", newAccessToken);
+      token = localStorage.getItem("jwtToken");
+
+      return newAccessToken;
+    } catch (error) {
+      console.error("Error refreshing access token:", error);
+      localStorage.removeItem("jwtToken");
+      syncSession();
+      navigateTo("login");
+    }
+  }
     document.querySelectorAll('img, p, a, div, button').forEach(function(element) {
       element.setAttribute('draggable', 'false');
     });
@@ -130,16 +168,16 @@
     //   addFriendContainer.classList.add("d-none");
     // }); //*request to be sent to the backend request sent*
   
-    function handlert() {
-      friendListSection.classList.toggle("active");
-      mobileFriendsToggle.style.zIndex = 10;
-    }
-    mobileFriendsToggle.addEventListener("click", handlert);
-      eventRegistry.push({
-        element: mobileFriendsToggle,
-        eventType: "click",
-        handler: handlert
-      });
+    // function handlert() {
+    //   friendListSection.classList.toggle("active");
+    //   mobileFriendsToggle.style.zIndex = 10;
+    // }
+    // mobileFriendsToggle.addEventListener("click", handlert);
+    //   eventRegistry.push({
+    //     element: mobileFriendsToggle,
+    //     eventType: "click",
+    //     handler: handlert
+    //   });
   
     // Add event listener to "Play" button
     // const playButton = document.getElementById("confirmButton");
@@ -240,10 +278,7 @@
     let currentRoomId = null;
     let currentFriendId = null;
     // Fetch User Data
-    async function fetchUserData() {
-      // let token = localStorage.getItem("jwtToken");
-      let token = localStorage.getItem("jwtToken");
-      console.log("TOEKN  in home page : ", token);
+    async function fetchUserData() {  
       try {
         let response = await fetch("http://0.0.0.0:8000/userinfo/", {
           headers: {
@@ -252,23 +287,34 @@
           },
           method: "GET",
         });
+    
         if (response.ok) {
-          userData = await response.json();
-          console.log("RESPONSE = ", userData);
-          console.log("user data = ", userData);
-          let profilePicture = "http://0.0.0.0:8000/" + userData.profile_picture;
+          const userData = await response.json();  
+          const profilePicture = "http://0.0.0.0:8000/" + userData.profile_picture;
           switchCheckbox.checked = userData.is_2fa_enabled;
           updateUserDisplay(userData, profilePicture);
           attachUserMenuListeners();
+        } else if (response.status === 401) {
+          console.log("Access token expired. Refreshing token...");
+          token = await refreshAccessToken();
+    
+          if (token) {
+            return fetchUserData();
+          } else {
+            console.error("Unable to refresh access token. Please log in again.");
+            localStorage.removeItem("jwtToken");
+            syncSession();
+            navigateTo("login");
+          }
         } else {
           console.error("Failed to fetch user data:", response.statusText);
-          localStorage.removeItem('jwtToken');
-          syncSession();
-          navigateTo("login");
+          // localStorage.removeItem("jwtToken");
+          //   syncSession();
+          //   navigateTo("login");
         }
       } catch (err) {
         console.error("Error fetching user data:", err);
-        // localStorage.removeItem('jwtToken');
+        // localStorage.removeItem("jwtToken");
         // syncSession();
         // navigateTo("login");
       }

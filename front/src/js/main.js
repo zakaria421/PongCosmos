@@ -1,4 +1,5 @@
 const contentDiv = document.getElementById('app');
+const validPages = ['landing', 'login', 'home', 'about', 'leaderboard', 'play', 'profil', 'game', 'otheruser', 'error'];
 export const eventRegistry = [];
 
 // const divs = document.getElementById("window");
@@ -11,15 +12,21 @@ window.addEventListener('DOMContentLoaded', function () {
 
 async function loadPage(page, mode = null) {
   const token = localStorage.getItem("jwtToken");
+
   if (!token && page !== 'landing') {
     page = 'login';
-  }
-  else if (token && (page === 'landing' || page === 'login'))
+  } else if (token && (page === 'landing' || page === 'login')) {
     page = 'home';
+  }
 
   const existingLink = document.getElementById('page-style');
   if (existingLink) {
     existingLink.remove(); // Remove the old CSS file
+  }
+
+  // Validate page
+  if (!validPages.includes(page)) {
+    page = 'error'; // If page is invalid, go to the error page
   }
 
   // Dynamically load CSS
@@ -32,41 +39,53 @@ async function loadPage(page, mode = null) {
   // Handle page loading and rendering dynamically
   contentDiv.innerHTML = ''; // Clear previous content
   console.log("TMS7 KOLO");
+
   // Extract query parameters from the URL hash
   const modeToSend = getQueryParamsFromUrl();
   console.log(page, "in LoadPage");
 
-  if (page === 'landing' || page === 'login') {
-    // Clear the content area and load the landing or login page
-    if (page === 'landing') {
-      fetch('src/components/landing.html')
-        .then(response => response.text())
-        .then(html => {
-          contentDiv.innerHTML = html;
-          initializePageScripts(page);
-          // Event listener for landing page interaction
-          document.getElementById('startButton').addEventListener('click', () => navigateTo('login'));
-        })
-        .catch(() => contentDiv.innerHTML = '<h1>404 Page Not Found</h1>');
-    } else if (page === 'login') {
-      fetch('login.html')
-        .then(response => response.text())
-        .then(html => {
-          contentDiv.innerHTML = html;
-          initializePageScripts(page);
-        })
-        .catch(() => contentDiv.innerHTML = '<h1>404 Page Not Found</h1>');
-    }
-  } else {
-    // Load component dynamically for other pages
-    fetch(`src/components/${page}.html`)
-      .then(response => response.text())
-      .then(html => {
+  try {
+    if (page === 'landing' || page === 'login') {
+      // Clear the content area and load the landing or login page
+      let html;
+      if (page === 'landing') {
+        html = await fetchHtml('src/components/landing.html');
         contentDiv.innerHTML = html;
-        console.log("INITIAT SCRIPT :", page)
-        initializePageScripts(page, modeToSend);
-      })
-      .catch(() => contentDiv.innerHTML = '<h1>404 Page Not Found</h1>');
+        initializePageScripts(page);
+        // Event listener for landing page interaction
+        document.getElementById('startButton').addEventListener('click', () => navigateTo('login'));
+      } else if (page === 'login') {
+        html = await fetchHtml('login.html');
+        contentDiv.innerHTML = html;
+        initializePageScripts(page);
+      }
+    } else {
+      // Load component dynamically for other pages
+      const html = await fetchHtml(`src/components/${page}.html`);
+      contentDiv.innerHTML = html;
+      console.log("INITIAT SCRIPT :", page);
+      initializePageScripts(page, modeToSend);
+    }
+  } catch (error) {
+    console.log("Error loading page:", error);
+    const errorMessage = `Failed to load page: ${page}`;
+    navigateTo('error', { message: errorMessage });
+  }
+}
+
+// Helper function to fetch HTML content and handle errors
+async function fetchHtml(url) {
+  try {
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      const errorMessage = `Error ${response.status}: ${response.statusText}`;
+      throw new Error(errorMessage);
+    }
+
+    return await response.text();
+  } catch (error) {
+    throw new Error(error.message);
   }
 }
 
@@ -137,6 +156,11 @@ function initializePageScripts(page, mode) {
     case 'otheruser':
       import('./otheruser.js').then(module => {
         module.initOtherUserPage(mode);
+      });
+      break;
+    case 'error':
+      import('./error.js').then(module => {
+        module.initErrorPage();
       });
       break;
     default:
