@@ -653,7 +653,7 @@
       const message = chatInput.value.trim();
       if (message) {
         sendMessage(message);
-        appendMessageToChat(userData.nickname, message, new Date().toISOString());
+        // appendMessageToChat(userData.nickname, message, new Date().toISOString());
         chatInput.value = "";
       }
     });
