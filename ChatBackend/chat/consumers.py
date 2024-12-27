@@ -175,18 +175,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
             sender_name = data.get("sender_name")
             sender_id = data.get("sender_id")
 
-            logger.info(query_params)
-            logger.info(receiver_id)
-            logger.info(invite_id)
-            logger.info(sender_name)
-            logger.info(sender_id)
-
 
             if not receiver_id or not invite_id or not sender_name:
                 raise ValueError("Missing required fields in game invite payload")
 
-            # Correctly address the group for the receiver
-            # receiver_group_name = self.room_group_name 
             receiver_group_name = f"user_{receiver_id}"
             logger.info(f"Sending game invite to {receiver_group_name} with invite_id: {invite_id}")
 
@@ -198,9 +190,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 raise ValueError("Blocked users cannot receive game invites")
 
         
-            logger.info(f"___DBG___SENDER___ID___: {sender_id}")
-            logger.info(f"___DBG___INVITE___ID___: {invite_id}")
-            # Sending to the receiver's group
             await self.channel_layer.group_add(
                 receiver_group_name,
                 self.channel_name
@@ -225,23 +214,51 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def send_invite_response(self, data):
         try:
-            inviter_id = data.get("sender_id")
-            status = data.get("status")
+            query_params = parse_qs(self.scope['query_string'].decode())
+            receiver_id = query_params.get('receiver_id', [None])[0]
+            invite_id = data.get("invite_id")
             sender_name = data.get("sender_name")
+            sender_id = data.get("sender_id")
 
-            if not inviter_id or not status or not sender_name:
+            status = data.get("status")
+
+            if not status or not sender_name or not invite_id:
                 raise ValueError("Missing required fields in invite response payload")
+            receiver_group_name = f"user_{receiver_id}"
 
+            await self.channel_layer.group_add(
+                receiver_group_name,
+                self.channel_name
+            )
             await self.channel_layer.group_send(
-                f"user_{inviter_id}",
+                receiver_group_name,
                 {
                     "type": "invite_response",
                     "status": status,
+                    "sender_id": sender_id,
                     "sender_name": sender_name,
+                    "invite_id": invite_id,
                 },
             )
+            logger.info(f"Invite response sent to group user_{receiver_group_name}")
         except Exception as e:
             logger.error(f"Error in send_invite_response: {e}")
+
+
+    async def invite_response(self, event):
+        try:
+            response_message = {
+                "type": "invite_response",
+                "status": event["status"],
+                "sender_id": event["sender_id"],
+                "sender_name": event["sender_name"],
+                "invite_id": event["invite_id"],
+            }
+            await self.send(text_data=json.dumps(response_message))
+            logger.info(f"Invite response successfully sent to client: {response_message}")
+        except Exception as e:
+            logger.error(f"Error processing invite response: {traceback.format_exc()}")
+            await self.send(text_data=json.dumps({"error": f"Error processing invite response: {str(e)}"}))
 
     async def game_invite(self, event):
         logger.info(f"Handling game invite with event data: {event}")
@@ -334,7 +351,7 @@ class StatusConsumer(AsyncWebsocketConsumer):
         await self.broadcast_user_status(self.user.id, "offline")
 
     async def broadcast_user_status(self, user_id, status):
-        """Broadcasts user status to the global notifications group."""
+        # Broadcasts user status to the global notifications group
         await self.channel_layer.group_send(
             self.global_group_name,
             {
@@ -351,5 +368,3 @@ class StatusConsumer(AsyncWebsocketConsumer):
             "user_id": event["user_id"],
             "status": event["status"],
         }))
-
-    # Existing functionality for chat messages...
