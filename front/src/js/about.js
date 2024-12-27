@@ -31,7 +31,8 @@ export function initAboutPage() {
       localStorage.removeItem("jwtToken");
       syncSession();
       localStorage.setItem("jwtToken", newAccessToken);
-  
+      token = localStorage.getItem("jwtToken");
+
       return newAccessToken;
     } catch (error) {
       console.error("Error refreshing access token:", error);
