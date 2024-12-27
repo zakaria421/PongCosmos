@@ -13,7 +13,7 @@ export function initLeaderboardPage() {
     }
 
     try {
-      const response = await fetch("http://10.12.8.11:8000/api/token/refresh/", {
+      const response = await fetch("http://0.0.0.0:8000/api/token/refresh/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -187,7 +187,7 @@ export function initLeaderboardPage() {
             <div class="podium-item podium-${place}">
                 <div class="avatar-container">
                     <img src="src/assets/leaderboard/rank${place}.png" alt="" class="avatar-border">
-                    <img src="http://10.12.8.11:8000${user.profile_picture}" alt="${user.nickname}" class="avatar">
+                    <img src="http://0.0.0.0:8000${user.profile_picture}" alt="${user.nickname}" class="avatar">
                 </div>
                 <div class="name">${user.nickname}</div>
                 <div class="podium-block">
@@ -212,7 +212,7 @@ export function initLeaderboardPage() {
       index + 1
     }</span>
                 <div class="line-horizontal"></div>
-                <img src="http://10.12.8.11:8000${user.profile_picture}" alt="${
+                <img src="http://0.0.0.0:8000${user.profile_picture}" alt="${
       user.nickname
     }" class="rounded-circle me-3" width="${
       isTopThree ? "60" : "40"
@@ -231,7 +231,7 @@ export function initLeaderboardPage() {
     const leaderboardList = document.getElementById("leaderboard-list");
     // let leaderboardData = [];
     try {
-      const response = await fetch("http://10.12.8.11:8000/topplayers/", {
+      const response = await fetch("http://0.0.0.0:8000/topplayers/", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -308,7 +308,7 @@ export function initLeaderboardPage() {
     try {
     console.log("FEETCHHH", token);
 
-      let response = await fetch("http://10.12.8.11:8000/userinfo/", {
+      let response = await fetch("http://0.0.0.0:8000/userinfo/", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -318,7 +318,7 @@ export function initLeaderboardPage() {
   
       if (response.ok) {
         const userData = await response.json();  
-        const profilePicture = "http://10.12.8.11:8000/" + userData.profile_picture;
+        const profilePicture = "http://0.0.0.0:8000/" + userData.profile_picture;
         switchCheckbox.checked = userData.is_2fa_enabled;
         updateUserDisplay(userData, profilePicture);
         attachUserMenuListeners();
@@ -484,7 +484,7 @@ export function initLeaderboardPage() {
     
             try {
               console.log("ACTION : ", action);
-              const response = await fetch(`http://10.12.8.11:8000/2fa/${action}/`, {
+              const response = await fetch(`http://0.0.0.0:8000/2fa/${action}/`, {
                 method: "POST",
                 headers: {
                   "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
