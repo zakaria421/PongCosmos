@@ -68,22 +68,21 @@ export function initAboutPage() {
         if (token) {
           return fetchUserData();
         } else {
-          console.error("Unable to refresh access token. Please log in again.");
           localStorage.removeItem("jwtToken");
           syncSession();
-          navigateTo("login");
+          navigateTo("error", {message: "Unable to refresh access token. Please log in again."});
         }
       } else {
-        console.error("Failed to fetch user data:", response.statusText);
-        // localStorage.removeItem("jwtToken");
-        //   syncSession();
-        //   navigateTo("login");
+        console.error("Error fetching user data:", err);
+        localStorage.removeItem("jwtToken");
+        syncSession();
+        navigateTo("error", {message: err.message});
       }
     } catch (err) {
       console.error("Error fetching user data:", err);
-      // localStorage.removeItem("jwtToken");
-      // syncSession();
-      // navigateTo("login");
+      localStorage.removeItem("jwtToken");
+      syncSession();
+      navigateTo("error", {message: err.message});
     }
   }
 

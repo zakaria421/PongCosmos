@@ -104,6 +104,7 @@
     // const closeAddFriend = document.getElementById('closeAddFriend');
     function handlerz() {
       friendListSection.classList.remove("active");
+      mobileFriendsToggle.classList.remove("d-none");
     }
     closeFriendList.addEventListener("click", handlerz);
     eventRegistry.push({
@@ -289,7 +290,7 @@
         });
     
         if (response.ok) {
-          const userData = await response.json();  
+          userData = await response.json();  
           const profilePicture = "http://0.0.0.0:8000/" + userData.profile_picture;
           switchCheckbox.checked = userData.is_2fa_enabled;
           updateUserDisplay(userData, profilePicture);
@@ -301,22 +302,21 @@
           if (token) {
             return fetchUserData();
           } else {
-            console.error("Unable to refresh access token. Please log in again.");
             localStorage.removeItem("jwtToken");
             syncSession();
-            navigateTo("login");
+            navigateTo("error", {message: "Unable to refresh access token. Please log in again."});
           }
         } else {
-          console.error("Failed to fetch user data:", response.statusText);
-          // localStorage.removeItem("jwtToken");
-          //   syncSession();
-          //   navigateTo("login");
+          console.error("Error fetching user data:", err);
+          localStorage.removeItem("jwtToken");
+          syncSession();
+          navigateTo("error", {message: err.message});
         }
       } catch (err) {
         console.error("Error fetching user data:", err);
-        // localStorage.removeItem("jwtToken");
-        // syncSession();
-        // navigateTo("login");
+        localStorage.removeItem("jwtToken");
+        syncSession();
+        navigateTo("error", {message: err.message});
       }
     }
   
@@ -683,7 +683,7 @@
   
     mobileFriendsToggle.addEventListener("click", () => {
       friendListSection.classList.toggle("active");
-      mobileFriendsToggle.style.zIndex = 0;
+      mobileFriendsToggle.classList.add("d-none");
     });
   
     // Add event listener to "Play" button
@@ -1014,11 +1014,12 @@
           // Disconnect any existing WebSocket and initiate a new one
           disconnectWebSocket();
           connectWebSocket(userData.nickname, friendId);
-  
+          
+          friendListSection.classList.remove("active");
           // Update the chat window UI
           document.getElementById("chatUserAvatar").src = friendAvatar;
           document.getElementById("chatUserName").textContent = friendName;
-  
+          
           // Show chat window
           document.getElementById("defaultContent").classList.add("d-none");
           document.getElementById("chatWindow").classList.remove("d-none");

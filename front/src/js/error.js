@@ -4,8 +4,11 @@ export function initErrorPage() {
     const errorMessage = new URLSearchParams(window.location.hash.split('?')[1]).get('message') || 'An unexpected error occurred';
     console.log(errorMessage);
     const errorDiv = document.getElementById('error-message');
-    errorDiv.innerHTML = errorMessage;
-    console.log("Error page initialized:", errorMessage);
+    if (errorDiv) {
+        errorDiv.innerHTML = errorMessage;
+    } else {
+        document.body.innerHTML = errorMessage;
+    }
     document.getElementById('go-home').addEventListener('click', () => {
         navigateTo('landing');
     });

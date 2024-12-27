@@ -92,7 +92,7 @@ services:
   redis:
     image: redis:6
     ports:
-      - "6379:6379"
+      - "6378:6379"
     networks:
     - my-net
 
@@ -114,3 +114,4 @@ volumes:
 networks:
   my-net:
     name: my-net
+    driver: bridge

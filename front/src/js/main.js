@@ -191,7 +191,7 @@ export function navigateTo(page, queryParams = {}) {
   if (window.location.href === fullUrl) return;
 
   history.pushState({ page }, '', fullUrl);
-
+  console.log("page in navigate To: ", page);
   handleRouting();
 }
 
@@ -215,6 +215,9 @@ function handleRouting() {
     history.replaceState(null, '', cleanedUrl);
   }
 
+  console.log("page in handleRouting To: ", page);
+
+  
   // Load the appropriate page
   loadPage(page || 'landing', modeToGet);
 }
