@@ -14,7 +14,7 @@ export function initHomePage() {
     }
 
     try {
-      const response = await fetch("http://0.0.0.0:8000/api/token/refresh/", {
+      const response = await fetch("http://10.12.8.11:8000/api/token/refresh/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -279,7 +279,7 @@ export function initHomePage() {
   // Fetch User Data
   async function fetchUserData() {  
     try {
-      let response = await fetch("http://0.0.0.0:8000/userinfo/", {
+      let response = await fetch("http://10.12.8.11:8000/userinfo/", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -289,12 +289,13 @@ export function initHomePage() {
   
       if (response.ok) {
         const userData = await response.json();  
-        const profilePicture = "http://0.0.0.0:8000/" + userData.profile_picture;
+        const profilePicture = "http://10.12.8.11:8000/" + userData.profile_picture;
         switchCheckbox.checked = userData.is_2fa_enabled;
         updateUserDisplay(userData, profilePicture);
         attachUserMenuListeners();
       } else if (response.status === 401) {
         console.log("Access token expired. Refreshing token...");
+        console.log(token, "drgergergergergergergegegegergerg");
         token = await refreshAccessToken();
   
         if (token) {
@@ -389,7 +390,7 @@ export function initHomePage() {
   
           try {
             console.log("ACTION : ", action);
-            const response = await fetch(`http://0.0.0.0:8000/2fa/${action}/`, {
+            const response = await fetch(`http://10.12.8.11:8000/2fa/${action}/`, {
               method: "POST",
               headers: {
                 "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -429,7 +430,7 @@ export function initHomePage() {
       return;
     }
     console.log(userData.id, receiverId)
-    socket = new WebSocket(`ws://0.0.0.0:8002/ws/chat/${roomId}/?receiver_id=${roomId}`);
+    socket = new WebSocket(`ws://10.12.8.11:8002/ws/chat/${roomId}/?receiver_id=${roomId}`);
   
     socket.onopen = () => {
       console.log(`WebSocket connected to room: ${roomId}`);
@@ -736,7 +737,7 @@ export function initHomePage() {
     console.log("Sending friend request for nickname:", nickname);
 
     try {
-      const response = await fetch(`http://0.0.0.0:8000/friends/send-friend-request/${nickname}/`, {
+      const response = await fetch(`http://10.12.8.11:8000/friends/send-friend-request/${nickname}/`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -762,7 +763,7 @@ export function initHomePage() {
 
   async function fetchFriendRequests() {
     try {
-      const response = await fetch("http://0.0.0.0:8000/friends/friend-requests/", {
+      const response = await fetch("http://10.12.8.11:8000/friends/friend-requests/", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -818,7 +819,7 @@ export function initHomePage() {
       button.addEventListener("click", async () => {
         const nickname = button.dataset.nickname;
         try {
-          const response = await fetch(`http://0.0.0.0:8000/friends/accept-friend-request/${nickname}/`, {
+          const response = await fetch(`http://10.12.8.11:8000/friends/accept-friend-request/${nickname}/`, {
             method: "POST",
             headers: {
               Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -845,7 +846,7 @@ export function initHomePage() {
         const nickname = button.dataset.nickname;
         console.log(`Canceling friend request for: ${nickname}`); // Debug
         try {
-          const response = await fetch(`http://0.0.0.0:8000/friends/cancel-friend-request/${nickname}/`, {
+          const response = await fetch(`http://10.12.8.11:8000/friends/cancel-friend-request/${nickname}/`, {
             method: "POST",
             headers: {
               Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -884,7 +885,7 @@ export function initHomePage() {
 
     if (query) {
       try {
-        const response = await fetch(`http://0.0.0.0:8000/api/search-friends/?query=${query}`, {
+        const response = await fetch(`http://10.12.8.11:8000/api/search-friends/?query=${query}`, {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
             "Content-Type": "application/json",
@@ -960,7 +961,7 @@ export function initHomePage() {
       console.error("JWT token is missing. Please log in.");
       return;
     }
-    fetch("http://0.0.0.0:8000/friends/friend-list/", {
+    fetch("http://10.12.8.11:8000/friends/friend-list/", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -1085,7 +1086,7 @@ export function initHomePage() {
     console.log("Friend ID:", friendId);
   
     try {
-      const response = await fetch(`http://0.0.0.0:8002/chat/block/${friendId}/`, {
+      const response = await fetch(`http://10.12.8.11:8002/chat/block/${friendId}/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ blocker_id: blockerId }),
@@ -1104,7 +1105,7 @@ export function initHomePage() {
     console.log("Unblock Function Triggered! Blocker ID:", blockerId, "Friend ID:", friendId);
   
     try {
-      const response = await fetch(`http://0.0.0.0:8002/chat/unblock/${friendId}/`, {
+      const response = await fetch(`http://10.12.8.11:8002/chat/unblock/${friendId}/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ blocker_id: blockerId }),
@@ -1128,7 +1129,7 @@ export function initHomePage() {
 
   //  async function updateBlockButtonState(friendId) {
     //   try {
-    //     const response = await fetch(`http://0.0.0.0:8002/chat/status/${friendId}/`);
+    //     const response = await fetch(`http://10.12.8.11:8002/chat/status/${friendId}/`);
     //     const data = await response.json();
     
     //     if (data.is_blocked) {

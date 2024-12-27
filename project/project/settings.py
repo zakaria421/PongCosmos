@@ -15,7 +15,8 @@ SECRET_KEY = 'django-insecure-4i%@946h$i&9-f0o5sh0z9pazinic)!&=e-n=1=5v9!s0n_gqc
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+
+ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1', 'localhost', '10.12.8.11', '*']
 
 
 REST_FRAMEWORK = {
@@ -132,18 +133,11 @@ USE_TZ = True
 CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOWED_ORIGINS = [
-    "http://10.14.53.155:5174",
-    "http://10.14.53.155:5173",
-    "http://10.14.53.155:5501",
-    "http://10.13.247.145:5501",
-    "http://localhost:5501",
-    "http://0.0.0.0:5501",
-    "http://127.0.0.1:5501",
     "http://127.0.0.1:8080",
-    "http://127.18.0.1:8080",
     "http://0.0.0.0:8000",
     "http://0.0.0.0:8080",
     "http://localhost:8000",
+    "http://10.12.8.11:8080", 
 ]
 
 CORS_ALLOW_METHODS = [
@@ -183,17 +177,3 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 APPEND_SLASH=True
 
 
-
-
-#the superuser is : "otitebah" with the password: "1234" 
-
-
-
-#        DATABASE
-# this is the linux database
-#the database is called "ft_transcandencedb"
-# the superUser in database is called "othmane" with password "otitebah1234"
-
-
-
-#"sudo -i -u postgres" the command to access the database 

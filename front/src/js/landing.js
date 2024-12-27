@@ -25,7 +25,7 @@ async function fetchOAuthCode(authCode) {
     console.log("before");
     console.log("-------------------------------FETCHING-----------------------");
     const response = await fetch(
-      "http://0.0.0.0:8000/oauthcallback?code=" + authCode
+      "http://10.12.8.11:8000/oauthcallback?code=" + authCode
     );
     if (response.ok) {
       console.log("AFTER");
@@ -46,7 +46,7 @@ async function fetchOAuthCode(authCode) {
           async function handleri(event) {
             event.preventDefault();
             try {
-              const response = await fetch(`http://0.0.0.0:8000/2fa/verify/`, {
+              const response = await fetch(`http://10.12.8.11:8000/2fa/verify/`, {
                 method: "POST",
                 headers: {
                   Authorization: `Bearer ${token}`,

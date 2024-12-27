@@ -33,7 +33,7 @@ async function loadPage(page, mode = null) {
   contentDiv.innerHTML = ''; // Clear previous content
   console.log("TMS7 KOLO");
   // Extract query parameters from the URL hash
-  const {modeToSend, id} = getQueryParamsFromUrl();
+  const modeToSend = getQueryParamsFromUrl();
   console.log(page, "in LoadPage");
 
   if (page === 'landing' || page === 'login') {
@@ -149,14 +149,13 @@ function getQueryParamsFromUrl() {
   const queryString = hash.split('?')[1]; // after '?'
   const urlParams = new URLSearchParams(queryString);
   const modeToGet = urlParams.get('mode');
-  const id = urlParams.get('id') || 0;
-  console.log(modeToGet, id);
+  console.log(modeToGet);
   if (!modeToGet) {
     const name = urlParams.get('name');
     if (name)
       return name;
   }
-  return {modeToGet, id};
+  return modeToGet;
 }
 
 export function navigateTo(page, queryParams = {}) {

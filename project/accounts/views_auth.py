@@ -21,7 +21,7 @@ def tokenFunc(code):
         "grant_type": "authorization_code",
         "client_id": "u-s4t2ud-9e8cb1d6b2b0bb181505b29a9397b6d8e3079ab0fe7be47c059b43e8f4603fcf",
         "client_secret": "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",
-        "redirect_uri": "http://0.0.0.0:8080/login",
+        "redirect_uri": "http://10.12.8.11:8080/login",
         "code": code
     }
     #Sending a post request to the Token endPoint
