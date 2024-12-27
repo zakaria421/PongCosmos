@@ -24,6 +24,10 @@ html {
   margin: 0 0 0 20px !important;
 }
 
+img {
+  object-fit: cover;
+}
+
 .fonts {
   font-size: 1.2rem !important;
   color: white;

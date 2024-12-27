@@ -12,6 +12,8 @@ html {
   background-size: 100vh 100vh;
   background-position: top left, bottom left;
   background-attachment: fixed;
+  overflow-y: visible !important;
+  
 }
 
 /*------------------------------*/
