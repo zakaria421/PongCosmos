@@ -26,6 +26,12 @@ body{
   background-attachment: fixed;
 }
 
+.passwordToggleBtn{
+  display: none;
+  padding: 0;
+  background: none;
+}
+
 .container {
     background-color: #ffffff !important;
     border-radius: 30px !important;

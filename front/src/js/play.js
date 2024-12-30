@@ -3,10 +3,13 @@ import { eventRegistry } from "./main.js";
 import { syncSession } from "./main.js";
 
 export function initPlayPage() {
+  let isRefreshing = false; // Flag to track if token refresh is in progress
+  let refreshAttempts = 0; // Retry counter for token refresh attempts
+  const maxRefreshAttempts = 10; // Maximum number of attempts to refresh token
   let token = localStorage.getItem("jwtToken");
   async function refreshAccessToken() {
     const refreshToken = localStorage.getItem("refresh");
-  
+
     if (!refreshToken) {
       console.error("No refresh token found.");
       return null;
@@ -20,12 +23,12 @@ export function initPlayPage() {
         },
         body: JSON.stringify({ refresh: refreshToken }),
       });
-  
+
       if (!response.ok) {
         console.error("Failed to refresh token");
         return null; // Return null if refresh fails
       }
-  
+
       const data = await response.json();
       const newAccessToken = data.access;
       localStorage.removeItem("jwtToken");
@@ -40,7 +43,7 @@ export function initPlayPage() {
       navigateTo("login");
     }
   }
-  document.querySelectorAll('img, p, a, div, button').forEach(function(element) {
+  document.querySelectorAll('img, p, a, div, button').forEach(function (element) {
     element.setAttribute('draggable', 'false');
   });
   const modeItems = document.querySelectorAll(".mode-item");
@@ -77,8 +80,8 @@ export function initPlayPage() {
     if (activeMode) {
       const modeName =
         activeMode.parentElement.querySelector(".mode-title").textContent;
-        
-        navigateTo('game', { mode: modeName });
+
+      navigateTo('game', { mode: modeName });
     } else {
       alert("Please select a game mode first!");
     }
@@ -139,56 +142,70 @@ export function initPlayPage() {
       handler: handled
     });
   }
-  
-  // if (document.getElementsByClassName("profil")) {
-    // const profilButton = document.getElementsByClassName("profil");
-    // if (profilButton[0]) {
-    //   profilButton[0].addEventListener("click", function (event) {
-    //     event.preventDefault();
-    //     navigateTo("profil");
-    //   });
-    // }
 
-    async function fetchUserData() {  
-      try {
-        let response = await fetch("http://0.0.0.0:8000/userinfo/", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          method: "GET",
-        });
-    
-        if (response.ok) {
-          const userData = await response.json();  
-          const profilePicture = "http://0.0.0.0:8000/" + userData.profile_picture;
-          switchCheckbox.checked = userData.is_2fa_enabled;
-          updateUserDisplay(userData, profilePicture);
-          attachUserMenuListeners();
-        } else if (response.status === 401) {
-          console.log("Access token expired. Refreshing token...");
+  // if (document.getElementsByClassName("profil")) {
+  // const profilButton = document.getElementsByClassName("profil");
+  // if (profilButton[0]) {
+  //   profilButton[0].addEventListener("click", function (event) {
+  //     event.preventDefault();
+  //     navigateTo("profil");
+  //   });
+  // }
+
+  async function fetchUserData() {
+    try {
+      let response = await fetch("http://0.0.0.0:8000/userinfo/", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        method: "GET",
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        const profilePicture = "http://0.0.0.0:8000/" + userData.profile_picture;
+        switchCheckbox.checked = userData.is_2fa_enabled;
+        updateUserDisplay(userData, profilePicture);
+        attachUserMenuListeners();
+      } else if (response.status === 401) {
+        console.log("Access token expired. Refreshing token...");
+
+        if (!isRefreshing && refreshAttempts < maxRefreshAttempts) {
+          isRefreshing = true; // Lock refresh to prevent infinite loop
+          refreshAttempts++; // Increment retry counter
+
           token = await refreshAccessToken();
-    
+
           if (token) {
-            return fetchUserData();
+            // Save the new token and reset the refresh state
+            localStorage.setItem("jwtToken", token);
+            isRefreshing = false;
+            return fetchUserData(); // Retry fetching data with the new token
           } else {
+            // Refresh token failed, log out user
             localStorage.removeItem("jwtToken");
             syncSession();
-            navigateTo("error", {message: "Unable to refresh access token. Please log in again."});
+            navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
           }
         } else {
-          console.error("Error fetching user data:", err);
+          // Too many refresh attempts or token refresh failed
+          console.error("Failed to refresh token after multiple attempts.");
           localStorage.removeItem("jwtToken");
           syncSession();
-          navigateTo("error", {message: err.message});
+          navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
         }
-      } catch (err) {
+      } else {
         console.error("Error fetching user data:", err);
         localStorage.removeItem("jwtToken");
         syncSession();
-        navigateTo("error", {message: err.message});
+        navigateTo("error", { message: err.message });
       }
+    } catch (err) {
+      console.error("Error fetching user data:", err);
+      navigateTo("error", { message: err.message });
     }
+  }
 
   function renderUser(userData, profilePicture) {
     return `
@@ -219,7 +236,7 @@ export function initPlayPage() {
           </div>
         </button>
     `;
-}
+  }
 
 
   function updateUserDisplay(userData, profilePicture) {
@@ -227,8 +244,8 @@ export function initPlayPage() {
     userProfileButtonContainer.innerHTML = renderUser(userData, profilePicture);
   }
   fetchUserData();
-   // Function to attach event listeners when elements exist
-   function attachUserMenuListeners() {
+  // Function to attach event listeners when elements exist
+  function attachUserMenuListeners() {
     const userContainer = document.getElementById("toggler");
     const userMenu = document.getElementById("user-menu");
     console.log(userMenu, "WWAAAAAAWW", userContainer);
@@ -263,7 +280,7 @@ export function initPlayPage() {
 
     // Delegated event listener for "View Profile" and "Log Out" clicks
     async function handlel(event) {
-      
+
       const clickedItem = event.target.closest('.dropdown-item');
 
       if (!clickedItem) return;
@@ -290,39 +307,39 @@ export function initPlayPage() {
 
     async function handlehone(event) {
       console.log("change event INSIDE");
-        if (event.target.classList.contains("input")) {
-          const checkbox = event.target;
-          const isChecked = checkbox.checked;
-          const action = isChecked ? "enable" : "disable";
-  
-          try {
-            console.log("ACTION : ", action);
-            const response = await fetch(`http://0.0.0.0:8000/2fa/${action}/`, {
-              method: "POST",
-              headers: {
-                "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
-                "Content-Type": "application/json",
-              },
-            });
-  
-            if (response.ok) {
-              console.log(`2FA ${action}d successfully.`);
-            } else {
-              console.error("Request failed. Reverting switch state.");
-              checkbox.checked = !isChecked; // Revert state if request fails
-            }
-          } catch (error) {
-            console.error("Error occurred:", error);
-            checkbox.checked = !isChecked; // Revert state if an error occurs
+      if (event.target.classList.contains("input")) {
+        const checkbox = event.target;
+        const isChecked = checkbox.checked;
+        const action = isChecked ? "enable" : "disable";
+
+        try {
+          console.log("ACTION : ", action);
+          const response = await fetch(`http://0.0.0.0:8000/2fa/${action}/`, {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (response.ok) {
+            console.log(`2FA ${action}d successfully.`);
+          } else {
+            console.error("Request failed. Reverting switch state.");
+            checkbox.checked = !isChecked; // Revert state if request fails
           }
+        } catch (error) {
+          console.error("Error occurred:", error);
+          checkbox.checked = !isChecked; // Revert state if an error occurs
         }
       }
-      document.addEventListener("change", handlehone);
-      eventRegistry.push({
-        element: document,
-        eventType: "change",
-        handler: handlehone
-      });
+    }
+    document.addEventListener("change", handlehone);
+    eventRegistry.push({
+      element: document,
+      eventType: "change",
+      handler: handlehone
+    });
   }
   // }
   /******************************************************************************** */

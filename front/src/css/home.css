@@ -14,6 +14,23 @@ body {
   color: white;
 }
 
+.p-section {
+  border-radius: 16px;
+}
+
+h2 {
+  color: var(--colors-cyan) !important;
+}
+
+.styling {
+  background-color: var(--colors-cyan) !important;
+  border: 1px solid var(--colors-cyan) !important;
+}
+
+.invitation {
+  background-color: #51087E; border: 1px solid #51087E; margin-right: 5px;
+}
+
 /* LOGO */
 .image { 
   display: block;

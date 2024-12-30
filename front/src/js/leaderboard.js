@@ -3,10 +3,13 @@ import { eventRegistry } from "./main.js";
 import { syncSession } from "./main.js";
 
 export function initLeaderboardPage() {
+  let isRefreshing = false; // Flag to track if token refresh is in progress
+  let refreshAttempts = 0; // Retry counter for token refresh attempts
+  const maxRefreshAttempts = 10; // Maximum number of attempts to refresh token
   let token = localStorage.getItem("jwtToken");
   async function refreshAccessToken() {
     const refreshToken = localStorage.getItem("refresh");
-  
+
     if (!refreshToken) {
       console.error("No refresh token found.");
       return null;
@@ -20,12 +23,12 @@ export function initLeaderboardPage() {
         },
         body: JSON.stringify({ refresh: refreshToken }),
       });
-  
+
       if (!response.ok) {
         console.error("Failed to refresh token");
-        return null; // Return null if refresh fails
+        return null;
       }
-  
+
       const data = await response.json();
       const newAccessToken = data.access;
       localStorage.removeItem("jwtToken");
@@ -40,11 +43,11 @@ export function initLeaderboardPage() {
       navigateTo("login");
     }
   }
-  document.querySelectorAll('img, p, a, div, button').forEach(function(element) {
+  document.querySelectorAll('img, p, a, div, button').forEach(function (element) {
     element.setAttribute('draggable', 'false');
   });
   const switchCheckbox = document.getElementById("2fa-switch");
-  /*------------------------------------- NEW CODE ADDED -------------- */
+  /*------------------------------------- Render User -------------- */
   function renderUser(userData, profilePicture) {
     return `
         <button class="user btn p-2 no-border">
@@ -74,7 +77,7 @@ export function initLeaderboardPage() {
           </div>
         </button>
     `;
-}
+  }
 
 
   function updateUserDisplay(userData, profilePicture) {
@@ -82,153 +85,136 @@ export function initLeaderboardPage() {
     userProfileButtonContainer.innerHTML = renderUser(userData, profilePicture);
   }
 
-  /*------------------------------------- NEW CODE ADDED -------------- */
+  /*------------------------------------- LeaderBoard -------------- */
   let leaderboardData = [];
-  // const leaderboardData = [
-  //   {
-  //     id: 1,
-  //     name: "Alex",
-  //     level: 42,
-  //     wins: 150,
-  //     avatar: "https://i.pravatar.cc/160?img=1",
-  //     border: "src/assets/leaderboard/rank1.png",
-  //   },
-  //   {
-  //     id: 2,
-  //     name: "Sam",
-  //     level: 39,
-  //     wins: 130,
-  //     avatar: "https://i.pravatar.cc/160?img=2",
-  //     border: "src/assets/leaderboard/rank2.png",
-  //   },
-  //   {
-  //     id: 3,
-  //     name: "Jordan",
-  //     level: 38,
-  //     wins: 120,
-  //     avatar: "https://i.pravatar.cc/160?img=3",
-  //     border: "src/assets/leaderboard/rank3.png",
-  //   },
-  //   {
-  //     id: 4,
-  //     name: "Casey",
-  //     level: 35,
-  //     wins: 100,
-  //     avatar: "https://i.pravatar.cc/160?img=4",
-  //   },
-  //   {
-  //     id: 5,
-  //     name: "Jamie",
-  //     level: 33,
-  //     wins: 90,
-  //     avatar: "https://i.pravatar.cc/160?img=5",
-  //   },
-  //   {
-  //     id: 6,
-  //     name: "Taylor",
-  //     level: 31,
-  //     wins: 80,
-  //     avatar: "https://i.pravatar.cc/160?img=6",
-  //   },
-  //   {
-  //     id: 7,
-  //     name: "Morgan",
-  //     level: 30,
-  //     wins: 70,
-  //     avatar: "https://i.pravatar.cc/160?img=7",
-  //   },
-  //   {
-  //     id: 7,
-  //     name: "Morgan",
-  //     level: 30,
-  //     wins: 70,
-  //     avatar: "https://i.pravatar.cc/160?img=7",
-  //   },
-  //   {
-  //     id: 7,
-  //     name: "Morgan",
-  //     level: 30,
-  //     wins: 70,
-  //     avatar: "https://i.pravatar.cc/160?img=7",
-  //   },
-  //   {
-  //     id: 7,
-  //     name: "Morgan",
-  //     level: 30,
-  //     wins: 70,
-  //     avatar: "https://i.pravatar.cc/160?img=7",
-  //   },
-  //   {
-  //     id: 7,
-  //     name: "Morgan",
-  //     level: 30,
-  //     wins: 70,
-  //     avatar: "https://i.pravatar.cc/160?img=7",
-  //   },
-  // ];
-
   function createPodiumItem(user, place) {
     // Determine the color based on the rank
     let color;
     switch (place) {
-      case 1:
-        color = "#ffaf00";
-        break;
-      case 2:
-        color = "#189cfd";
-        break;
-      case 3:
-        color = "#9201fe";
-        break;
-      default:
-        color = "black"; // Default color if rank is higher than 3
+        case 1:
+            color = "#ffaf00";
+            break;
+        case 2:
+            color = "#189cfd";
+            break;
+        case 3:
+            color = "#9201fe";
+            break;
+        default:
+            color = "black"; // Default color if rank is higher than 3
     }
-    return `
-            <div class="podium-item podium-${place}">
-                <div class="avatar-container">
-                    <img src="src/assets/leaderboard/rank${place}.png" alt="" class="avatar-border">
-                    <img src="http://0.0.0.0:8000${user.profile_picture}" alt="${user.nickname}" class="avatar">
-                </div>
-                <div class="name">${user.nickname}</div>
-                <div class="podium-block">
-                    <div class="podium-stats">
-                        <div class="wins">${user.wins} <br><div style="color: ${color}">Win</div></div>
-                        <div class="rank rank-${place}">${place}</div>
-                        <div class="level">${user.level} <br><div style="color: ${color}">level</div></div>
-                    </div>
-                </div>
-            </div>
-        `;
-  }
 
-  function createLeaderboardItem(user, index) {
-    const isTopThree = index < 3;
-    // ${isTopThree ? 'bg-light' : ''}
-    return `
-            <li class="list-group-item d-flex align-items-center"> 
-                <span class="fw-bold me-3 ${
-                  isTopThree ? `rank rank-${index + 1}` : ""
-                }" style="${isTopThree ? "font-size: 1.5rem;" : ""}">${
-      index + 1
-    }</span>
-                <div class="line-horizontal"></div>
-                <img src="http://0.0.0.0:8000${user.profile_picture}" alt="${
-      user.nickname
-    }" class="rounded-circle me-3" width="${
-      isTopThree ? "60" : "40"
-    }" height="${isTopThree ? "60" : "40"}">
-                <div class="flex-grow-1">
-                    <div class="fw-semibold">${user.nickname}</div>
-                    <div class="text-muted small font">Level ${user.level}</div>
-                </div>
-                <div class="text-muted font">${user.wins} Win</div>
-            </li>
-        `;
-  }
+    // Create the elements for the podium item
+    const podiumItem = document.createElement('div');
+    podiumItem.classList.add('podium-item', `podium-${place}`);
+
+    const avatarContainer = document.createElement('div');
+    avatarContainer.classList.add('avatar-container');
+
+    const avatarBorder = document.createElement('img');
+    avatarBorder.classList.add('avatar-border');
+    avatarBorder.src = `src/assets/leaderboard/rank${place}.png`;
+    avatarBorder.alt = '';
+
+    const avatar = document.createElement('img');
+    avatar.classList.add('avatar');
+    avatar.src = `http://0.0.0.0:8000${user.profile_picture}`;
+    avatar.alt = user.nickname;
+
+    const name = document.createElement('div');
+    name.classList.add('name');
+    name.textContent = user.nickname;
+
+    const podiumBlock = document.createElement('div');
+    podiumBlock.classList.add('podium-block');
+
+    const podiumStats = document.createElement('div');
+    podiumStats.classList.add('podium-stats');
+
+    const wins = document.createElement('div');
+    wins.classList.add('wins');
+    
+    // Create win label text
+    const winText = document.createElement('span');
+    winText.textContent = user.wins;
+
+    // Create a colorized label for 'Win'
+    const winLabel = document.createElement('span');
+    winLabel.style.color = color;
+    winLabel.textContent = 'Win';
+
+    // Append them to wins div
+    wins.appendChild(winText);
+    wins.appendChild(document.createElement('br')); // Add a line break
+    wins.appendChild(winLabel);
+
+    const rank = document.createElement('div');
+    rank.classList.add('rank', `rank-${place}`);
+    rank.textContent = place;
+
+    const level = document.createElement('div');
+    level.classList.add('level');
+
+    // Create level label text
+    const levelText = document.createElement('span');
+    levelText.textContent = user.level;
+
+    // Create a colorized label for 'level'
+    const levelLabel = document.createElement('span');
+    levelLabel.style.color = color;
+    levelLabel.textContent = 'level';
+
+    // Append them to level div
+    level.appendChild(levelText);
+    level.appendChild(document.createElement('br')); // Add a line break
+    level.appendChild(levelLabel);
+
+    // Append elements together
+    avatarContainer.appendChild(avatarBorder);
+    avatarContainer.appendChild(avatar);
+    podiumStats.appendChild(wins);
+    podiumStats.appendChild(rank);
+    podiumStats.appendChild(level);
+    podiumBlock.appendChild(podiumStats);
+    podiumItem.appendChild(avatarContainer);
+    podiumItem.appendChild(name);
+    podiumItem.appendChild(podiumBlock);
+
+    return podiumItem; // Return the created element
+}
+
+
+
+function createLeaderboardItem(user, index) {
+  const isTopThree = index < 3;
+
+  const rankClass = isTopThree ? `rank rank-${index + 1} top-three` : '';
+  const avatarClass = isTopThree ? 'top-three-avatar' : 'regular-avatar';
+
+  return `
+      <li class="list-group-item d-flex align-items-center"> 
+          <span class="fw-bold me-3 ${rankClass}">
+              ${index + 1}
+          </span>
+          <div class="line-horizontal"></div>
+          <img src="http://0.0.0.0:8000${user.profile_picture}" 
+               alt="${user.nickname}" 
+               class="rounded-circle me-3 ${avatarClass}">
+          <div class="flex-grow-1">
+              <div class="fw-semibold">${user.nickname}</div>
+              <div class="text-muted small font">Level ${user.level}</div>
+          </div>
+          <div class="text-muted font">${user.wins} Win</div>
+      </li>
+  `;
+}
+
 
   async function renderLeaderboard() {
     const podium = document.getElementById("podium");
+    podium.innerHTML = ''; // Ensure it's empty before adding new items
     const leaderboardList = document.getElementById("leaderboard-list");
+    leaderboardList.innerHTML = '';
     // let leaderboardData = [];
     try {
       const response = await fetch("http://0.0.0.0:8000/topplayers/", {
@@ -240,12 +226,49 @@ export function initLeaderboardPage() {
       });
       if (response.ok) {
         const data = await response.json();
-        console.log("ALL USERS : ", data);
         leaderboardData = data;
+        // Render podium with order: 2nd, 1st, 3rd
+        if (leaderboardData && leaderboardData.length > 2) {
+          document.getElementById("leftOne").style.display = 'block';
+          document.getElementById("rightOne").style.display = 'block';
+          podium.innerHTML = '';
+          const rankOrder = [
+            { rank: 2, data: leaderboardData[1] },
+            { rank: 1, data: leaderboardData[0] },
+            { rank: 3, data: leaderboardData[2] }
+          ];
+
+          // Loop through the rankOrder array to append podium items in the desired order
+          rankOrder.forEach(( { rank, data }) => {
+            console.log(rank, data);
+            const podiumItem = createPodiumItem(data, rank);
+            podium.appendChild(podiumItem);
+          });
+
+          // Render leaderboard list
+          const leaderboardHtml = leaderboardData
+            .map((user, index) => {
+              if (window.innerWidth > 991) {
+                // On large screens, exclude top 3 from the table
+                return index > 4 ? createLeaderboardItem(user, index) : "";
+              } else {
+                // On small screens, include all players in the table
+                return createLeaderboardItem(user, index);
+              }
+            })
+            .join("");
+          leaderboardList.innerHTML = leaderboardHtml;
+        }
+        else {
+          console.log("entered here : ");
+          document.getElementById("notEnough").style.display = "block";
+          document.getElementById("leftOne").style.display = 'none';
+          document.getElementById("rightOne").style.display = 'none';
+        }
       } else if (response.status === 401) {
         console.log("Access token expired. Refreshing token...");
         token = await refreshAccessToken();
-  
+
         if (token) {
           return renderLeaderboard();
         } else {
@@ -257,41 +280,11 @@ export function initLeaderboardPage() {
       }
       else {
         console.error("Failed to fetch user data:", response.statusText);
-        localStorage.removeItem("jwtToken");
-        syncSession();
-        navigateTo("login");
       }
 
     } catch (error) {
       console.log(error);
-      // localStorage.removeItem("jwtToken");
-      // syncSession();
-      // navigateTo("login");
     }
-
-    // Render podium with order: 2nd, 1st, 3rd
-    if (leaderboardData.length > 2) {
-      const podiumHtml = `
-              ${createPodiumItem(leaderboardData[1], 2)}
-              ${createPodiumItem(leaderboardData[0], 1)}
-              ${createPodiumItem(leaderboardData[2], 3)}
-          `;
-      podium.innerHTML = podiumHtml;
-    }
-
-    // Render leaderboard list
-    const leaderboardHtml = leaderboardData
-      .map((user, index) => {
-        if (window.innerWidth > 991) {
-          // On large screens, exclude top 3 from the table
-          return index > 2 ? createLeaderboardItem(user, index) : "";
-        } else {
-          // On small screens, include all players in the table
-          return createLeaderboardItem(user, index);
-        }
-      })
-      .join("");
-    leaderboardList.innerHTML = leaderboardHtml;
   }
 
   renderLeaderboard();
@@ -304,7 +297,7 @@ export function initLeaderboardPage() {
     handler: renderLeaderboard
   });
   /**------------------------------------------------------------- */
-  async function fetchUserData() {  
+  async function fetchUserData() {
     try {
       let response = await fetch("http://0.0.0.0:8000/userinfo/", {
         headers: {
@@ -313,35 +306,49 @@ export function initLeaderboardPage() {
         },
         method: "GET",
       });
-  
+
       if (response.ok) {
-        const userData = await response.json();  
+        const userData = await response.json();
         const profilePicture = "http://0.0.0.0:8000/" + userData.profile_picture;
         switchCheckbox.checked = userData.is_2fa_enabled;
         updateUserDisplay(userData, profilePicture);
         attachUserMenuListeners();
       } else if (response.status === 401) {
         console.log("Access token expired. Refreshing token...");
-        token = await refreshAccessToken();
-  
-        if (token) {
-          return fetchUserData();
+
+        if (!isRefreshing && refreshAttempts < maxRefreshAttempts) {
+          isRefreshing = true; // Lock refresh to prevent infinite loop
+          refreshAttempts++; // Increment retry counter
+
+          token = await refreshAccessToken();
+
+          if (token) {
+            // Save the new token and reset the refresh state
+            localStorage.setItem("jwtToken", token);
+            isRefreshing = false;
+            return fetchUserData(); // Retry fetching data with the new token
+          } else {
+            // Refresh token failed, log out user
+            localStorage.removeItem("jwtToken");
+            syncSession();
+            navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+          }
         } else {
+          // Too many refresh attempts or token refresh failed
+          console.error("Failed to refresh token after multiple attempts.");
           localStorage.removeItem("jwtToken");
           syncSession();
-          navigateTo("error", {message: "Unable to refresh access token. Please log in again."});
+          navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
         }
       } else {
         console.error("Error fetching user data:", err);
         localStorage.removeItem("jwtToken");
         syncSession();
-        navigateTo("error", {message: err.message});
+        navigateTo("error", { message: err.message });
       }
     } catch (err) {
       console.error("Error fetching user data:", err);
-      localStorage.removeItem("jwtToken");
-      syncSession();
-      navigateTo("error", {message: err.message});
+      navigateTo("error", { message: err.message });
     }
   }
 
@@ -402,112 +409,102 @@ export function initLeaderboardPage() {
       handler: handled
     });
   }
-  // if (document.getElementsByClassName("profil")) {
-    // const profilButton = document.getElementsByClassName("profil");
-    // if (profilButton[0]) {
-    //   profilButton[0].addEventListener("click", function (event) {
-    //     event.preventDefault();
-    //     navigateTo("profil");
-    //   });
-    // }
 
-     // Function to attach event listeners when elements exist
-     function attachUserMenuListeners() {
-      const userContainer = document.getElementById("toggler");
-      const userMenu = document.getElementById("user-menu");
-      console.log(userMenu, "WWAAAAAAWW", userContainer);
-      if (userContainer && userMenu) {
-        function handlej(event) {
-          userMenu.classList.toggle("visible");
-          if (userMenu.classList.contains("visible")) {
-            userMenu.classList.remove("hidden");
-          }
-        }
-        userContainer.addEventListener("click", handlej);
-        eventRegistry.push({
-          element: userContainer,
-          eventType: "click",
-          handler: handlej
-        });
-  
-        // Close dropdown menu when clicking outside of the user container
-        function handlek(event) {
-          if (!userMenu.contains(event.target) && !userContainer.contains(event.target)) {
-            userMenu.classList.remove("visible");
-            userMenu.classList.add("hidden");
-          }
-        }
-        window.addEventListener("click", handlek);
-        eventRegistry.push({
-          element: window,
-          eventType: "click",
-          handler: handlek
-        });
-      }
-  
-      // Delegated event listener for "View Profile" and "Log Out" clicks
-      async function handlel(event) {
-        
-        const clickedItem = event.target.closest('.dropdown-item');
-  
-        if (!clickedItem) return;
-  
-        // Check which specific dropdown item was clicked
-        if (clickedItem.querySelector("#view-profile")) {
-          console.log("Viewing profile...");
-          navigateTo("profil");
-        }
-  
-        if (clickedItem.querySelector("#log-out")) {
-          console.log("Logging out...");
-          localStorage.removeItem('jwtToken');
-          syncSession();
-          navigateTo("landing");
+  // Function to attach event listeners when elements exist
+  function attachUserMenuListeners() {
+    const userContainer = document.getElementById("toggler");
+    const userMenu = document.getElementById("user-menu");
+    console.log(userMenu, "WWAAAAAAWW", userContainer);
+    if (userContainer && userMenu) {
+      function handlej(event) {
+        userMenu.classList.toggle("visible");
+        if (userMenu.classList.contains("visible")) {
+          userMenu.classList.remove("hidden");
         }
       }
-      document.body.addEventListener("click", handlel);
+      userContainer.addEventListener("click", handlej);
       eventRegistry.push({
-        element: document.body,
+        element: userContainer,
         eventType: "click",
-        handler: handlel
+        handler: handlej
       });
-  
-      async function handlehone(event) {
-        console.log("change event INSIDE");
-          if (event.target.classList.contains("input")) {
-            const checkbox = event.target;
-            const isChecked = checkbox.checked;
-            const action = isChecked ? "enable" : "disable";
-    
-            try {
-              console.log("ACTION : ", action);
-              const response = await fetch(`http://0.0.0.0:8000/2fa/${action}/`, {
-                method: "POST",
-                headers: {
-                  "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
-                  "Content-Type": "application/json",
-                },
-              });
-    
-              if (response.ok) {
-                console.log(`2FA ${action}d successfully.`);
-              } else {
-                console.error("Request failed. Reverting switch state.");
-                checkbox.checked = !isChecked; // Revert state if request fails
-              }
-            } catch (error) {
-              console.error("Error occurred:", error);
-              checkbox.checked = !isChecked; // Revert state if an error occurs
-            }
-          }
+
+      // Close dropdown menu when clicking outside of the user container
+      function handlek(event) {
+        if (!userMenu.contains(event.target) && !userContainer.contains(event.target)) {
+          userMenu.classList.remove("visible");
+          userMenu.classList.add("hidden");
         }
-        document.addEventListener("change", handlehone);
-        eventRegistry.push({
-          element: document,
-          eventType: "change",
-          handler: handlehone
-        });
+      }
+      window.addEventListener("click", handlek);
+      eventRegistry.push({
+        element: window,
+        eventType: "click",
+        handler: handlek
+      });
     }
-  // }
-  /******************************************************************************** */
+
+    // Delegated event listener for "View Profile" and "Log Out" clicks
+    async function handlel(event) {
+
+      const clickedItem = event.target.closest('.dropdown-item');
+
+      if (!clickedItem) return;
+
+      // Check which specific dropdown item was clicked
+      if (clickedItem.querySelector("#view-profile")) {
+        console.log("Viewing profile...");
+        navigateTo("profil");
+      }
+
+      if (clickedItem.querySelector("#log-out")) {
+        console.log("Logging out...");
+        localStorage.removeItem('jwtToken');
+        syncSession();
+        navigateTo("landing");
+      }
+    }
+    document.body.addEventListener("click", handlel);
+    eventRegistry.push({
+      element: document.body,
+      eventType: "click",
+      handler: handlel
+    });
+
+    async function handlehone(event) {
+      console.log("change event INSIDE");
+      if (event.target.classList.contains("input")) {
+        const checkbox = event.target;
+        const isChecked = checkbox.checked;
+        const action = isChecked ? "enable" : "disable";
+
+        try {
+          console.log("ACTION : ", action);
+          const response = await fetch(`http://0.0.0.0:8000/2fa/${action}/`, {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (response.ok) {
+            console.log(`2FA ${action}d successfully.`);
+          } else {
+            console.error("Request failed. Reverting switch state.");
+            checkbox.checked = !isChecked; // Revert state if request fails
+          }
+        } catch (error) {
+          console.error("Error occurred:", error);
+          checkbox.checked = !isChecked; // Revert state if an error occurs
+        }
+      }
+    }
+    document.addEventListener("change", handlehone);
+    eventRegistry.push({
+      element: document,
+      eventType: "change",
+      handler: handlehone
+    });
+  }
 }

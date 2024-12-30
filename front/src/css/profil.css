@@ -13,10 +13,13 @@ html {
   background-position: top left, bottom left;
   background-attachment: fixed;
   overflow-y: visible !important;
-  
 }
 
 /*------------------------------*/
+
+#fileInput {
+  display: none;
+}
 
 /* LOGO */
 .image {
@@ -234,7 +237,7 @@ html {
   height: 150px;
   border-radius: 50%;
   object-fit: cover;
-  cursor: not-allowed; /* Cursor style when not editing */
+  cursor: not-allowed;
   position: relative;
 }
 

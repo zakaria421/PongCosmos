@@ -40,6 +40,11 @@ export function initLoginPage() {
     handler: handleb
   });
 
+
+  document.getElementById('closeQRCodeModal').addEventListener('click', () => {
+    document.getElementById('qrcode').style.display = 'none';
+  });
+
   for (let i = 0; i < passwordToggleBtn.length; i++) {
     // Declare the function outside the loop
     function handlec(event) {

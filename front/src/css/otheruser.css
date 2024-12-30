@@ -12,6 +12,7 @@ html {
   background-size: 100vh 100vh;
   background-position: top left, bottom left;
   background-attachment: fixed;
+  overflow-y: visible !important;
 }
 
 /*------------------------------*/
@@ -225,6 +226,10 @@ html {
 .profile-section {
   position: relative; /* Set relative position for positioning child elements */
   /* height: 480px; */
+}
+
+#fileInput {
+  display: none;
 }
 
 .profile-picture {

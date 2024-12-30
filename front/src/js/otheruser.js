@@ -3,6 +3,9 @@ import { eventRegistry } from "./main.js";
 import { syncSession } from "./main.js";
 
 export function initOtherUserPage(name) {
+  let isRefreshing = false; // Flag to track if token refresh is in progress
+  let refreshAttempts = 0; // Retry counter for token refresh attempts
+  const maxRefreshAttempts = 10; // Maximum number of attempts to refresh token
   let token = localStorage.getItem("jwtToken");
   async function refreshAccessToken() {
     const refreshToken = localStorage.getItem("refresh");
@@ -20,12 +23,12 @@ export function initOtherUserPage(name) {
         },
         body: JSON.stringify({ refresh: refreshToken }),
       });
-  
+
       if (!response.ok) {
         console.error("Failed to refresh token");
         return null; // Return null if refresh fails
       }
-  
+
       const data = await response.json();
       const newAccessToken = data.access;
       localStorage.removeItem("jwtToken");
@@ -94,128 +97,6 @@ export function initOtherUserPage(name) {
   // }
   // Match History (last 10 games)
 
-  const matchData = [
-    {
-      player: {
-        name: "Player1",
-        icon: "https://picsum.photos/50?random=1",
-        score: 10,
-      },
-      enemy: {
-        name: "Enemy1",
-        icon: "https://picsum.photos/50?random=2",
-        score: 8,
-      },
-    },
-    {
-      player: {
-        name: "Player1",
-        icon: "https://picsum.photos/50?random=1",
-        score: 7,
-      },
-      enemy: {
-        name: "Enemy2",
-        icon: "https://picsum.photos/50?random=3",
-        score: 9,
-      },
-    },
-    {
-      player: {
-        name: "Player1",
-        icon: "https://picsum.photos/50?random=1",
-        score: 12,
-      },
-      enemy: {
-        name: "Enemy3",
-        icon: "https://picsum.photos/50?random=4",
-        score: 6,
-      },
-    },
-    {
-      player: {
-        name: "Player1",
-        icon: "https://picsum.photos/50?random=1",
-        score: 8,
-      },
-      enemy: {
-        name: "Enemy4",
-        icon: "https://picsum.photos/50?random=5",
-        score: 8,
-      },
-    },
-    {
-      player: {
-        name: "Player1",
-        icon: "https://picsum.photos/50?random=1",
-        score: 15,
-      },
-      enemy: {
-        name: "Enemy5",
-        icon: "https://picsum.photos/50?random=6",
-        score: 13,
-      },
-    },
-    {
-      player: {
-        name: "Player1",
-        icon: "https://picsum.photos/50?random=1",
-        score: 9,
-      },
-      enemy: {
-        name: "Enemy6",
-        icon: "https://picsum.photos/50?random=7",
-        score: 11,
-      },
-    },
-    {
-      player: {
-        name: "Player1",
-        icon: "https://picsum.photos/50?random=1",
-        score: 14,
-      },
-      enemy: {
-        name: "Enemy7",
-        icon: "https://picsum.photos/50?random=8",
-        score: 10,
-      },
-    },
-    {
-      player: {
-        name: "Player1",
-        icon: "https://picsum.photos/50?random=1",
-        score: 6,
-      },
-      enemy: {
-        name: "Enemy8",
-        icon: "https://picsum.photos/50?random=9",
-        score: 7,
-      },
-    },
-    {
-      player: {
-        name: "Player1",
-        icon: "https://picsum.photos/50?random=1",
-        score: 11,
-      },
-      enemy: {
-        name: "Enemy9",
-        icon: "https://picsum.photos/50?random=10",
-        score: 9,
-      },
-    },
-    {
-      player: {
-        name: "Player1",
-        icon: "https://picsum.photos/50?random=1",
-        score: 13,
-      },
-      enemy: {
-        name: "Enemy10",
-        icon: "https://picsum.photos/50?random=11",
-        score: 12,
-      },
-    },
-  ];
 
   function createMatchCard(match) {
     const playerWon = match.score > match.opponent_score;
@@ -268,7 +149,7 @@ export function initOtherUserPage(name) {
   /**
    * ------------------------------------------------------------------
    */
-  async function fetchUserData() {  
+  async function fetchUserData() {
     try {
       let response = await fetch("http://0.0.0.0:8000/userinfo/", {
         headers: {
@@ -277,35 +158,49 @@ export function initOtherUserPage(name) {
         },
         method: "GET",
       });
-  
+
       if (response.ok) {
-        const userData = await response.json();  
+        const userData = await response.json();
         const profilePicture = "http://0.0.0.0:8000/" + userData.profile_picture;
         switchCheckbox.checked = userData.is_2fa_enabled;
         updateUserDisplay(userData, profilePicture);
         attachUserMenuListeners();
       } else if (response.status === 401) {
         console.log("Access token expired. Refreshing token...");
-        token = await refreshAccessToken();
-  
-        if (token) {
-          return fetchUserData();
+
+        if (!isRefreshing && refreshAttempts < maxRefreshAttempts) {
+          isRefreshing = true; // Lock refresh to prevent infinite loop
+          refreshAttempts++; // Increment retry counter
+
+          token = await refreshAccessToken();
+
+          if (token) {
+            // Save the new token and reset the refresh state
+            localStorage.setItem("jwtToken", token);
+            isRefreshing = false;
+            return fetchUserData(); // Retry fetching data with the new token
+          } else {
+            // Refresh token failed, log out user
+            localStorage.removeItem("jwtToken");
+            syncSession();
+            navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+          }
         } else {
+          // Too many refresh attempts or token refresh failed
+          console.error("Failed to refresh token after multiple attempts.");
           localStorage.removeItem("jwtToken");
           syncSession();
-          navigateTo("error", {message: "Unable to refresh access token. Please log in again."});
+          navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
         }
       } else {
         console.error("Error fetching user data:", err);
         localStorage.removeItem("jwtToken");
         syncSession();
-        navigateTo("error", {message: err.message});
+        navigateTo("error", { message: err.message });
       }
     } catch (err) {
       console.error("Error fetching user data:", err);
-      localStorage.removeItem("jwtToken");
-      syncSession();
-      navigateTo("error", {message: err.message});
+      navigateTo("error", { message: err.message });
     }
   }
 
@@ -340,11 +235,11 @@ export function initOtherUserPage(name) {
 
       } else {
         console.log("ERROR : 11");
-        navigateTo("error", {message: "User can not be found !"});
+        navigateTo("error", { message: "User can not be found !" });
       }
     } catch (err) {
       console.log("ERROR : 22");
-      navigateTo("error", {message: "User can not be found !!"});
+      navigateTo("error", { message: "User can not be found !!" });
     }
   }
 

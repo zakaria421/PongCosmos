@@ -3,6 +3,9 @@ import { eventRegistry } from "./main.js";
 import { syncSession } from "./main.js";
 
 export function initAboutPage() {
+  let isRefreshing = false; // Flag to track if token refresh is in progress
+    let refreshAttempts = 0; // Retry counter for token refresh attempts
+    const maxRefreshAttempts = 10; // Maximum number of attempts to refresh token
   let token = localStorage.getItem("jwtToken");
   async function refreshAccessToken() {
     const refreshToken = localStorage.getItem("refresh");
@@ -63,28 +66,42 @@ export function initAboutPage() {
         attachUserMenuListeners();
       } else if (response.status === 401) {
         console.log("Access token expired. Refreshing token...");
+
+      if (!isRefreshing && refreshAttempts < maxRefreshAttempts) {
+        isRefreshing = true; // Lock refresh to prevent infinite loop
+        refreshAttempts++; // Increment retry counter
+
         token = await refreshAccessToken();
-  
+
         if (token) {
-          return fetchUserData();
+          // Save the new token and reset the refresh state
+          localStorage.setItem("jwtToken", token);
+          isRefreshing = false;
+          return fetchUserData(); // Retry fetching data with the new token
         } else {
+          // Refresh token failed, log out user
           localStorage.removeItem("jwtToken");
           syncSession();
-          navigateTo("error", {message: "Unable to refresh access token. Please log in again."});
+          navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
         }
       } else {
-        console.error("Error fetching user data:", err);
+        // Too many refresh attempts or token refresh failed
+        console.error("Failed to refresh token after multiple attempts.");
         localStorage.removeItem("jwtToken");
         syncSession();
-        navigateTo("error", {message: err.message});
+        navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
       }
-    } catch (err) {
+    } else {
       console.error("Error fetching user data:", err);
       localStorage.removeItem("jwtToken");
       syncSession();
-      navigateTo("error", {message: err.message});
+      navigateTo("error", { message: err.message });
     }
+  } catch (err) {
+    console.error("Error fetching user data:", err);
+    navigateTo("error", { message: err.message });
   }
+}
 
   function renderUser(userData, profilePicture) {
     return `

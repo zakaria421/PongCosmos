@@ -1,10 +1,23 @@
+body {
+    overflow: hidden;
+    font-size: 1.5rem; /* Base font size for scaling */
+    background-color: var(--colors-body);
+    background-image: 
+      radial-gradient(circle at top left, rgb(213, 5, 255) 1%, transparent 40%),
+      radial-gradient(circle at bottom left, rgb(15, 195, 231) 1%, transparent 40%);
+    background-repeat: no-repeat;
+    background-size: 100vh 100vh;
+    background-position: top left, bottom left;
+    background-attachment: fixed;
+}
+
 .error-container {
     text-align: center;
     padding: 20px;
 }
 
 .error-container h1 {
-    color: #ff0000;
+    color: #ffffff;
     font-size: 2rem;
 }
 
@@ -13,5 +26,5 @@
 }
 
 .error-container button {
-    margin-top: 20px;
+    margin-top: 50px;
 }

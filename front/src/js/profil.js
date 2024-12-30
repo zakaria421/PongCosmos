@@ -3,10 +3,13 @@ import { eventRegistry } from "./main.js";
 import { syncSession } from "./main.js";
 
 export function initProfilPage() {
+  let isRefreshing = false; // Flag to track if token refresh is in progress
+  let refreshAttempts = 0; // Retry counter for token refresh attempts
+  const maxRefreshAttempts = 10; // Maximum number of attempts to refresh token
   let token = localStorage.getItem("jwtToken");
   async function refreshAccessToken() {
     const refreshToken = localStorage.getItem("refresh");
-  
+
     if (!refreshToken) {
       console.error("No refresh token found.");
       return null;
@@ -20,12 +23,12 @@ export function initProfilPage() {
         },
         body: JSON.stringify({ refresh: refreshToken }),
       });
-  
+
       if (!response.ok) {
         console.error("Failed to refresh token");
         return null;
       }
-  
+
       const data = await response.json();
       const newAccessToken = data.access;
       localStorage.removeItem("jwtToken");
@@ -415,26 +418,40 @@ export function initProfilPage() {
         displayMatchHistory();
       } else if (response.status === 401) {
         console.log("Access token expired. Refreshing token...");
-        token = await refreshAccessToken();
-  
-        if (token) {
-          return fetchUserData();
+
+        if (!isRefreshing && refreshAttempts < maxRefreshAttempts) {
+          isRefreshing = true; // Lock refresh to prevent infinite loop
+          refreshAttempts++; // Increment retry counter
+
+          token = await refreshAccessToken();
+
+          if (token) {
+            // Save the new token and reset the refresh state
+            localStorage.setItem("jwtToken", token);
+            isRefreshing = false;
+            return fetchUserData(); // Retry fetching data with the new token
+          } else {
+            // Refresh token failed, log out user
+            localStorage.removeItem("jwtToken");
+            syncSession();
+            navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+          }
         } else {
+          // Too many refresh attempts or token refresh failed
+          console.error("Failed to refresh token after multiple attempts.");
           localStorage.removeItem("jwtToken");
           syncSession();
-          navigateTo("error", {message: "Unable to refresh access token. Please log in again."});
+          navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
         }
       } else {
         console.error("Error fetching user data:", err);
         localStorage.removeItem("jwtToken");
         syncSession();
-        navigateTo("error", {message: err.message});
+        navigateTo("error", { message: err.message });
       }
     } catch (err) {
       console.error("Error fetching user data:", err);
-      localStorage.removeItem("jwtToken");
-      syncSession();
-      navigateTo("error", {message: err.message});
+      navigateTo("error", { message: err.message });
     }
   }
 
@@ -543,24 +560,24 @@ export function initProfilPage() {
         },
         body: JSON.stringify({ nickname: updatedName, bio: updatedBio }),
       });
-  
+
       if (response.ok) {
         const userData = await response.json();
         document.getElementById("profileName").textContent = userData.nickname;
         document.getElementById("profileN").textContent = userData.nickname;
       } else if (response.status === 401) {
-          console.log("Access token expired. Refreshing...");
-          token = await refreshAccessToken();
-          if (token) {
-            await updateProfile(updatedName, updatedBio);
-          } else {
-            console.error("Unable to refresh access token. Please log in again.");
-            localStorage.removeItem("jwtToken");
-            syncSession();
-            navigateTo("login");
-          }
+        console.log("Access token expired. Refreshing...");
+        token = await refreshAccessToken();
+        if (token) {
+          await updateProfile(updatedName, updatedBio);
+        } else {
+          console.error("Unable to refresh access token. Please log in again.");
+          localStorage.removeItem("jwtToken");
+          syncSession();
+          navigateTo("login");
         }
-      } catch (error) {
+      }
+    } catch (error) {
       console.error("Error updating profile:", error);
     }
   }

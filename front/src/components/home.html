@@ -54,7 +54,7 @@
       aria-label="Toggle navigation"
       draggable="false"
     >
-      <span class="navbar-toggler-icon" draggable="false"></span> <!--style="color: var(--colors-cyan) !important;"-->
+      <span class="navbar-toggler-icon" draggable="false"></span>
     </button>
     <!-- USER PROFILE -->
     <div id="user-container" class="user-container position-relative profil" draggable="false">
@@ -86,17 +86,17 @@
 <div class="main-container" draggable="false">
   <div class="row g-4" draggable="false">
     <!-- Friend List -->
-    <div class="col-lg-3" id="friendListSection" draggable="false"> <!--style="box-shadow: 0 4px 8px #C8AA6E; border-radius: 16px;"-->
+    <div class="col-lg-3" id="friendListSection" draggable="false">
       <div class="section-card" draggable="false">
         <div class="friend-header" draggable="false">
           <h5 draggable="false">Friends</h5>
           <div class="friend-actions" draggable="false">
             <div class="friend-requests-container d-none" draggable="false"></div>
               <button class="btn btn-outline-primary btn-sm customBtn" id="searchBtn" draggable="false">
-                  <i class="bi bi-search" draggable="false"></i>
+                  <i class="fa-solid fa-magnifying-glass" draggable="false"></i>
               </button>
               <button class="btn btn-outline-primary btn-sm customBtn" id="addFriendBtn" draggable="false">
-                  <i class="bi bi-person-plus" draggable="false"></i>
+                  <i class="fa-solid fa-user-plus" draggable="false"></i>
               </button>
               <button id="friendRequestButton" class="btn btn-outline-danger btn-sm position-relative" draggable="false">
                   Requests
@@ -105,7 +105,7 @@
                   </span>
               </button>
               <button class="btn btn-outline-danger btn-sm d-lg-none" id="closeFriendList" draggable="false">
-                  <i class="bi bi-x-lg draggable="false""></i>
+                  <i class="fa-solid fa-xmark" draggable="false"></i>
               </button>
           </div>
       </div>
@@ -115,7 +115,7 @@
           <div class="input-group" draggable="false">
             <input  type="text" class="form-control" id="searchInput" placeholder="Search friends..." draggable="false"/>
               <button class="btn btn-outline-secondary customBtn" id="closeSearch" draggable="false">
-                <i class="bi bi-x" draggable="false"></i>
+                <i class="fa-solid fa-xmark" draggable="false"></i>
               </button>
             </div>
           </div>
@@ -124,7 +124,7 @@
           <div class="add-friend-container d-none mb-3" draggable="false">
             <div class="input-group" draggable="false">
               <input type="text" class="form-control" id="addFriendInput" placeholder="Enter friend's username" draggable="false"/>
-            <button class="btn btn-primary" id="addFriendButton" style="background-color: var(--colors-cyan); border: 1px solid var(--colors-cyan)" draggable="false">Add</button> <!--style="background-color: var(--colors-cyan); border: 1px solid var(--colors-cyan)"-->
+            <button class="btn btn-primary styling" id="addFriendButton" draggable="false">Add</button>
           </div>
           <div id="addFriendResult" draggable="false"></div>
           <div id="friendRequestResult" draggable="false"></div>          
@@ -140,7 +140,7 @@
     <div class="col-lg-6" draggable="false">
       <div class="section-card" draggable="false">
         <div id="defaultContent" class="content-center py-5" draggable="false">
-          <h2 style="color: var(--colors-cyan);" draggable="false">Welcome, Summoners,</h2>
+          <h2 draggable="false">Welcome, Summoners,</h2>
           <p class="lead" draggable="false">
             to the ultimate Ping Pong experience! Immerse yourself in a world
             where skill meets precision, and every game is a battle for glory.
@@ -148,7 +148,7 @@
             enthusiasts, or simply enjoy a match.
           </p>
           <button class="btn btn-primary btn-lg play-button" id="confirmButton" draggable="false">
-            <i class="bi bi-play-fill" draggable="false"></i> Play Now
+            <i class="fa-solid fa-play me-3 fs-6" draggable="false"></i>Play Now
           </button>
         </div>
 
@@ -160,12 +160,12 @@
               <div class="friend-status" data-status="online">Online</div>
             </div>
             <div class="chat-actions">
-              <button id="invitePlayBtn" class="btn btn-primary btn-sm" style="background-color: #51087E; border: 1px solid #51087E; margin-right: 5px;">
+              <button id="invitePlayBtn" class="btn btn-primary btn-sm invitation">
                 <i class="bi bi-controller"></i> Let's Play
               </button>
               <button id="blockBtn" class="btn btn-danger btn-sm" data-friend-id="">Block</button> 
               <button class="btn btn-outline-secondary customBtn" id="exitChat">
-                <i class="bi bi-x-lg"></i>
+                <i class="fa-solid fa-xmark"></i>
               </button>
             </div>
           </div>
@@ -173,29 +173,30 @@
           </div>
           <div class="chat-input">
             <input type="text" class="form-control" placeholder="Type your message..."/>
-            <button class="btn btn-primary" style="background-color: var(--colors-cyan); border: 1px solid var(--colors-cyan)" >
-              <i class="bi bi-send-fill"></i>
+            <button class="btn btn-primary styling" >
+              <i class="fa-sharp fa-solid fa-paper-plane"></i>
             </button>
           </div>
         </div>
       </div>
     </div>
     <!-- Profile Section -->
-    <div class="col-lg-3" style="border-radius: 16px;"> <!--box-shadow: 0 4px 8px #C8AA6E; -->
+    <div class="col-lg-3 p-section"> <!--box-shadow: 0 4px 8px #C8AA6E; -->
       <div class="section-card text-center" id="userProfile">
-        <img src="https://picsum.photos/200" class="profile-avatar mb-3" />
+        <img src="" id="prfl-pic" class="profile-avatar mb-3" />
         <h4>Your Profile</h4>
-        <p class="text-muted">Level 42 | Diamond Rank</p>
+        <p class="text-muted"id="level">Level </p>
       </div>
       <div class="section-card text-center d-none" id="friendProfile">
         <img src="" class="profile-avatar mb-3" id="friendProfileAvatar" />
         <h4 id="friendProfileName"></h4>
+        <p class="text-muted"id="level">Level </p>
         <p class="text-muted" id="friendProfileBio"></p>
       </div>
     </div>
   </div>
   <!-- Add this before closing body tag -->
-  <button class="mobile-friends-toggle d-lg-none" id="mobileFriendsToggle" style="background-color: var(--colors-cyan); border: 1px solid var(--colors-cyan)">
-    <i class="bi bi-chat-dots-fill"></i>
+  <button class="mobile-friends-toggle d-lg-none styling" id="mobileFriendsToggle">
+    <i class="fa-regular fa-comment-dots"></i>
   </button>
 </div>

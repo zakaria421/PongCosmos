@@ -24,7 +24,7 @@
   <div class="row h-100">
     <!-- Left Section: Text and Button -->
     <div class="col-12 col-md-5 d-flex flex-column justify-content-center align-items-center text-center p-3">
-      <h1 class="mb-5" style="color: var(--colors-cyan);">Ping Pong Pro</h1>
+      <h1 class="mb-5 ping">Ping Pong Pro</h1>
       <p class="mb-5">Compete with players from around the world in our fast-paced ping pong game. Climb the leaderboard
         and become a champion!</p>
       <button id="startButton" class="btn play-button position-relative p-0 border-0">
@@ -51,11 +51,12 @@
   <div class="modal-content">
     <div class="modal-header">
       <h5 class="modal-title">QR Code</h5>
-      <button type="button" class="btn-close" aria-label="Close" onclick="document.getElementById('qrcode').style.display='none';"></button>
+      <button type="button" class="btn-close" aria-label="Close" id="closeQRCodeModal"></button>
+
     </div>
     <div class="modal-body">
       <img id="QR" src="" alt="QR Code" class="img-fluid mb-3">
-      <input type="text" placeholder="Enter code here" class="form-control mb-3" required>
+      <input type="text" placeholder="Enter code here" class="form-control mb-3" required id="qrCodeInput">
     </div>
     <div class="modal-footer">
       <button id="qrc" class="btn btn-primary">Submit</button>

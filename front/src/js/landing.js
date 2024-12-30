@@ -18,11 +18,15 @@ export function initLandingPage() {
   } else {
     console.log("No authorization code found.");
   }
+
+  document.getElementById('closeQRCodeModal').addEventListener('click', () => {
+    document.getElementById('qrcode').style.display = 'none';
+  });
+  
 }
 
 async function fetchOAuthCode(authCode) {
   try {
-    console.log("before");
     console.log("-------------------------------FETCHING-----------------------");
     const response = await fetch(
       "http://0.0.0.0:8000/oauthcallback?code=" + authCode

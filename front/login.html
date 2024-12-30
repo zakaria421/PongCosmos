@@ -17,7 +17,7 @@
                     pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d{4,}).{6,}$"
                     title="Password must contain at least 1 lowercase letter, 1 uppercase letter, and at least 4 digits. Minimum length: 6 characters."
                     required autocomplete="new-password">
-                <button type="button" class="passwordToggleBtn" style="border: none; padding: 0; background: none;">
+                <button type="button" class="passwordToggleBtn">
                     <i class="bi bi-eye-slash"></i>
                 </button>
             </div>
@@ -26,7 +26,7 @@
                     placeholder="Confirm Password" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d{4,}).{6,}$"
                     title="Password must contain at least 1 lowercase letter, 1 uppercase letter, and at least 4 digits. Minimum length: 6 characters."
                     required autocomplete="verify-password">
-                <button type="button" class="passwordToggleBtn" style="border: none; padding: 0; background: none;">
+                <button type="button" class="passwordToggleBtn">
                     <i class="bi bi-eye-slash"></i>
                 </button>
             </div>
@@ -85,8 +85,8 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">QR Code</h5>
-        <button type="button" class="btn-close" aria-label="Close" onclick="document.getElementById('qrcode').style.display='none';"></button>
-      </div>
+        <button type="button" class="btn-close" aria-label="Close" id="closeQRCodeModal"></button>
+    </div>
       <div class="modal-body">
         <img id="QR" src="" alt="QR Code" class="img-fluid mb-3">
         <input type="text" placeholder="Enter code here" class="form-control mb-3" required>
