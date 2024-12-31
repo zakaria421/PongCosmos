@@ -350,7 +350,8 @@ export function initHomePage() {
       return;
     }
     console.log(userData.id, receiverId)
-    socket = new WebSocket(`ws://0.0.0.0:8002/ws/chat/${roomId}/?receiver_id=${roomId}`);
+    console.log("dkjhfkjdshkjshglksgflkg",receiverId);
+    socket = new WebSocket(`wss://0.0.0.0:8002/ws/chat/${roomId}/?receiver_id=${roomId}`);
 
     socket.onopen = () => {
       console.log(`WebSocket connected to room: ${roomId}`);
