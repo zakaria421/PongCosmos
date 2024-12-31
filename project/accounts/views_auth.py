@@ -20,7 +20,7 @@ def tokenFunc(code):
     payload = {
         "grant_type": "authorization_code",
         "client_id": "u-s4t2ud-9e8cb1d6b2b0bb181505b29a9397b6d8e3079ab0fe7be47c059b43e8f4603fcf",
-        "client_secret": "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",
+        "client_secret": "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",
         "redirect_uri": "http://0.0.0.0:8080/login",
         "code": code
     }
@@ -44,7 +44,7 @@ def get_tokens_for_user(user):
 def oauth_callback(request):
     code = request.GET.get('code')
     token_json = tokenFunc(code)
-    
+    print(code, token_json)
     if not token_json:
         return Response({'error': 'Failed to obtain token'}, status=400)
 

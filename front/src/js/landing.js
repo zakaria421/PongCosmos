@@ -1,6 +1,7 @@
 import { navigateTo } from "./main.js";
 import { eventRegistry } from "./main.js";
 import { syncSession } from "./main.js";
+import { sanitizeInput } from "./main.js";
 
 export function initLandingPage() {
   document.querySelectorAll('img, p, a, div, button').forEach(function(element) {
@@ -11,9 +12,9 @@ export function initLandingPage() {
   const urlParams = new URLSearchParams(window.location.search);
   const authCode = urlParams.get("code");
 
-  if (authCode) {
+  if (authCode && /^[a-zA-Z0-9_-]+$/.test(authCode)) {
     console.log("Authorization Code:", authCode);
-    showSpinner(); // Show the spinner when redirect happens
+    showSpinner();
     fetchOAuthCode(authCode);
   } else {
     console.log("No authorization code found.");
@@ -23,6 +24,10 @@ export function initLandingPage() {
     document.getElementById('qrcode').style.display = 'none';
   });
   
+}
+
+function validateOTP(otp) {
+  return /^\d{6}$/.test(otp);
 }
 
 async function fetchOAuthCode(authCode) {
@@ -50,6 +55,11 @@ async function fetchOAuthCode(authCode) {
           async function handleri(event) {
             event.preventDefault();
             try {
+              const otpInput = sanitizeInput(document.querySelector('#qrcode input[type="text"]').value);
+              if (!validateOTP(otpInput)) {
+                alert("Invalid OTP. Please enter a 6-digit code.");
+                return;
+              }
               const response = await fetch(`http://0.0.0.0:8000/2fa/verify/`, {
                 method: "POST",
                 headers: {
@@ -57,7 +67,7 @@ async function fetchOAuthCode(authCode) {
                   "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                  otp: document.querySelector('#qrcode input[type="text"]').value,
+                  otp: otpInput,
                 }),
               });
               if (response.ok) {

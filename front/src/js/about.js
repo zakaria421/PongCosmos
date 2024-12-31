@@ -1,6 +1,7 @@
 import { navigateTo } from "./main.js";
 import { eventRegistry } from "./main.js";
 import { syncSession } from "./main.js";
+import { sanitizeInput, sanitizeObject } from "./main.js";
 
 export function initAboutPage() {
   let isRefreshing = false; // Flag to track if token refresh is in progress
@@ -9,7 +10,7 @@ export function initAboutPage() {
   let token = localStorage.getItem("jwtToken");
   async function refreshAccessToken() {
     const refreshToken = localStorage.getItem("refresh");
-  
+
     if (!refreshToken) {
       console.error("No refresh token found.");
       return null;
@@ -23,14 +24,15 @@ export function initAboutPage() {
         },
         body: JSON.stringify({ refresh: refreshToken }),
       });
-  
+
       if (!response.ok) {
         console.error("Failed to refresh token");
         return null; // Return null if refresh fails
       }
-  
+
       const data = await response.json();
-      const newAccessToken = data.access;
+      const sanitizedData = sanitizeObject(data);
+      const newAccessToken = sanitizedData.access;
       localStorage.removeItem("jwtToken");
       syncSession();
       localStorage.setItem("jwtToken", newAccessToken);
@@ -59,8 +61,9 @@ export function initAboutPage() {
       });
   
       if (response.ok) {
-        const userData = await response.json();  
-        const profilePicture = "http://0.0.0.0:8000/" + userData.profile_picture;
+        const toSanitize = await response.json();
+        const userData = sanitizeObject(toSanitize);  
+        const profilePicture = "http://0.0.0.0:8000/" + sanitizeInput(userData.profile_picture);
         switchCheckbox.checked = userData.is_2fa_enabled;
         updateUserDisplay(userData, profilePicture);
         attachUserMenuListeners();
@@ -103,36 +106,37 @@ export function initAboutPage() {
   }
 }
 
-  function renderUser(userData, profilePicture) {
-    return `
-          <button class="user btn p-2 no-border">
-            <div class="d-flex align-items-center gap-2">
-              <!-- Profile Image -->
-              <div id="toggler">
-            <div class="users-container">
-              <img src="./src/assets/home/border.png" alt="" class="users-border">
-              <img src="${profilePicture}" alt="Profile Image" class="rounded-circle users" id="profilePicture">
-              <p class="level text-white text-decoration-none" draggable="false">
-                  <strong draggable="false">${userData.level}</strong>
+function renderUser(userData, profilePicture) {
+  const sanitizedNickname = sanitizeInput(userData.nickname);
+  const sanitizedLevel = sanitizeInput(userData.level);
+  return `
+        <button class="user btn p-2 no-border" draggable="false">
+          <div class="d-flex align-items-center gap-2" draggable="false">
+            <!-- Profile Image -->
+            <div id="toggler" draggable="false">
+              <div class="users-container" draggable="false">
+                <img src="./src/assets/home/border.png" alt="" class="users-border" draggable="false">
+                <img src="${profilePicture}" alt="Profile Image" class="rounded-circle users" id="profilePicture" draggable="false">
+                <p class="level text-white text-decoration-none" draggable="false">
+                  <strong draggable="false">${sanitizedLevel}</strong>
+                </p>
+                </div>
+
+              <!-- User Name -->
+              <div class="UserProfile" draggable="false">
+                <p class="text-white text-decoration-none" draggable="false" id="profileN">
+                  <strong draggable="false">${sanitizedNickname}</strong>
                 </p>
               </div>
-
-            <!-- User Name -->
-            <div class="UserProfile">
-              <p class="text-white text-decoration-none" id="profileN">
-                <strong>${userData.nickname}</strong>
-              </p>
             </div>
+            <!-- Notification Icon -->
+            <div class="Notifications" draggable="false">
+              <i class="bi bi-bell-fill text-white" draggable="false"></i>
             </div>
-  
-              <!-- Notification Icon -->
-              <div class="Notifications">
-                <i class="bi bi-bell-fill text-white"></i>
-              </div>
-            </div>
-          </button>
-      `;
-  }
+          </div>
+        </button>
+    `;
+}
 
 
   function updateUserDisplay(userData, profilePicture) {
@@ -386,11 +390,11 @@ export function initAboutPage() {
               console.log(`2FA ${action}d successfully.`);
             } else {
               console.error("Request failed. Reverting switch state.");
-              checkbox.checked = !isChecked; // Revert state if request fails
+              checkbox.checked = !isChecked;
             }
           } catch (error) {
             console.error("Error occurred:", error);
-            checkbox.checked = !isChecked; // Revert state if an error occurs
+            checkbox.checked = !isChecked;
           }
         }
       }
@@ -401,6 +405,4 @@ export function initAboutPage() {
         handler: handlehone
       });
   }
-  // }
-  /******************************************************************************** */
 }

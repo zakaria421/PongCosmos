@@ -26,12 +26,6 @@ body{
   background-attachment: fixed;
 }
 
-.passwordToggleBtn{
-  display: none;
-  padding: 0;
-  background: none;
-}
-
 .container {
     background-color: #ffffff !important;
     border-radius: 30px !important;
@@ -128,15 +122,17 @@ body{
 }
 
 .passwordToggleBtn {
-    position: absolute !important; /* Absolute positioning within the container */
-    right: 20px !important; /* Adjust distance from the right edge */
-    transform: translateY(0%) !important; /* Center vertically */
-    cursor: pointer !important; /* Pointer cursor */
-    border: none !important; /* Remove default border */
-    padding: 0 !important; /* Remove padding */
-    background: none !important; /* Remove background color */
+    position: absolute !important;
+    right: 20px !important;
+    transform: translateY(0%) !important;
+    cursor: pointer !important;
+    border: none !important;
+    padding: 0 !important;
+    background: none !important;
     color: white !important;
+    z-index: 9999 !important;
 }
+
 
 /* ------------------------------------------------------- */
 

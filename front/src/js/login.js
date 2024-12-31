@@ -1,4 +1,5 @@
 import { navigateTo } from "./main.js";
+import { sanitizeFormData } from "./main.js";
 import { syncSession } from "./main.js";
 import { eventRegistry } from "./main.js";
 
@@ -46,17 +47,15 @@ export function initLoginPage() {
   });
 
   for (let i = 0; i < passwordToggleBtn.length; i++) {
-    // Declare the function outside the loop
     function handlec(event) {
-      // Toggle password visibility
       if (passwordInput[i].type === "password") {
         passwordInput[i].type = "text";
         passwordToggleBtn[i].innerHTML =
-          '<i class="bi bi-eye" style="color: white;"></i>';
+          '<i class="fa-regular fa-eye text-white"></i>';
       } else {
         passwordInput[i].type = "password";
         passwordToggleBtn[i].innerHTML =
-          '<i class="bi bi-eye-slash" style="color: white;"></i>';
+          '<i class="fa-regular fa-eye-slash text-white"></i>';
       }
     }
 
@@ -78,7 +77,9 @@ export function initLoginPage() {
       return;
     }
     const formData = new FormData(this);
-    console.log("FORM: ", formData);
+    const sanitizedData = sanitizeFormData(formData);
+
+    console.log("FORM: ", sanitizedData);
     try {
       let response = await fetch("http://0.0.0.0:8000/signup/", {
         headers: {
@@ -86,7 +87,7 @@ export function initLoginPage() {
           Accept: "application/json",
         },
         method: "POST",
-        body: formDataToJson(formData),
+        body: JSON.stringify(sanitizedData),
       });
       if (response.ok) {
         passwordSimilar1.value = "";
@@ -109,9 +110,14 @@ export function initLoginPage() {
     handler: handled
   });
 
+  function validateOTP(otp) {
+    return /^\d{6}$/.test(otp); // Example: OTP should be 6 digits
+  }
+
   async function handlee(event) {
     event.preventDefault(); // Prevent the default signUp submission
     const formData = new FormData(this);
+    const sanitizedData = sanitizeFormData(formData);
     // console.log(formData.get("nickname"));
     // console.log(formData.get("password"));
     // console.log(formData.get('email'));
@@ -124,7 +130,7 @@ export function initLoginPage() {
           Accept: "application/json", // Optionally, specify the format you want the response in
         },
         method: "POST",
-        body: formDataToJson(formData),
+        body: JSON.stringify(sanitizedData),
       });
       if (response.ok) {
         let rewind = await response.json();
@@ -141,7 +147,11 @@ export function initLoginPage() {
           async function handlef(event) {
             event.preventDefault();
             try {
-              console.log("COOODE : : : :" + document.querySelector('#qrcode input[type="text"]').value);
+              const otpInput = document.querySelector('#qrcode input[type="text"]').value;
+              if (!validateOTP(otpInput)) {
+                alert("Invalid OTP. Please enter a 6-digit code.");
+                return;
+              }
               const response = await fetch(`http://0.0.0.0:8000/2fa/verify/`, {
                 method: "POST",
                 headers: {

@@ -1,6 +1,7 @@
 import { navigateTo } from "./main.js";
 import { eventRegistry } from "./main.js";
 import { syncSession } from "./main.js";
+import { sanitizeInput, sanitizeObject } from "./main.js";
 
 export function initLeaderboardPage() {
   let isRefreshing = false; // Flag to track if token refresh is in progress
@@ -26,15 +27,17 @@ export function initLeaderboardPage() {
 
       if (!response.ok) {
         console.error("Failed to refresh token");
-        return null;
+        return null; // Return null if refresh fails
       }
 
       const data = await response.json();
-      const newAccessToken = data.access;
+      const sanitizedData = sanitizeObject(data);
+      const newAccessToken = sanitizedData.access;
       localStorage.removeItem("jwtToken");
       syncSession();
       localStorage.setItem("jwtToken", newAccessToken);
       token = localStorage.getItem("jwtToken");
+
       return newAccessToken;
     } catch (error) {
       console.error("Error refreshing access token:", error);
@@ -49,36 +52,36 @@ export function initLeaderboardPage() {
   const switchCheckbox = document.getElementById("2fa-switch");
   /*------------------------------------- Render User -------------- */
   function renderUser(userData, profilePicture) {
+    const sanitizedNickname = sanitizeInput(userData.nickname);
+    const sanitizedLevel = sanitizeInput(userData.level);
     return `
-        <button class="user btn p-2 no-border">
-          <div class="d-flex align-items-center gap-2">
-            <!-- Profile Image -->
-            <div id="toggler">
-            <div class="users-container">
-              <img src="./src/assets/home/border.png" alt="" class="users-border">
-              <img src="${profilePicture}" alt="Profile Image" class="rounded-circle users" id="profilePicture">
-              <p class="levels text-white text-decoration-none" draggable="false">
-                  <strong draggable="false">${userData.level}</strong>
-                </p>
+          <button class="user btn p-2 no-border" draggable="false">
+            <div class="d-flex align-items-center gap-2" draggable="false">
+              <!-- Profile Image -->
+              <div id="toggler" draggable="false">
+                <div class="users-container" draggable="false">
+                  <img src="./src/assets/home/border.png" alt="" class="users-border" draggable="false">
+                  <img src="${profilePicture}" alt="Profile Image" class="rounded-circle users" id="profilePicture" draggable="false">
+                  <p class="level text-white text-decoration-none" draggable="false">
+                    <strong draggable="false">${sanitizedLevel}</strong>
+                  </p>
+                  </div>
+  
+                <!-- User Name -->
+                <div class="UserProfile" draggable="false">
+                  <p class="text-white text-decoration-none" draggable="false" id="profileN">
+                    <strong draggable="false">${sanitizedNickname}</strong>
+                  </p>
+                </div>
               </div>
-
-            <!-- User Name -->
-            <div class="UserProfile">
-              <p class="text-white text-decoration-none" id="profileN">
-                <strong>${userData.nickname}</strong>
-              </p>
+              <!-- Notification Icon -->
+              <div class="Notifications" draggable="false">
+                <i class="bi bi-bell-fill text-white" draggable="false"></i>
+              </div>
             </div>
-            </div>
-
-            <!-- Notification Icon -->
-            <div class="Notifications">
-              <i class="bi bi-bell-fill text-white"></i>
-            </div>
-          </div>
-        </button>
-    `;
+          </button>
+      `;
   }
-
 
   function updateUserDisplay(userData, profilePicture) {
     const userProfileButtonContainer = document.getElementById("user-profile-button");
@@ -101,10 +104,9 @@ export function initLeaderboardPage() {
             color = "#9201fe";
             break;
         default:
-            color = "black"; // Default color if rank is higher than 3
+            color = "black";
     }
 
-    // Create the elements for the podium item
     const podiumItem = document.createElement('div');
     podiumItem.classList.add('podium-item', `podium-${place}`);
 
@@ -134,18 +136,15 @@ export function initLeaderboardPage() {
     const wins = document.createElement('div');
     wins.classList.add('wins');
     
-    // Create win label text
     const winText = document.createElement('span');
     winText.textContent = user.wins;
 
-    // Create a colorized label for 'Win'
     const winLabel = document.createElement('span');
     winLabel.style.color = color;
     winLabel.textContent = 'Win';
 
-    // Append them to wins div
     wins.appendChild(winText);
-    wins.appendChild(document.createElement('br')); // Add a line break
+    wins.appendChild(document.createElement('br'));
     wins.appendChild(winLabel);
 
     const rank = document.createElement('div');
@@ -155,21 +154,17 @@ export function initLeaderboardPage() {
     const level = document.createElement('div');
     level.classList.add('level');
 
-    // Create level label text
     const levelText = document.createElement('span');
     levelText.textContent = user.level;
 
-    // Create a colorized label for 'level'
     const levelLabel = document.createElement('span');
     levelLabel.style.color = color;
     levelLabel.textContent = 'level';
 
-    // Append them to level div
     level.appendChild(levelText);
-    level.appendChild(document.createElement('br')); // Add a line break
+    level.appendChild(document.createElement('br'));
     level.appendChild(levelLabel);
 
-    // Append elements together
     avatarContainer.appendChild(avatarBorder);
     avatarContainer.appendChild(avatar);
     podiumStats.appendChild(wins);
@@ -180,7 +175,7 @@ export function initLeaderboardPage() {
     podiumItem.appendChild(name);
     podiumItem.appendChild(podiumBlock);
 
-    return podiumItem; // Return the created element
+    return podiumItem;
 }
 
 
@@ -225,10 +220,12 @@ function createLeaderboardItem(user, index) {
         },
       });
       if (response.ok) {
-        const data = await response.json();
+        const toSanitize = await response.json();
+        let data = sanitizeObject(toSanitize);
         leaderboardData = data;
         // Render podium with order: 2nd, 1st, 3rd
         if (leaderboardData && leaderboardData.length > 2) {
+          document.getElementById("notEnough").classList.add("d-none");
           document.getElementById("leftOne").style.display = 'block';
           document.getElementById("rightOne").style.display = 'block';
           podium.innerHTML = '';
@@ -261,7 +258,7 @@ function createLeaderboardItem(user, index) {
         }
         else {
           console.log("entered here : ");
-          document.getElementById("notEnough").style.display = "block";
+          document.getElementById("notEnough").classList.remove("d-none");
           document.getElementById("leftOne").style.display = 'none';
           document.getElementById("rightOne").style.display = 'none';
         }
@@ -308,8 +305,9 @@ function createLeaderboardItem(user, index) {
       });
 
       if (response.ok) {
-        const userData = await response.json();
-        const profilePicture = "http://0.0.0.0:8000/" + userData.profile_picture;
+        const toSanitize = await response.json();
+        const userData = sanitizeObject(toSanitize);
+        const profilePicture = "http://0.0.0.0:8000/" + sanitizeInput(userData.profile_picture);
         switchCheckbox.checked = userData.is_2fa_enabled;
         updateUserDisplay(userData, profilePicture);
         attachUserMenuListeners();

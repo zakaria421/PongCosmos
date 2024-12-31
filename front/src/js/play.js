@@ -1,6 +1,7 @@
 import { navigateTo } from "./main.js";
 import { eventRegistry } from "./main.js";
 import { syncSession } from "./main.js";
+import { sanitizeInput, sanitizeObject } from "./main.js";
 
 export function initPlayPage() {
   let isRefreshing = false; // Flag to track if token refresh is in progress
@@ -30,11 +31,13 @@ export function initPlayPage() {
       }
 
       const data = await response.json();
-      const newAccessToken = data.access;
+      const sanitizedData = sanitizeObject(data);
+      const newAccessToken = sanitizedData.access;
       localStorage.removeItem("jwtToken");
       syncSession();
       localStorage.setItem("jwtToken", newAccessToken);
       token = localStorage.getItem("jwtToken");
+
       return newAccessToken;
     } catch (error) {
       console.error("Error refreshing access token:", error);
@@ -143,15 +146,6 @@ export function initPlayPage() {
     });
   }
 
-  // if (document.getElementsByClassName("profil")) {
-  // const profilButton = document.getElementsByClassName("profil");
-  // if (profilButton[0]) {
-  //   profilButton[0].addEventListener("click", function (event) {
-  //     event.preventDefault();
-  //     navigateTo("profil");
-  //   });
-  // }
-
   async function fetchUserData() {
     try {
       let response = await fetch("http://0.0.0.0:8000/userinfo/", {
@@ -163,7 +157,8 @@ export function initPlayPage() {
       });
 
       if (response.ok) {
-        const userData = await response.json();
+        const toSanitize = await response.json();
+        const userData = sanitizeObject(toSanitize);
         const profilePicture = "http://0.0.0.0:8000/" + userData.profile_picture;
         switchCheckbox.checked = userData.is_2fa_enabled;
         updateUserDisplay(userData, profilePicture);
@@ -248,7 +243,6 @@ export function initPlayPage() {
   function attachUserMenuListeners() {
     const userContainer = document.getElementById("toggler");
     const userMenu = document.getElementById("user-menu");
-    console.log(userMenu, "WWAAAAAAWW", userContainer);
     if (userContainer && userMenu) {
       function handlej(event) {
         userMenu.classList.toggle("visible");

@@ -1,6 +1,7 @@
 import { navigateTo } from "./main.js";
 import { eventRegistry } from "./main.js";
 import { syncSession } from "./main.js";
+import { sanitizeInput, sanitizeObject } from "./main.js";
 
 export function initProfilPage() {
   let isRefreshing = false; // Flag to track if token refresh is in progress
@@ -26,15 +27,17 @@ export function initProfilPage() {
 
       if (!response.ok) {
         console.error("Failed to refresh token");
-        return null;
+        return null; // Return null if refresh fails
       }
 
       const data = await response.json();
-      const newAccessToken = data.access;
+      const sanitizedData = sanitizeObject(data);
+      const newAccessToken = sanitizedData.access;
       localStorage.removeItem("jwtToken");
       syncSession();
       localStorage.setItem("jwtToken", newAccessToken);
       token = localStorage.getItem("jwtToken");
+
       return newAccessToken;
     } catch (error) {
       console.error("Error refreshing access token:", error);
@@ -53,86 +56,6 @@ export function initProfilPage() {
   let isEditing = false;
 
   const friendsContainer = document.getElementById("friendsContainer");
-
-  // Mock friends data
-  // const friends = [
-  //   {
-  //     name: "Alice",
-  //     status: "online",
-  //     picture: "https://i.pravatar.cc/160?img=3",
-  //   },
-  //   {
-  //     name: "Bob",
-  //     status: "offline",
-  //     picture: "https://i.pravatar.cc/160?img=3",
-  //   },
-  //   {
-  //     name: "Charlie",
-  //     status: "online",
-  //     picture: "https://i.pravatar.cc/160?img=3",
-  //   },
-  //   {
-  //     name: "David",
-  //     status: "offline",
-  //     picture: "https://i.pravatar.cc/160?img=3",
-  //   },
-  //   {
-  //     name: "Eve",
-  //     status: "online",
-  //     picture: "https://i.pravatar.cc/160?img=3",
-  //   },
-  //   {
-  //     name: "Frank",
-  //     status: "offline",
-  //     picture: "https://i.pravatar.cc/160?img=3",
-  //   },
-  //   {
-  //     name: "54y6",
-  //     status: "offline",
-  //     picture: "https://i.pravatar.cc/160?img=3",
-  //   },
-  //   {
-  //     name: "y",
-  //     status: "offline",
-  //     picture: "https://i.pravatar.cc/160?img=3",
-  //   },
-  //   {
-  //     name: "4",
-  //     status: "offline",
-  //     picture: "https://i.pravatar.cc/160?img=3",
-  //   },
-  //   {
-  //     name: "y",
-  //     status: "offline",
-  //     picture: "https://i.pravatar.cc/160?img=3",
-  //   },
-  //   {
-  //     name: "h",
-  //     status: "offline",
-  //     picture: "https://i.pravatar.cc/160?img=3",
-  //   },
-  //   {
-  //     name: "b",
-  //     status: "offline",
-  //     picture: "https://i.pravatar.cc/160?img=3",
-  //   },
-  //   {
-  //     name: "w",
-  //     status: "offline",
-  //     picture: "https://i.pravatar.cc/160?img=3",
-  //   },
-  //   {
-  //     name: "p",
-  //     status: "offline",
-  //     picture: "https://i.pravatar.cc/160?img=3",
-  //   },
-  //   {
-  //     name: "c",
-  //     status: "offline",
-  //     picture: "https://i.pravatar.cc/160?img=3",
-  //   },
-  // ];
-
 
   const bio = document.getElementById("profileBio");
   const maxLength = 100;
@@ -183,136 +106,6 @@ export function initProfilPage() {
     });
   }
 
-  // ${
-  //   friend.status.charAt(0).toUpperCase() +
-  //   friend.status.slice(1)
-  // }
-
-  // Match History (last 10 games)
-
-  const matchData = [
-    {
-      player: {
-        name: "Player1",
-        icon: "https://picsum.photos/50?random=1",
-        score: 10,
-      },
-      enemy: {
-        name: "Enemy1",
-        icon: "https://picsum.photos/50?random=2",
-        score: 8,
-      },
-    },
-    {
-      player: {
-        name: "Player1",
-        icon: "https://picsum.photos/50?random=1",
-        score: 7,
-      },
-      enemy: {
-        name: "Enemy2",
-        icon: "https://picsum.photos/50?random=3",
-        score: 9,
-      },
-    },
-    {
-      player: {
-        name: "Player1",
-        icon: "https://picsum.photos/50?random=1",
-        score: 12,
-      },
-      enemy: {
-        name: "Enemy3",
-        icon: "https://picsum.photos/50?random=4",
-        score: 6,
-      },
-    },
-    {
-      player: {
-        name: "Player1",
-        icon: "https://picsum.photos/50?random=1",
-        score: 8,
-      },
-      enemy: {
-        name: "Enemy4",
-        icon: "https://picsum.photos/50?random=5",
-        score: 8,
-      },
-    },
-    {
-      player: {
-        name: "Player1",
-        icon: "https://picsum.photos/50?random=1",
-        score: 15,
-      },
-      enemy: {
-        name: "Enemy5",
-        icon: "https://picsum.photos/50?random=6",
-        score: 13,
-      },
-    },
-    {
-      player: {
-        name: "Player1",
-        icon: "https://picsum.photos/50?random=1",
-        score: 9,
-      },
-      enemy: {
-        name: "Enemy6",
-        icon: "https://picsum.photos/50?random=7",
-        score: 11,
-      },
-    },
-    {
-      player: {
-        name: "Player1",
-        icon: "https://picsum.photos/50?random=1",
-        score: 14,
-      },
-      enemy: {
-        name: "Enemy7",
-        icon: "https://picsum.photos/50?random=8",
-        score: 10,
-      },
-    },
-    {
-      player: {
-        name: "Player1",
-        icon: "https://picsum.photos/50?random=1",
-        score: 6,
-      },
-      enemy: {
-        name: "Enemy8",
-        icon: "https://picsum.photos/50?random=9",
-        score: 7,
-      },
-    },
-    {
-      player: {
-        name: "Player1",
-        icon: "https://picsum.photos/50?random=1",
-        score: 11,
-      },
-      enemy: {
-        name: "Enemy9",
-        icon: "https://picsum.photos/50?random=10",
-        score: 9,
-      },
-    },
-    {
-      player: {
-        name: "Player1",
-        icon: "https://picsum.photos/50?random=1",
-        score: 13,
-      },
-      enemy: {
-        name: "Enemy10",
-        icon: "https://picsum.photos/50?random=11",
-        score: 12,
-      },
-    },
-  ];
-
   function createMatchCard(match) {
     const playerWon = match.score > match.opponent_score;
     const card = document.createElement("div");
@@ -358,7 +151,8 @@ export function initProfilPage() {
         method: "GET",
       });
       if (response.ok) {
-        let userData = await response.json();
+        const toSanitize = await response.json();
+        let userData = sanitizeObject(toSanitize);
         console.log(userData);
         let matchDatas = userData.matches;
         console.log(matchDatas);
@@ -396,7 +190,8 @@ export function initProfilPage() {
         method: "GET",
       });
       if (response.ok) {
-        let userData = await response.json();
+        const toSanitize = await response.json();
+        let userData = sanitizeObject(toSanitize);
         console.log(userData);
         // Decrypt the profile picture and update the user display
         let profilePicture = "http://0.0.0.0:8000/" + userData.profile_picture;
@@ -527,8 +322,8 @@ export function initProfilPage() {
         sel.addRange(range);
       }
     } else {
-      const updatedName = document.getElementById("profileName").textContent;
-      const updatedBio = document.getElementById("profileBio").textContent;
+      const updatedName = sanitizeInput(document.getElementById("profileName").textContent);
+      const updatedBio = sanitizeInput(document.getElementById("profileBio").textContent);
       await updateProfile(updatedName, updatedBio);
 
       document
@@ -562,7 +357,8 @@ export function initProfilPage() {
       });
 
       if (response.ok) {
-        const userData = await response.json();
+        const toSanitize = await response.json();
+        const userData = sanitizeObject(toSanitize);
         document.getElementById("profileName").textContent = userData.nickname;
         document.getElementById("profileN").textContent = userData.nickname;
       } else if (response.status === 401) {
@@ -597,37 +393,60 @@ export function initProfilPage() {
       }
     });
 
-  document
-    .getElementById("fileInput")
-    .addEventListener("change", function handlepls(event) {
+    function handlepls(event) {
       event.preventDefault();
-      eventRegistry.push({
-        element: document.getElementById("fileInput"),
-        eventType: "change",
-        handler: handlepls
-      });
-      console.log("File input changed");
-      let formData = new FormData();
+    
       const file = event.target.files[0];
-
-      if (file) {
-        formData.append("profile_picture", file);
-        fetch("http://0.0.0.0:8000/profile/update/picture/", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        })
-          .then((response) => response.json())
-          .then((userData) => {
-            const imageUrl = "http://0.0.0.0:8000/" + userData.profile_picture;
-            document.getElementById("profilePicture").src = imageUrl;
-            document.getElementById("profileImage").src = imageUrl;
-          })
-          .catch((error) => console.error("Error uploading image:", error));
+    
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+      if (!allowedTypes.includes(file.type)) {
+        console.error("Invalid file type. Only image files are allowed.");
+        alert("Please upload a valid image file (JPG, PNG, GIF).");
+        return;
       }
-    });
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        console.error("File size exceeds the limit of 5MB.");
+        alert("File size exceeds the limit of 5MB.");
+        return;
+      }
+      let formData = new FormData();
+      formData.append("profile_picture", file);
+    
+      const token = sanitizeInput(localStorage.getItem("jwtToken"));
+      if (!token) {
+        navigateTo("error", { message: "Missing or invalid token." });
+      }
+    
+      fetch("http://0.0.0.0:8000/profile/update/picture/", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Error uploading image. Please try again.");
+          }
+          return response.json();
+        })
+        .then((userData) => {
+          const imageUrl = "http://0.0.0.0:8000/" + sanitizeInput(userData.profile_picture); // Sanitize the returned image URL
+          document.getElementById("profilePicture").src = imageUrl;
+          document.getElementById("profileImage").src = imageUrl;
+        })
+        .catch((error) => {
+          console.error("Error uploading image:", error);
+          alert(error.message);
+        });
+    }
+    document.getElementById("fileInput").addEventListener("change", handlepls);
+    eventRegistry.push({
+      element: document.getElementById("fileInput"),
+      eventType: "change",
+      handler: handlepls
+    });  
   /******************************************************************************** */
   const homebtn = document.getElementsByClassName("home");
   if (homebtn[0]) {
@@ -684,19 +503,10 @@ export function initProfilPage() {
       handler: handled
     });
   }
-  // if (document.getElementsByClassName("profil")) {
-  // const profilButton = document.getElementsByClassName("profil");
-  // if (profilButton[0]) {
-  //   profilButton[0].addEventListener("click", function (event) {
-  //     event.preventDefault();
-  //     navigateTo("profil");
-  //   });
-  // }
-  // Function to attach event listeners when elements exist
+
   function attachUserMenuListeners() {
     const userContainer = document.getElementById("toggler");
     const userMenu = document.getElementById("user-menu");
-    console.log(userMenu, "WWAAAAAAWW", userContainer);
     if (userContainer && userMenu) {
       function handlej(event) {
         userMenu.classList.toggle("visible");

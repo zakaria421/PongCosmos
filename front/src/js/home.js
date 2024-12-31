@@ -2,6 +2,8 @@
 import { navigateTo } from "./main.js";
 import { eventRegistry } from "./main.js";
 import { syncSession } from "./main.js";
+import { sanitizeInput, sanitizeObject } from "./main.js";
+
 
 export function initHomePage() {
   let token = localStorage.getItem("jwtToken");
@@ -28,7 +30,8 @@ export function initHomePage() {
       }
 
       const data = await response.json();
-      const newAccessToken = data.access;
+      const sanitizedData = sanitizeObject(data);
+      const newAccessToken = sanitizedData.access;
       localStorage.removeItem("jwtToken");
       syncSession();
       localStorage.setItem("jwtToken", newAccessToken);
@@ -45,7 +48,10 @@ export function initHomePage() {
   document.querySelectorAll('img, p, a, div, button').forEach(function (element) {
     element.setAttribute('draggable', 'false');
   });
+
   function renderUser(userData, profilePicture) {
+    const sanitizedNickname = sanitizeInput(userData.nickname);
+    const sanitizedLevel = sanitizeInput(userData.level);
     return `
           <button class="user btn p-2 no-border" draggable="false">
             <div class="d-flex align-items-center gap-2" draggable="false">
@@ -55,14 +61,14 @@ export function initHomePage() {
                   <img src="./src/assets/home/border.png" alt="" class="users-border" draggable="false">
                   <img src="${profilePicture}" alt="Profile Image" class="rounded-circle users" id="profilePicture" draggable="false">
                   <p class="level text-white text-decoration-none" draggable="false">
-                    <strong draggable="false">${userData.level}</strong>
+                    <strong draggable="false">${sanitizedLevel}</strong>
                   </p>
                   </div>
   
                 <!-- User Name -->
                 <div class="UserProfile" draggable="false">
                   <p class="text-white text-decoration-none" draggable="false" id="profileN">
-                    <strong draggable="false">${userData.nickname}</strong>
+                    <strong draggable="false">${sanitizedNickname}</strong>
                   </p>
                 </div>
               </div>
@@ -85,23 +91,11 @@ export function initHomePage() {
   // Elements
   const friendListSection = document.getElementById("friendListSection");
   const closeFriendList = document.getElementById("closeFriendList");
-  // const friendItems = document.querySelectorAll(".friend-item");
-  const defaultContent = document.getElementById("defaultContent");
-  const chatWindow = document.getElementById("chatWindow");
-  // const exitChat = document.getElementById("exitChat");
   const userProfile = document.getElementById("userProfile");
   const friendProfile = document.getElementById("friendProfile");
-  // const searchBtn = document.getElementById("searchBtn");
-  // const addFriendBtn = document.getElementById("addFriendBtn");
-  // const searchContainer = document.querySelector(".search-container");
-  // const addFriendContainer = document.querySelector(".add-friend-container");
-  // const closeSearch = document.getElementById("closeSearch");
-
-
 
   const mobileFriendsToggle = document.getElementById("mobileFriendsToggle");
 
-  // const closeAddFriend = document.getElementById('closeAddFriend');
   function handlerz() {
     friendListSection.classList.remove("active");
     mobileFriendsToggle.classList.remove("d-none");
@@ -113,7 +107,6 @@ export function initHomePage() {
     handler: handlerz
   });
 
-  /******************************************************************************** */
   const homebtn = document.getElementsByClassName("home");
   if (homebtn[0]) {
     function handlea(event) {
@@ -207,8 +200,9 @@ export function initHomePage() {
       });
 
       if (response.ok) {
-        userData = await response.json();
-        const profilePicture = "http://0.0.0.0:8000/" + userData.profile_picture;
+        const toSanitize = await response.json();
+        userData = sanitizeObject(toSanitize);
+        const profilePicture = "http://0.0.0.0:8000/" + sanitizeInput(userData.profile_picture);
         switchCheckbox.checked = userData.is_2fa_enabled;
         updateUserDisplay(userData, profilePicture);
         attachUserMenuListeners();
@@ -217,24 +211,21 @@ export function initHomePage() {
         console.log("Access token expired. Refreshing token...");
 
         if (!isRefreshing && refreshAttempts < maxRefreshAttempts) {
-            isRefreshing = true; // Lock refresh to prevent infinite loop
-            refreshAttempts++; // Increment retry counter
+            isRefreshing = true;
+            refreshAttempts++;
 
           token = await refreshAccessToken();
 
           if (token) {
-            // Save the new token and reset the refresh state
             localStorage.setItem("jwtToken", token);
             isRefreshing = false;
-            return fetchUserData(); // Retry fetching data with the new token
+            return fetchUserData();
           } else {
-            // Refresh token failed, log out user
             localStorage.removeItem("jwtToken");
             syncSession();
             navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
           }
         } else {
-          // Too many refresh attempts or token refresh failed
           console.error("Failed to refresh token after multiple attempts.");
           localStorage.removeItem("jwtToken");
           syncSession();
@@ -271,7 +262,6 @@ export function initHomePage() {
         handler: handlej
       });
 
-      // Close dropdown menu when clicking outside of the user container
       function handlek(event) {
         if (!userMenu.contains(event.target) && !userContainer.contains(event.target)) {
           userMenu.classList.remove("visible");
@@ -286,14 +276,12 @@ export function initHomePage() {
       });
     }
 
-    // Delegated event listener for "View Profile" and "Log Out" clicks
     async function handlel(event) {
 
       const clickedItem = event.target.closest('.dropdown-item');
 
       if (!clickedItem) return;
 
-      // Check which specific dropdown item was clicked
       if (clickedItem.querySelector("#view-profile")) {
         console.log("Viewing profile...");
         navigateTo("profil");

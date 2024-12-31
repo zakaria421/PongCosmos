@@ -1,6 +1,7 @@
 import { navigateTo } from "./main.js";
 import { eventRegistry } from "./main.js";
 import { syncSession } from "./main.js";
+import { sanitizeInput, sanitizeObject } from "./main.js";
 
 export function initOtherUserPage(name) {
   let isRefreshing = false; // Flag to track if token refresh is in progress
@@ -30,11 +31,13 @@ export function initOtherUserPage(name) {
       }
 
       const data = await response.json();
-      const newAccessToken = data.access;
+      const sanitizedData = sanitizeObject(data);
+      const newAccessToken = sanitizedData.access;
       localStorage.removeItem("jwtToken");
       syncSession();
       localStorage.setItem("jwtToken", newAccessToken);
       token = localStorage.getItem("jwtToken");
+
       return newAccessToken;
     } catch (error) {
       console.error("Error refreshing access token:", error);
@@ -160,7 +163,8 @@ export function initOtherUserPage(name) {
       });
 
       if (response.ok) {
-        const userData = await response.json();
+        const toSanitize = await response.json();
+        const userData = sanitizeObject(toSanitize);
         const profilePicture = "http://0.0.0.0:8000/" + userData.profile_picture;
         switchCheckbox.checked = userData.is_2fa_enabled;
         updateUserDisplay(userData, profilePicture);
@@ -215,7 +219,8 @@ export function initOtherUserPage(name) {
         method: "GET",
       });
       if (response.ok) {
-        let userData = await response.json();
+        const toSanitize = await response.json();
+        let userData = sanitizeObject(toSanitize);
         console.log(userData);
         // Decrypt the profile picture and update the user display
         let profilePicture = "http://0.0.0.0:8000/" + userData.profile_picture;

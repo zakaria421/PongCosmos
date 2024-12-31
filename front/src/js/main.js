@@ -266,3 +266,40 @@ window.addEventListener('storage', (event) => {
       }
   }
 });
+
+export function sanitizeInput(input) {
+  if (typeof input !== 'string') {
+      return input; // Return input as is if it's not a string
+  }
+  return input.replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/"/g, "&quot;")
+              .replace(/'/g, "&#039;");
+}
+
+export function sanitizeObject(obj) {
+  if (Array.isArray(obj)) {
+      return obj.map(item => sanitizeObject(item));
+  } else if (typeof obj === 'object' && obj !== null) {
+      const sanitizedObj = {};
+      for (const key in obj) {
+          if (obj.hasOwnProperty(key)) {
+              sanitizedObj[key] = sanitizeObject(obj[key]);
+          }
+      }
+      return sanitizedObj;
+  } else if (typeof obj === 'string') {
+      return sanitizeInput(obj);
+  } else {
+      return obj;
+  }
+}
+
+export function sanitizeFormData(formData) {
+  const sanitizedData = {};
+  formData.forEach((value, key) => {
+    sanitizedData[key] = sanitizeInput(value);
+  });
+  return sanitizedData;
+}
