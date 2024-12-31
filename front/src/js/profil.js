@@ -359,6 +359,7 @@ export function initProfilPage() {
       if (response.ok) {
         const toSanitize = await response.json();
         const userData = sanitizeObject(toSanitize);
+        console.log("WAAAAAAAAAAAAHT1");
         document.getElementById("profileName").textContent = userData.nickname;
         document.getElementById("profileN").textContent = userData.nickname;
       } else if (response.status === 401) {
@@ -372,6 +373,10 @@ export function initProfilPage() {
           syncSession();
           navigateTo("login");
         }
+      } else if (response.status === 400) {
+        const name = sanitizeInput(document.getElementById("profileN").textContent);
+        document.getElementById("profileName").textContent = name;
+        alert("Username already taken !");
       }
     } catch (error) {
       console.error("Error updating profile:", error);
