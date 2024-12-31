@@ -6,6 +6,7 @@ services:
       build: ./front  # Assuming the frontend Dockerfile is in a folder named 'frontend'
       ports:
         - "8080:80"
+        - "8443:8443"
       networks:
         - my-net
       depends_on:
@@ -13,6 +14,8 @@ services:
         - backend
       volumes:
         - ./front:/usr/share/nginx/html
+        - media_volume:/usr/share/nginx/media  #  Nginx config
+
   web:
     container_name: web
     build: ./project

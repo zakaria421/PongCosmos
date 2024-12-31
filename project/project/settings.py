@@ -133,10 +133,12 @@ USE_TZ = True
 CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOWED_ORIGINS = [
+    "https://0.0.0.0:8443",
     "http://127.0.0.1:8080",
     "http://0.0.0.0:8000",
     "http://0.0.0.0:8080",
     "http://localhost:8000",
+    "https://localhost:8443",
     "http://10.12.8.11:8080", 
 ]
 
@@ -175,5 +177,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 APPEND_SLASH=True
+
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 
 

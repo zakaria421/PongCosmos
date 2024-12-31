@@ -16,7 +16,7 @@ export function initHomePage() {
     }
 
     try {
-      const response = await fetch("http://0.0.0.0:8000/api/token/refresh/", {
+      const response = await fetch("https://0.0.0.0:8443/api/token/refresh/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -191,7 +191,7 @@ export function initHomePage() {
   // Fetch User Data
   async function fetchUserData() {
     try {
-      let response = await fetch("http://0.0.0.0:8000/userinfo/", {
+      let response = await fetch("https://0.0.0.0:8443/api/userinfo/", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -202,7 +202,7 @@ export function initHomePage() {
       if (response.ok) {
         const toSanitize = await response.json();
         userData = sanitizeObject(toSanitize);
-        const profilePicture = "http://0.0.0.0:8000/" + sanitizeInput(userData.profile_picture);
+        const profilePicture = "https://0.0.0.0:8443/" + sanitizeInput(userData.profile_picture);
         switchCheckbox.checked = userData.is_2fa_enabled;
         updateUserDisplay(userData, profilePicture);
         attachUserMenuListeners();
@@ -310,7 +310,7 @@ export function initHomePage() {
 
         try {
           console.log("ACTION : ", action);
-          const response = await fetch(`http://0.0.0.0:8000/2fa/${action}/`, {
+          const response = await fetch(`https://0.0.0.0:8443/api/2fa/${action}/`, {
             method: "POST",
             headers: {
               "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -539,6 +539,7 @@ export function initHomePage() {
   const friendItems = document.querySelectorAll(".friend-item");
   friendItems.forEach((friend) => {
     friend.addEventListener("click", () => {
+      console.log(friend);
       // Update UI for the selected friend
       const friendName = friend.querySelector(".friend-name").textContent;
       const friendAvatar = friend.querySelector(".friend-avatar").src;
@@ -658,7 +659,7 @@ export function initHomePage() {
     console.log("Sending friend request for nickname:", nickname);
 
     try {
-      const response = await fetch(`http://0.0.0.0:8000/friends/send-friend-request/${nickname}/`, {
+      const response = await fetch(`https://0.0.0.0:8443/api/friends/send-friend-request/${nickname}/`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -684,7 +685,7 @@ export function initHomePage() {
 
   async function fetchFriendRequests() {
     try {
-      const response = await fetch("http://0.0.0.0:8000/friends/friend-requests/", {
+      const response = await fetch("https://0.0.0.0:8443/api/friends/friend-requests/", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -740,7 +741,7 @@ export function initHomePage() {
       button.addEventListener("click", async () => {
         const nickname = button.dataset.nickname;
         try {
-          const response = await fetch(`http://0.0.0.0:8000/friends/accept-friend-request/${nickname}/`, {
+          const response = await fetch(`https://0.0.0.0:8443/api/friends/accept-friend-request/${nickname}/`, {
             method: "POST",
             headers: {
               Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -767,7 +768,7 @@ export function initHomePage() {
         const nickname = button.dataset.nickname;
         console.log(`Canceling friend request for: ${nickname}`); // Debug
         try {
-          const response = await fetch(`http://0.0.0.0:8000/friends/cancel-friend-request/${nickname}/`, {
+          const response = await fetch(`https://0.0.0.0:8443/api/friends/cancel-friend-request/${nickname}/`, {
             method: "POST",
             headers: {
               Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -806,7 +807,7 @@ export function initHomePage() {
 
     if (query) {
       try {
-        const response = await fetch(`http://0.0.0.0:8000/api/search-friends/?query=${query}`, {
+        const response = await fetch(`https://0.0.0.0:8443/api/search-friends/?query=${query}`, {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
             "Content-Type": "application/json",
@@ -882,7 +883,7 @@ export function initHomePage() {
       console.error("JWT token is missing. Please log in.");
       return;
     }
-    fetch("http://0.0.0.0:8000/friends/friend-list/", {
+    fetch("https://0.0.0.0:8443/api/friends/friend-list/", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,

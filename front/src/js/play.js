@@ -17,7 +17,7 @@ export function initPlayPage() {
     }
 
     try {
-      const response = await fetch("http://0.0.0.0:8000/api/token/refresh/", {
+      const response = await fetch("https://0.0.0.0:8443/api/token/refresh/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -148,7 +148,7 @@ export function initPlayPage() {
 
   async function fetchUserData() {
     try {
-      let response = await fetch("http://0.0.0.0:8000/userinfo/", {
+      let response = await fetch("https://0.0.0.0:8443/api/userinfo/", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -159,7 +159,7 @@ export function initPlayPage() {
       if (response.ok) {
         const toSanitize = await response.json();
         const userData = sanitizeObject(toSanitize);
-        const profilePicture = "http://0.0.0.0:8000/" + userData.profile_picture;
+        const profilePicture = "https://0.0.0.0:8443/" + userData.profile_picture;
         switchCheckbox.checked = userData.is_2fa_enabled;
         updateUserDisplay(userData, profilePicture);
         attachUserMenuListeners();
@@ -308,7 +308,7 @@ export function initPlayPage() {
 
         try {
           console.log("ACTION : ", action);
-          const response = await fetch(`http://0.0.0.0:8000/2fa/${action}/`, {
+          const response = await fetch(`https://0.0.0.0:8443/api/2fa/${action}/`, {
             method: "POST",
             headers: {
               "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,

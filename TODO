@@ -34,6 +34,9 @@ ZAKARIA:
     -add time out to the tournament id  request
     -modify pasue in the tournament game and local game
     -check the routing of the game in gameover window and in esc exit
+    -add /api/ to url in backend
+    -add wss:// in game.js
+    -figure it out what wrong with the font 
 
 
 

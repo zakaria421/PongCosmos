@@ -34,7 +34,7 @@ async function fetchOAuthCode(authCode) {
   try {
     console.log("-------------------------------FETCHING-----------------------");
     const response = await fetch(
-      "http://0.0.0.0:8000/oauthcallback?code=" + authCode
+      "https://0.0.0.0:8443/api/oauthcallback?code=" + authCode
     );
     if (response.ok) {
       console.log("AFTER");
@@ -60,7 +60,7 @@ async function fetchOAuthCode(authCode) {
                 alert("Invalid OTP. Please enter a 6-digit code.");
                 return;
               }
-              const response = await fetch(`http://0.0.0.0:8000/2fa/verify/`, {
+              const response = await fetch(`https://0.0.0.0:8443/api/2fa/verify/`, {
                 method: "POST",
                 headers: {
                   Authorization: `Bearer ${token}`,

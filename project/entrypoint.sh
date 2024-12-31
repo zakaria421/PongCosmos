@@ -6,7 +6,7 @@ set -a  # Automatically export all variables
 set +a  # Stop exporting
 
 
-wait-for-it db:5432 --timeout=60 --strict -- echo "Database is ready!"
+wait-for-it db:5432 --timeout=30 --strict -- echo "Database is ready!"
 
 
 python3 manage.py makemigrations

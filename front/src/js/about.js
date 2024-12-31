@@ -17,7 +17,7 @@ export function initAboutPage() {
     }
 
     try {
-      const response = await fetch("http://0.0.0.0:8000/api/token/refresh/", {
+      const response = await fetch("https://0.0.0.0:8443/api/token/refresh/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -52,7 +52,7 @@ export function initAboutPage() {
   const switchCheckbox = document.getElementById("2fa-switch");
   async function fetchUserData() {  
     try {
-      let response = await fetch("http://0.0.0.0:8000/userinfo/", {
+      let response = await fetch("https://0.0.0.0:8443/api/userinfo/", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -63,7 +63,7 @@ export function initAboutPage() {
       if (response.ok) {
         const toSanitize = await response.json();
         const userData = sanitizeObject(toSanitize);  
-        const profilePicture = "http://0.0.0.0:8000/" + sanitizeInput(userData.profile_picture);
+        const profilePicture = "https://0.0.0.0:8443/" + sanitizeInput(userData.profile_picture);
         switchCheckbox.checked = userData.is_2fa_enabled;
         updateUserDisplay(userData, profilePicture);
         attachUserMenuListeners();
@@ -378,7 +378,7 @@ function renderUser(userData, profilePicture) {
   
           try {
             console.log("ACTION : ", action);
-            const response = await fetch(`http://0.0.0.0:8000/2fa/${action}/`, {
+            const response = await fetch(`https://0.0.0.0:8443/api/2fa/${action}/`, {
               method: "POST",
               headers: {
                 "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
