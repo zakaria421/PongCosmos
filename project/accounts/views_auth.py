@@ -61,30 +61,35 @@ def oauth_callback(request):
         return Response({'error': 'Failed to fetch user info'}, status=user_info_response.status_code)
 
     user_info = user_info_response.json()
+    
     login = user_info.get('login')
-    if not login:
-        return Response({'error': 'Login is missing from 42 API response'}, status=400)
-
+    email = user_info.get('email')  # Retrieve email from the API response
     picture = user_info.get('image', {}).get('versions', {}).get('small')
 
-    user, created = User.objects.get_or_create(
-        username=login,
-        defaults={'first_name': login}
-    )
-    
-    user_profile, created = UserProfile.objects.update_or_create(
-        user=user,
-        defaults={'nickname': login}
-    )
+    if not email or not login:
+        return Response({'error': 'Required fields (email, login) are missing from 42 API response'}, status=400)
 
-    if picture:
-        response = requests.get(picture)
-        if response.status_code == 200:
-            user_profile.profile_picture.save(
-                f"{login}_profile.jpg",
-                ContentFile(response.content)
-            )
-            user_profile.save()
+    # Check if user exists by email
+    print("The user email:", email)
+    try:
+        user = User.objects.get(email=email)
+        user_profile, _ = UserProfile.objects.get_or_create(user=user)
+        # Skip updating nickname and profile picture for existing users
+    except User.DoesNotExist:
+        # If user does not exist, create a new one
+        user = User.objects.create(username=login, email=email, first_name=login)
+        user_profile = UserProfile.objects.create(user=user, nickname=login)
+
+        # Save the profile picture for new users only
+        if picture:
+            response = requests.get(picture)
+            if response.status_code == 200:
+                user_profile.profile_picture.save(
+                    f"{login}_profile.jpg",
+                    ContentFile(response.content)
+                )
+                user_profile.save()
+
     
     tokens = get_tokens_for_user(user)
 
