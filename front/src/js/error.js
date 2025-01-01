@@ -1,15 +1,26 @@
 import { navigateTo } from "./main.js";
 
 export function initErrorPage() {
-    const errorMessage = new URLSearchParams(window.location.hash.split('?')[1]).get('message') || 'An unexpected error occurred';
+    const params = new URLSearchParams(window.location.hash.split('?')[1]);
+    const errorMessage = params.get('message') || 'An unexpected error occurred';
+
     console.log(errorMessage);
+
     const errorDiv = document.getElementById('error-message');
     if (errorDiv) {
-        errorDiv.innerHTML = errorMessage;
+        errorDiv.textContent = errorMessage;
     } else {
-        document.body.innerHTML = errorMessage;
+        const errorFallbackDiv = document.createElement('div');
+        errorFallbackDiv.textContent = errorMessage;
+        document.body.appendChild(errorFallbackDiv);
     }
-    document.getElementById('go-home').addEventListener('click', () => {
-        navigateTo('landing');
-    });
+
+    const goHomeButton = document.getElementById('go-home');
+    if (goHomeButton) {
+        goHomeButton.addEventListener('click', () => {
+            navigateTo('landing');
+        });
+    } else {
+        console.error('Go Home button not found.');
+    }
 }
