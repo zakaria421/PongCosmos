@@ -1237,7 +1237,8 @@ function updateUserDisplay(userData, profilePicture) {
     console.log("Friend ID:", friendId);
 
     try {
-      const response = await fetch(`http://0.0.0.0:8002/chat/block/${friendId}/`, {
+      console.log("__________DKHAL_________")
+      const response = await fetch(`https://${location.host}/chat/block/${friendId}/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ blocker_id: blockerId }),
@@ -1256,7 +1257,7 @@ function updateUserDisplay(userData, profilePicture) {
     console.log("Unblock Function Triggered! Blocker ID:", blockerId, "Friend ID:", friendId);
 
     try {
-      const response = await fetch(`http://0.0.0.0:8002/chat/unblock/${friendId}/`, {
+      const response = await fetch(`https://${location.host}/chat/unblock/${friendId}/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ blocker_id: blockerId }),

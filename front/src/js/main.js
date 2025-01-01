@@ -80,8 +80,11 @@ export async function disconnectSocket() {
 fetchUseStatus();
 
 async function fetchUseStatus() {
-  const token = localStorage.getItem("jwtToken");
+
   try {
+    await new Promise((resolve) => setTimeout(resolve, 30000));
+    const token = localStorage.getItem("jwtToken");
+    
     let response = await fetch("https://0.0.0.0:8443/api/online-offline/", {
       headers: {
         Authorization: `Bearer ${token}`,
