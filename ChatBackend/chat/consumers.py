@@ -6,6 +6,11 @@ from django.contrib.auth.models import User
 from .models import ChatRoom, Message, Block
 from django.db.models import Q
 from urllib.parse import parse_qs
+from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth.models import User
+# from .models import UserProfile
+from urllib.parse import parse_qs
+
 import traceback
 
 
@@ -13,14 +18,7 @@ logger = logging.getLogger(__name__)
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        # self.user = self.scope["user"]
-        # self.global_group_name = "global_notif"
-        
-        # await self.channel_layer.group_add(
-        #     self.global_group_name,
-        #     self.channel_name
-        # )
-        
+        logger.info("_________USER______DBG______ : " + str(self.scope["user"]))
         self.room_name = self.scope['url_route']['kwargs']['room_name']
         self.room_group_name = f"chat_{self.room_name}"
 
@@ -101,6 +99,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 await self.send_invite_response(data)
             elif message_type == "message":
                 await self.handle_chat_message(data)
+            elif message_type == "onlineCheck":
+                await self.send_onlineCheck(data)
             else:
                 logger.warning(f"Unknown message type received: {data}")
                 await self.send(text_data=json.dumps({"error": "Unknown message type"}))
@@ -279,7 +279,36 @@ class ChatConsumer(AsyncWebsocketConsumer):
             logger.error(error_details)
             # logger.error(f"Error processing game_invite event: {e}")
             await self.send(text_data=json.dumps({"error": f"Error processing game invite: {str(e)}"}))
+    
+    async def send_onlineCheck(self, data):
+        try:
+            logger.info(f"XXXXXXXXXYYYYYYZZZZZZZ  Sending onlineCheck to group: {self.room_group_name}")
+            online_ids = data.get("online_ids")
+            if not online_ids:
+                raise ValueError("Missing required fields in onlineCheck payload")
 
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    "type": "onlineCheck",
+                    "online_ids": online_ids,
+                }
+            )
+            logger.info(f"onlineCheck successfully sent to group: {self.room_group_name}")
+        except Exception as e:
+            logger.error(f"Error in send_onlineCheck: {e}")
+            await self.send(
+                text_data=json.dumps({"error": f"Error sending onlineCheck: {str(e)}"})
+            )
+    
+    async def onlineCheck(self, event):
+        try:
+            await self.send(text_data=json.dumps({
+                "online_ids": event["online_ids"]
+            }))
+        except Exception as e:
+            logger.error(f"Error processing onlineCheck event: {e}")
+            await self.send(text_data=json.dumps({"error": f"Error processing onlineCheck event: {str(e)})"}))
 
     @sync_to_async
     def save_message(self, username, message):
@@ -324,47 +353,286 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
 
 
-class StatusConsumer(AsyncWebsocketConsumer):
-    async def connect(self):
-        self.user = self.scope["user"]
-        self.global_group_name = "global_notifications"
 
-        # Join a global group to receive notifications
+# class StatusConsumer(AsyncWebsocketConsumer):
+#     async def connect(self):
+#         logger.info('___DBG___00___')
+#         self.user = self.scope["user"]
+#         logger.info('___DBG___01___')
+#         # if not self.user.is_authenticated:
+#         #     # Reject connection if the user is not authenticated
+#         #     await self.close()
+#         #     return
+
+#         # Create a unique group name for the user
+#         self.user_group_name = f"userXXXX"
+#         logger.info('___DBG___02___')
+#         # Join the user-specific group
+#         await self.channel_layer.group_add(
+#             self.user_group_name,
+#             self.channel_name
+#         )
+#         logger.info('___DBG___03___')
+#         await self.accept()
+#         logger.info('___DBG___04___')
+#         # Optionally, join a global group for other notifications
+#         self.global_group_name = "global_notifications"
+#         logger.info('___DBG___05___')
+#         await self.channel_layer.group_add(
+#             self.global_group_name,
+#             self.channel_name
+#         )
+#         logger.info('___DBG___06___')
+#         # Notify others that the user is online
+#         await self.broadcast_user_status(self.user.id, "online")
+#         logger.info('___DBG___07___')
+
+#     async def disconnect(self, close_code):
+#         # Leave the user-specific group
+#         await self.channel_layer.group_discard(
+#             self.user_group_name,
+#             self.channel_name
+#         )
+
+#         # Leave the global group
+#         if hasattr(self, "global_group_name"):
+#             await self.channel_layer.group_discard(
+#                 self.global_group_name,
+#                 self.channel_name
+#             )
+
+#         # Notify others that the user is offline
+#         await self.broadcast_user_status(self.user.id, "offline")
+
+#     async def broadcast_user_status(self, user_id, status):
+#         """
+#         Broadcast user status to the global notifications group.
+#         """
+#         logger.info('___DBG___08___')
+#         await self.channel_layer.group_send(
+#             self.global_group_name,
+#             {
+#                 "type": "onlineCheck",
+#                 "user_id": user_id,
+#                 "status": status,
+#             }
+#         )
+
+#     async def send_to_user(self, target_user_id, message):
+#         """
+#         Send a message directly to a specific user.
+#         """
+#         target_group_name = f"user_{target_user_id}"
+#         await self.channel_layer.group_send(
+#             target_group_name,
+#             {
+#                 "type": "onlineCheck",
+#                 "message": message,
+#             }
+#         )
+
+#     # Handler for user status updates within the global group
+#     async def user_status(self, event):
+#         # Send a message down to the client
+#         await self.send(text_data=json.dumps({
+#             "user_id": event["user_id"],
+#             "status": event["status"],
+#         }))
+
+#     # Handler for direct user messages
+#     async def user_message(self, event):
+#         # Send a message down to the client
+#         await self.send(text_data=json.dumps({
+#             "message": event["message"],
+#         }))
+
+#     async def onlineCheck(self, event):
+#         logger.info('___DBG___09___ : ___ONLINE___CHECK___HANDLER___')
+
+
+class StatusConsumer(AsyncWebsocketConsumer):
+    online_ids = {}
+    async def connect(self):
+        
+        
+        query_params = parse_qs(self.scope["query_string"].decode())
+        
+        # Get 'online_id' from the query parameters
+        self.online_id = query_params.get("online_id", [None])[0]        
+            
+        if self.online_id != None:
+                self.online_ids[self.online_id] = self.online_ids.get(self.online_id, 0) + 1
+                logger.info(f"______DBG_____: Received online_id: {self.online_id}")
+        else:
+            logger.warning("______DBG_____: 'online_id' not found in request body")
+        
+        # logger.info('___DBG___00___ : ' + self.scope["online_id"])
+        self.user = self.scope["user"]
+        logger.info('___DBG___01___')
+
+        # Create a unique group name for the user
+        # self.user_group_name = f"user_{self.user.id}"
+        self.user_group_name = f"userXXXX"
+        
+        logger.info('___DBG___02___')
+
+        # Join the user-specific group
+        await self.channel_layer.group_add(
+            self.user_group_name,
+            self.channel_name
+        )
+        logger.info('___DBG___03___')
+        await self.accept()
+        logger.info('___DBG___04___')
+
+        # Optionally, join a global group for other notifications
+        self.global_group_name = "global_notifications"
+        logger.info('___DBG___05___')
         await self.channel_layer.group_add(
             self.global_group_name,
             self.channel_name
         )
+        logger.info('___DBG___06___')
 
-        await self.accept()
-
-        # Broadcast new user status
+        # Notify others that the user is online
         await self.broadcast_user_status(self.user.id, "online")
+        logger.info('___DBG___07___')
 
     async def disconnect(self, close_code):
-        # Leave the global group
+        # Leave the user-specific group
         await self.channel_layer.group_discard(
-            self.global_group_name,
+            self.user_group_name,
             self.channel_name
         )
 
-        # Broadcast user offline status
-        await self.broadcast_user_status(self.user.id, "offline")
+        # Leave the global group
+        if hasattr(self, "global_group_name"):
+            await self.channel_layer.group_discard(
+                self.global_group_name,
+                self.channel_name
+            )
+
+        self.online_ids[self.online_id] = self.online_ids.get(self.online_id, 0) - 1
+        if self.online_ids.get(self.online_id, 0) == 0:
+            del self.online_ids[self.online_id]
+            await self.broadcast_user_status(self.user.id, "offline")
 
     async def broadcast_user_status(self, user_id, status):
-        # Broadcasts user status to the global notifications group
+        """
+        Broadcast user status to the global notifications group.
+        """
+        logger.info('___DBG___08___')
         await self.channel_layer.group_send(
             self.global_group_name,
             {
                 "type": "user.status",
-                "user_id": user_id,
+                "user_id": self.online_id,
                 "status": status,
             }
         )
 
-    # Handler for user status updates within the group
+    async def send_to_user(self, target_user_id, message):
+        """
+        Send a message directly to a specific user.
+        """
+        target_group_name = f"user_{target_user_id}"
+        await self.channel_layer.group_send(
+            target_group_name,
+            {
+                "type": "user.message",
+                "message": message,
+            }
+        )
+
+    # Handler for user status updates within the global group
     async def user_status(self, event):
         # Send a message down to the client
         await self.send(text_data=json.dumps({
             "user_id": event["user_id"],
             "status": event["status"],
+            "type": "user.status",
         }))
+
+    # Handler for direct user messages
+    async def user_message(self, event):
+        # Send a message down to the client
+        await self.send(text_data=json.dumps({
+            "message": event["message"],
+        }))
+
+    async def onlineCheck(self, event):
+        """
+        Handle the onlineCheck event to respond with user status.
+        """
+        logger.info('___DBG___09___ : ___ONLINE___CHECK___HANDLER___')
+
+        # Respond directly to the sender with the event
+        if "online_id" in event:
+            await self.send(text_data=json.dumps({
+                "type": "onlineCheckResponse",
+                "online_id": event["online_id"],
+                "status": "online",
+            }))
+        else:
+            if self.online_ids.get(self.online_id, 0) == 0:
+                del self.online_ids[self.online_id]
+            await self.broadcast_user_status(self.user.id, "offline")
+
+    async def set_offline(self, event):
+        """
+        Handle the set_offline event to mark a user as offline.
+        """
+        logger.info("___DBG___10___: Received set_offline event")
+
+        # Update the user's online status and notify others
+        if self.online_id in self.online_ids:
+            self.online_ids[self.online_id] = 0
+            del self.online_ids[self.online_id]
+            await self.broadcast_user_status(self.user.id, "offline")
+            logger.info(f"___DBG___11___: User {self.online_id} marked offline.")
+
+
+# class StatusConsumer(AsyncWebsocketConsumer):
+#     async def connect(self):
+#         self.user = self.scope["user"]
+#         self.global_group_name = "global_notifications"
+
+#         # Join a global group to receive notifications
+#         await self.channel_layer.group_add(
+#             self.global_group_name,
+#             self.channel_name
+#         )
+
+#         await self.accept()
+
+#         # Broadcast new user status
+#         await self.broadcast_user_status(self.user.id, "online")
+
+#     async def disconnect(self, close_code):
+#         # Leave the global group
+#         await self.channel_layer.group_discard(
+#             self.global_group_name,
+#             self.channel_name
+#         )
+
+#         # Broadcast user offline status
+#         await self.broadcast_user_status(self.user.id, "offline")
+
+#     async def broadcast_user_status(self, user_id, status):
+#         # Broadcasts user status to the global notifications group
+#         await self.channel_layer.group_send(
+#             self.global_group_name,
+#             {
+#                 "type": "user.status",
+#                 "user_id": user_id,
+#                 "status": status,
+#             }
+#         )
+
+#     # Handler for user status updates within the group
+#     async def user_status(self, event):
+#         # Send a message down to the client
+#         await self.send(text_data=json.dumps({
+#             "user_id": event["user_id"],
+#             "status": event["status"],
+#         }))

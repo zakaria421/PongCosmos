@@ -20,19 +20,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# class CreateRoom(APIView):
-#     def post(self, request, *args, **kwargs):
-#         room_name = request.data.get('room_name')
-#         users = request.data.get('users', [])
-
-#         # Create a room and link users (simplified)
-#         room = ChatRoom.objects.create(name=room_name)
-#         for friend_id in users:
-#             user = User.objects.get(id=user_id)
-#             room.users.add(user)
-
-#         room.save()
-#         return Response(ChatRoomSerializer(room).data)
 
 class ChatRoomView(APIView):
     def get(self, request, room_name):
@@ -135,7 +122,7 @@ def unblock_user(request, friend_id):
 def block_status(request, friend_id):
     if request.method == "GET":
         try:
-            blocker_id = request.user.id  # Assuming the user is authenticated
+            blocker_id = request.user.id
             is_blocked = Block.objects.filter(blocker_id=blocker_id, blocked_user_id=friend_id).exists()
             return JsonResponse({"is_blocked": is_blocked}, status=200)
         except Exception as e:

@@ -12,9 +12,11 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 import chat.routing
 
+from chat.authentication_middleware import JwtAuthenticationMiddleware 
+
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
-    "websocket": AuthMiddlewareStack(
+    "websocket": JwtAuthenticationMiddleware(
         URLRouter(
             chat.routing.websocket_urlpatterns
         )

@@ -2,6 +2,113 @@ const contentDiv = document.getElementById('app');
 const validPages = ['landing', 'login', 'home', 'about', 'leaderboard', 'play', 'profil', 'game', 'otheruser', 'error'];
 export const eventRegistry = [];
 
+
+
+
+
+let socket = null;
+
+statusCheck()
+
+async function statusCheck(){
+  try {
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
+    const token = localStorage.getItem("jwtToken");
+    let response = await fetch("https://0.0.0.0:8443/api/userinfo/", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      method: "GET",
+    });
+
+    if (response.ok) {
+      const userData = await response.json();
+
+      socket = new WebSocket(`wss://${location.host}/ws/status/?online_id=${userData.id}`);
+      socket.onopen = async function (event) {
+        socket.send(JSON.stringify({ type: "onlineCheck" }));
+      }
+      
+      socket.onmessage = function (event) {
+        const data = JSON.parse(event.data);
+        console.log("___DATA___DBG___ : ", data);
+        if (data.type === "onlineCheckResponse") {
+          console.log("___DBG___ : Online check response received");
+          console.log("User ID:", data.online_id, "Status:", data.status);
+          // Handle the onlineCheckResponse message here
+        } else if (data.type === "user.status") {
+          console.log("___DBG___ : User status update received");
+          console.log("User ID:", data.user_id, "Status:", data.status);
+          // if (data.status == 'online') {
+          //   console.log("___FREIND____STATUS_____DBG___ :", friend.status);
+          // }
+          // else if (data.status == 'offline') {
+
+          // }
+        } 
+        else {
+          console.log("___DBG___ : Unhandled message type:", data.type);
+        }
+      };
+    } else if (response.status === 401) {
+      console.log("___DBG___ : Authentication required...");
+    }
+  } catch (err) {
+    console.error("Error fetching user data:", err);
+  }
+}
+
+
+
+
+export async function disconnectSocket() {
+  console.log('___DISCONNECT___SOCKET___CALLED___');
+  if (socket) {
+    socket.send(JSON.stringify({ type: "set_offline" }));
+    socket.close();
+    console.log("WebSocket disconnected.");
+    socket = null; // Ensure the socket variable is cleared
+  } else {
+    console.log("No active WebSocket connection to disconnect.");
+  }
+}
+
+
+
+fetchUseStatus();
+
+async function fetchUseStatus() {
+  const token = localStorage.getItem("jwtToken");
+  try {
+    let response = await fetch("https://0.0.0.0:8443/api/online-offline/", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      method: "GET",
+    });
+
+    if (response.ok) {
+      const userData = await response.json();
+
+      console.log("___DBG___ : Connection established", userData); 
+    }
+    else if (response.status === 401) {
+      console.log("___DBG___ : Authentication required...");
+    }
+  }
+  catch (err) {
+    console.error("Error fetching user data:", err);
+  }
+}
+
+
+
+
+
+
 // const divs = document.getElementById("window");
 window.addEventListener('DOMContentLoaded', function () {
   const hash = window.location.hash.slice(1);

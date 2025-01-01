@@ -350,8 +350,8 @@ export function initHomePage() {
       return;
     }
     console.log(userData.id, receiverId)
-    console.log("dkjhfkjdshkjshglksgflkg",receiverId);
-    socket = new WebSocket(`wss://0.0.0.0:8002/ws/chat/${roomId}/?receiver_id=${roomId}`);
+    console.log("____________OPEN________DBG________");
+    socket = new WebSocket(`wss://${location.host}/ws/chat/${roomId}/?receiver_id=${roomId}`);
 
     socket.onopen = () => {
       console.log(`WebSocket connected to room: ${roomId}`);
@@ -589,7 +589,6 @@ export function initHomePage() {
   chatInput.addEventListener("keypress", (event) => {
     if (event.key === "Enter") {
       const message = chatInput.value.trim();
-      console.log("waaaaaaal3adaw ", message);
       if (message !== "") {
         sendMessage(message);
         chatInput.value = "";

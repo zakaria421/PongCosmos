@@ -15,6 +15,11 @@ import qrcode
 import pyotp
 
 
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 class UserProfileDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -123,4 +128,39 @@ class Disable2FAView(APIView):
 
 
 
+online_users = {}
 
+class OnlineOfflineView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        logger.info(f"________marking user {request.user.id} as online")
+        logger.info("__________Marking user as online_________")
+        user_id = request.user.id
+        logger.info(f"________marking user {user_id} as online")
+
+        online_users[user_id] = online_users.get(user_id, 0) + 1
+        logger.info(f"Current online users: {online_users}")
+
+        return Response({"message": f"User {user_id} marked as online"}, status=200)
+
+    def delete(self, request):
+        
+        user_id = request.user.id
+        logger.info(f"Marking user {user_id} as offline")
+
+        if user_id in online_users:
+            online_users[user_id] -= 1
+            if online_users[user_id] <= 0:
+                del online_users[user_id]
+                logger.info(f"User {user_id} fully removed from online list")
+        else:
+            logger.warning(f"User {user_id} is not in the online list")
+
+        logger.info(f"Current online users: {online_users}")
+        return Response({"message": f"User {user_id} marked as offline"}, status=200)
+
+    def get(self, request):
+        
+        logger.info("__________Fetching list of onlineusers_________")
+        return Response({"online_users": list(online_users.keys())}, status=200)

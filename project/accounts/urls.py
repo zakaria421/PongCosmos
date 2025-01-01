@@ -8,6 +8,7 @@ from .views_PrflUpdate import UserProfileUpdateView, ChangeProfilePictureAPIView
 from .viewsWinLoss import UpdateWinLossView, matchHistory
 from .views import UserProfileDetailView, Enable2FAView, VerifyOTPView, Disable2FAView
 from .viewsTopplayers import TopPlayersView
+from .views import OnlineOfflineView
 # from .views import ProxyToChat
 
 from . import viewsUserInfo
@@ -21,6 +22,7 @@ urlpatterns = [
     path('profile/update/',UserProfileUpdateView.as_view()),
     path('profile/update/changepassword/',ChangePasswordView.as_view()),
     path('profile/update/picture/',ChangeProfilePictureAPIView.as_view(),),
+    path('online-offline/', OnlineOfflineView.as_view(), name='online-offline'),
     path('profile/update/<str:result>/', UpdateWinLossView.as_view()), #this is the url for the win or loss
     ####
     path('user-profile/<str:nickname>/', UserProfileDetailView.as_view(), name='user-profile-detail'),
