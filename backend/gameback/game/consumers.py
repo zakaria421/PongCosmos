@@ -39,6 +39,7 @@ class pingPongConsumer(AsyncWebsocketConsumer):
             self.losses = 0
             self.token = None
             self.gameType = None
+            self.playWithFriendIdRoom = 0
             # await self.channel_layer.group_add(
             #     self.room_group_name,
             #     self.channel_name
@@ -149,10 +150,8 @@ class pingPongConsumer(AsyncWebsocketConsumer):
                     'id': self.playerID
                 }))
                 if self.gameType == 'playWithFriend':
-                    if self.playerID == 1:
-                        self.other_playerId = 3
-                    elif self.playerID == 3:
-                        self.other_playerId = 1
+                    self.playWithFriendIdRoom = text_data_json.get('room_id')
+                    
                 if not self.room_group_name:
                     await self.assign_player_to_room(self.playerID)
                 else:
@@ -203,9 +202,15 @@ class pingPongConsumer(AsyncWebsocketConsumer):
             player_queueFriends.append(self)
             if len(player_queueFriends) >= 2:
                 for player in player_queueFriends:
-                    if player.playerID == self.other_playerId and player.other_playerId == self.playerID:
-                        player_queueFriends.remove(player)
-                        player_queueFriends.remove(self)
+                    if player.playWithFriendIdRoom == self.playWithFriendIdRoom:
+                        print("room id = ",self.playWithFriendIdRoom)
+                        print("other room id = ",player.playWithFriendIdRoom)
+                        print('first player name = ',player.nickname)
+                        print('second player = ',self.nickname)
+                        
+                        if player in player_queueFriends and self in player_queueFriends:
+                            player_queueFriends.remove(player)
+                            player_queueFriends.remove(self)
                         self.room_name = f'room_{self.playerID}_{player.playerID}'
                         self.room_group_name = f'pingPong_{self.room_name}'
                         
@@ -234,7 +239,6 @@ class pingPongConsumer(AsyncWebsocketConsumer):
                         if self.room_group_name not in room_task:
                             room_task[self.room_group_name] = asyncio.create_task(self.sendPingRemote(rooms_game_logic[self.room_group_name]))
                         
-                        player_queueFriends.remove(player)
                         break
         else:
             # global player_queue
@@ -311,7 +315,7 @@ class pingPongConsumer(AsyncWebsocketConsumer):
 
     @sync_to_async
     def sendRequestInfo(self):
-        url = "http://web:8000/userinfo/"
+        url = "http://web:8000/api/userinfo/"
         print('token = ',self.token)
         headers = {
             'Accept': 'application/json',
@@ -343,7 +347,7 @@ class pingPongConsumer(AsyncWebsocketConsumer):
     @sync_to_async
     def sendRequest(self):
         #send request for tournament id
-        url = "http://web:8000/smartcontract/create-tournament/"
+        url = "http://web:8000/api/smartcontract/create-tournament/"
         # Define the headers
         headers = {
             'Accept': 'application/json',
@@ -403,7 +407,7 @@ class pingPongConsumer(AsyncWebsocketConsumer):
 
     # @sync_to_async
     async def sendResult(self, tournament_id, player1_name, player1_score, player2_name, player2_score):
-        url = "http://web:8000/smartcontract/record-match/"
+        url = "http://web:8000/api/smartcontract/record-match/"
         # url = "https://google.com"
         headers = {'Accept': 'application/json'}
         data = {

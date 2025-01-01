@@ -458,7 +458,7 @@ class remotGameLogic:
 
         return level
     def post_result(self, result,token, level,id,score,opponent_name,opponent_score):
-        url = f"http://web:8000/profile/update/{result}/"
+        url = f"http://web:8000/api/profile/update/{result}/"
         headers = {
             'Accept': 'application/json',
             'Authorization': 'Bearer ' + token

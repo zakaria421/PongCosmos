@@ -1,4 +1,6 @@
 import * as tournamentFile from "./tournement.js";
+import { navigateTo } from "./main.js";
+
 export function initGamePage(mode) {
 
  function game(mode) {
@@ -111,7 +113,7 @@ export function initGamePage(mode) {
       button.appendChild(span);
       button.addEventListener("click", function () {
         win_dow.remove();
-        firstwindow();
+        navigateTo("home");
       });
       inDiv.appendChild(button);
       button = document.createElement("button");
@@ -121,7 +123,7 @@ export function initGamePage(mode) {
       button.appendChild(span);
       button.addEventListener("click", function () {
         win_dow.remove();
-        firstwindow();
+        navigateTo("play");
       });
       inDiv.appendChild(button);
       win_dow.appendChild(inDiv);
@@ -245,12 +247,12 @@ export function initGamePage(mode) {
       }
 
       if (gametype === "local") {
-        socket = new WebSocket("ws://localhost:8001/ws/pingPong/local");
+        socket = new WebSocket(`wss://${location.host}/ws/pingPong/local`);
       } else if (gametype === "remote" || gametype === "playWithFriend") {
         // Use backticks for string interpolation
-        socket = new WebSocket("ws://localhost:8001/ws/pingPong/remote/");
+        socket = new WebSocket(`wss://${location.host}/ws/pingPong/remote/`);
       } else if (gametype === "tournament") {
-        socket = new WebSocket("ws://localhost:8001/ws/pingPong/tournament/");
+        socket = new WebSocket(`wss://${location.host}/ws/pingPong/tournament/`);
       }
       // const socket = new WebSocket('ws://localhost:8001/ws/pingPong/');
       let id = 0;
@@ -269,14 +271,25 @@ export function initGamePage(mode) {
           creatloadingscreen();
         }
         else if (gametype === "playWithFriend") {
-          socket.send(
-            JSON.stringify({
-              message: "Hello, server!",
-              token: localStorage.getItem('jwtToken'),
-              type: "playWithFriend",
-            })
-          );
-          creatloadingscreen();
+          const fragment = window.location.href;
+          const queryString = fragment.split('?')[1];
+          if (queryString) {
+              const params = new URLSearchParams(queryString);
+              const room_id = params.get('id');
+              console.log(room_id);
+              socket.send(
+                JSON.stringify({
+                  message: "Hello, server!",
+                  token: localStorage.getItem('jwtToken'),
+                  type: "playWithFriend",
+                  room_id: room_id
+                })
+              );
+              creatloadingscreen();
+          } else {
+              console.log('No query string found');
+          }
+          
 
         }
         else if (gametype === "local") {
@@ -793,7 +806,17 @@ export function initGamePage(mode) {
                 y >= exitButtonY &&
                 y <= exitButtonY + exitButtonHeight
               ) {
-                window.location.href = "/"; // Redirect to home or exit the game
+                // window.location.href = "/"; // Redirect to home or exit the game
+                if (socket && socket.readyState === WebSocket.OPEN) {
+                  socket.close();
+                }
+                window.removeEventListener("resize", sendNewSize);
+                window.removeEventListener("keyup", handleKeyEvent);
+                window.removeEventListener("keydown", handleKeyEvent);
+                window.removeEventListener("beforeunload", handleBeforeUnload);
+                window.removeEventListener("popstate", handlePopState);
+                window.cancelAnimationFrame(animationControle);
+                navigateTo("home");
               }
             });
           }
@@ -1142,7 +1165,7 @@ export function initGamePage(mode) {
       game('bot');
     else if (mode == '1v1')
       game('local');
-    else if (mode == 'Invite friend')
+    else if (mode == 'playWithFriend')
       game('playWithFriend');
   } else {
     alert('No mode specified');
