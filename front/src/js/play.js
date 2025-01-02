@@ -2,6 +2,7 @@ import { navigateTo } from "./main.js";
 import { eventRegistry } from "./main.js";
 import { syncSession } from "./main.js";
 import { sanitizeInput, sanitizeObject } from "./main.js";
+export let inGame = false;
 
 export function initPlayPage() {
   let isRefreshing = false; // Flag to track if token refresh is in progress
@@ -83,8 +84,12 @@ export function initPlayPage() {
     if (activeMode) {
       const modeName =
         activeMode.parentElement.querySelector(".mode-title").textContent;
-
-      navigateTo('game', { mode: modeName });
+      if (!inGame) {
+        inGame = true;
+        navigateTo('game', { mode: modeName });
+      } else {
+        alert("User already in game !");
+      }
     } else {
       alert("Please select a game mode first!");
     }
