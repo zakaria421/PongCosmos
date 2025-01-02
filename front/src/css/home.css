@@ -160,11 +160,52 @@ h2 {
   font-size: 1.25rem;
 }
 
+#user-container {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Add spacing between username and notification icon */
+}
+
+#user-profile-button {
+  font-size: 1rem;
+  font-weight: bold;
+  color: white; /* Adjust to match your design */
+}
+
+.notification-icon {
+  font-size: 1rem;
+  color: white; /* Adjust to match your design */
+  cursor: pointer;
+}
+
+#notification-badge {
+  font-size: 0.7rem;
+  display: inline-block;
+}
+
+
 /* Chat Styles */
 /* ----------------------------------------------------------ggggggggggggrrgrgrgrgrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr */
 /* #chatWindow {
   background: rgba(0, 0, 0, 0.7);
 } */
+
+.rounded-circle {
+    border-radius: 50%; /* Makes the image circular */
+    width: 50px; /* Adjust to your desired size */
+    height: 50px; /* Ensure equal width and height for a perfect circle */
+    object-fit: cover; /* Ensures the image is properly scaled and cropped */
+    border: 2px solid #ccc; /* Optional: Add a border */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Add a slight shadow */
+}
+
+/* Add additional styles for hover effects if needed */
+/* .rounded-circle:hover { */
+    /* border-color: #007bff;  */
+    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);  */
+    /* Adds a stronger shadow on hover */
+/* } */
+
 
 .chat-header {
   padding-bottom: 1rem;
@@ -181,7 +222,7 @@ h2 {
   gap: 1rem;
 }
 
-.message {
+/* .message {
   max-width: 60%;
   padding: 10px;
   margin: 5px 0;
@@ -189,7 +230,34 @@ h2 {
   font-size: 0.9rem;
   line-height: 1.4;
   position: relative;
+} */
+
+
+#chat-messages {
+  width: 100%; /* Ensure it takes the full width of its container */
+  height: 630px; /* Set a fixed height for the chat container */
+  overflow-y: auto; /* Enable vertical scrolling if the content overflows */
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+  padding: 10px; /* Add padding for better spacing */
+  box-sizing: border-box; /* Include padding in the total dimensions */
+  border-radius: 10px; /* Rounded corners */
 }
+
+/* Styling for individual chat messages */
+.message {
+  max-width: 80%; 
+  word-wrap: break-word; 
+  overflow-wrap: break-word; 
+  margin-bottom: 10px; 
+  padding: 10px;
+  background-color: #d4f7dc; 
+  border-radius: 8px; 
+  font-size: 14px; 
+  color: #333; 
+}
+
+
+
 
 .message.sent {
   /* align-self: flex-end;
@@ -211,10 +279,10 @@ h2 {
   border-radius: 10px 10px 10px 0;
 }
 
-#chat-messages {
+/* #chat-messages {
   max-height: 600px;
   overflow-y: auto;
-}
+} */
 .message-timestamp {
   font-size: 0.7rem;
   color: #555;

@@ -77,35 +77,34 @@ export async function disconnectSocket() {
 
 
 
-fetchUseStatus();
+// fetchUseStatus();
 
-async function fetchUseStatus() {
+// async function fetchUseStatus() {
+//   const token = localStorage.getItem("jwtToken");
+//   try {
+//     await new Promise((resolve) => setTimeout(resolve, 6000));
+//     console.log("___________SLEEP________DBG__________");
+//     let response = await fetch("https://0.0.0.0:8443/api/online-offline/", {
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//         "Content-Type": "application/json",
+//       },
+//       method: "GET",
+//     });
 
-  try {
-    await new Promise((resolve) => setTimeout(resolve, 30000));
-    const token = localStorage.getItem("jwtToken");
-    
-    let response = await fetch("https://0.0.0.0:8443/api/online-offline/", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      method: "GET",
-    });
+//     if (response.ok) {
+//       const userData = await response.json();
 
-    if (response.ok) {
-      const userData = await response.json();
-
-      console.log("___DBG___ : Connection established", userData); 
-    }
-    else if (response.status === 401) {
-      console.log("___DBG___ : Authentication required...");
-    }
-  }
-  catch (err) {
-    console.error("Error fetching user data:", err);
-  }
-}
+//       console.log("___DBG___ : Connection established", userData); 
+//     }
+//     else if (response.status === 401) {
+//       console.log("___DBG___ : Authentication required...");
+//     }
+//   }
+//   catch (err) {
+//     console.error("Error fetching user data:", err);
+//   }
+// }
 
 
 

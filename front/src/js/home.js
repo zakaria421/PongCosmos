@@ -393,6 +393,39 @@ function updateUserDisplay(userData, profilePicture) {
     });
   }
 
+
+
+fetchUseStatus();
+
+async function fetchUseStatus() {
+
+  try {
+    // await new Promise((resolve) => setTimeout(resolve, 30000));
+    const token = localStorage.getItem("jwtToken");
+    
+    let response = await fetch("https://0.0.0.0:8443/api/online-offline/", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      method: "GET",
+    });
+
+    if (response.ok) {
+      const userData = await response.json();
+
+      console.log("___DBG___ : Connection established", userData); 
+    }
+    else if (response.status === 401) {
+      console.log("___DBG___ : Authentication required...");
+    }
+  }
+  catch (err) {
+    console.error("Error fetching user data:", err);
+  }
+}
+
+
   function connectWebSocket(username, receiverId) {
     const roomId = `${Math.min(userData.id, receiverId)}_${Math.max(userData.id, receiverId)}`;
     console.log("Connecting to room:", roomId);
@@ -571,25 +604,37 @@ function updateUserDisplay(userData, profilePicture) {
 
 
   function appendMessageToChat(username, message, timestamp) {
-    // console.log("appendMessageToChat called:", { username, message, timestamp });
-
     const chatMessagesContainer = document.getElementById("chat-messages");
     if (!chatMessagesContainer) {
-      console.error("Chat messages container not found!");
-      return;
+        console.error("Chat messages container not found!");
+        return;
     }
 
+    // Create message container
     const messageElement = document.createElement("div");
     messageElement.className = `message ${username === userData.nickname ? "sent" : "received"}`;
-    messageElement.innerHTML = `
-          <div class="message-content">${message}</div>
-          <div class="message-timestamp">${new Date(timestamp).toLocaleTimeString()}</div>
-      `;
-    chatMessagesContainer.appendChild(messageElement);
-    chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
 
-    // console.log("Message appended to chat:", messageElement);
-  }
+    // Create content container
+    const contentElement = document.createElement("div");
+    contentElement.className = "message-content";
+    contentElement.textContent = message; // Use textContent to prevent XSS
+
+    // Create timestamp container
+    const timestampElement = document.createElement("div");
+    timestampElement.className = "message-timestamp";
+    timestampElement.textContent = new Date(timestamp).toLocaleTimeString();
+
+    // Append content and timestamp to message element
+    messageElement.appendChild(contentElement);
+    messageElement.appendChild(timestampElement);
+
+    // Append message element to the chat container
+    chatMessagesContainer.appendChild(messageElement);
+
+    // Scroll to the bottom of the chat
+    chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+}
+
 
   // Friend selection logic to initiate chat
   const friendItems = document.querySelectorAll(".friend-item");
@@ -707,137 +752,175 @@ function updateUserDisplay(userData, profilePicture) {
     const nickname = addFriendInput.value.trim();
 
     if (!nickname) {
-      addFriendResult.innerHTML = "<p style='color: red;'>Please enter a nickname.</p>";
-      return;
+        const errorElement = document.createElement("p");
+        errorElement.style.color = "red";
+        errorElement.textContent = "Please enter a nickname.";
+        addFriendResult.textContent = ""; // Clear previous messages
+        addFriendResult.appendChild(errorElement);
+        return;
     }
 
     console.log("Sending friend request for nickname:", nickname);
 
     try {
-      const response = await fetch(`https://0.0.0.0:8443/api/friends/send-friend-request/${nickname}/`, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
-          "Content-Type": "application/json",
-        },
-      });
+        const response = await fetch(`https://0.0.0.0:8443/api/friends/send-friend-request/${nickname}/`, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
+                "Content-Type": "application/json",
+            },
+        });
 
-      if (response.ok) {
-        const result = await response.json();
-        addFriendResult.innerHTML = `<p style='color: green;'>${result.message}</p>`;
-        addFriendInput.value = "";
-        refreshAttempts = 0;
-      } else if (response.status === 401) {
-        console.log("Access token expired. Refreshing token...");
+        if (response.ok) {
+            const result = await response.json();
+            const successElement = document.createElement("p");
+            successElement.style.color = "green";
+            successElement.textContent = result.message;
+            addFriendResult.textContent = ""; // Clear previous messages
+            addFriendResult.appendChild(successElement);
+            addFriendInput.value = "";
+            refreshAttempts = 0;
+        } else if (response.status === 401) {
+            console.log("Access token expired. Refreshing token...");
 
-        if (refreshAttempts < maxRefreshAttempts) {
-          isRefreshing = true;
-          refreshAttempts++;
+            if (refreshAttempts < maxRefreshAttempts) {
+                isRefreshing = true;
+                refreshAttempts++;
 
-          token = await refreshAccessToken();
+                token = await refreshAccessToken();
 
-          if (token) {
-            localStorage.setItem("jwtToken", token);
-            isRefreshing = false;
-            return test();
-          } else {
-            localStorage.removeItem("jwtToken");
-            syncSession();
-            navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
-          }
+                if (token) {
+                    localStorage.setItem("jwtToken", token);
+                    isRefreshing = false;
+                    return test();
+                } else {
+                    localStorage.removeItem("jwtToken");
+                    syncSession();
+                    navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+                }
+            } else {
+                console.error("Failed to refresh token after multiple attempts.");
+                localStorage.removeItem("jwtToken");
+                syncSession();
+                navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+            }
         } else {
-          console.error("Failed to refresh token after multiple attempts.");
-          localStorage.removeItem("jwtToken");
-          syncSession();
-          navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+            const error = await response.json();
+            const errorElement = document.createElement("p");
+            errorElement.style.color = "red";
+            errorElement.textContent = error.error || "Error sending friend request.";
+            addFriendResult.textContent = ""; // Clear previous messages
+            addFriendResult.appendChild(errorElement);
         }
-      }
-      else {
-        const error = await response.json();
-        addFriendResult.innerHTML = `<p style='color: red;'>${error.error || "Error sending friend request."}</p>`;
-      }
     } catch (err) {
-      console.error("Error sending friend request:", err);
-      addFriendResult.innerHTML = "<p style='color: red;'>An error occurred. Please try again.</p>";
+        console.error("Error sending friend request:", err);
+        const errorElement = document.createElement("p");
+        errorElement.style.color = "red";
+        errorElement.textContent = "An error occurred. Please try again.";
+        addFriendResult.textContent = ""; // Clear previous messages
+        addFriendResult.appendChild(errorElement);
     }
-  });
+});
 
 
 
   async function fetchFriendRequests() {
     try {
-      const response = await fetch("https://0.0.0.0:8443/api/friends/friend-requests/", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-          "Content-Type": "application/json",
-        },
-      });
+        const response = await fetch("https://0.0.0.0:8443/api/friends/friend-requests/", {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+                "Content-Type": "application/json",
+            },
+        });
 
-      if (response.ok) {
-        refreshAttempts = 0;
-        const requests = await response.json();
+        if (response.ok) {
+            refreshAttempts = 0;
+            const requests = await response.json();
 
-        // uuuuupdate the badge count
-        friendRequestBadge.textContent = requests.length;
-        friendRequestBadge.style.display = requests.length > 0 ? "inline-block" : "none";
+            // Update the badge count
+            friendRequestBadge.textContent = requests.length;
+            friendRequestBadge.style.display = requests.length > 0 ? "inline-block" : "none";
 
-        // uuupdate the friend requests continer
-        if (friendRequestsContainer) {
-          friendRequestsContainer.innerHTML = "";
-          requests.forEach((request) => {
-            friendRequestsContainer.innerHTML += `
-              <div class="friend-request">
-                <div class="request-info">
-                  <span class="requester-name">${request.nickname}</span>
-                </div>
-                <div class="request-actions">
-                  <button class="btn btn-success accept-request" data-nickname="${request.nickname}">Accept</button>
-                  <button class="btn btn-danger cancel-request" data-nickname="${request.nickname}">Cancel</button>
-                </div>
-              </div>
-            `;
-          });
-        }
+            // Update the friend requests container
+            if (friendRequestsContainer) {
+                // Clear the container
+                friendRequestsContainer.textContent = "";
 
-        // Reattach listeners for Accept and Cancel buttons
-        attachFriendRequestListeners();
-      } else if (response.status === 401) {
-        console.log("Access token expired. Refreshing token...");
+                requests.forEach((request) => {
+                    // Create the friend request container
+                    const requestElement = document.createElement("div");
+                    requestElement.className = "friend-request";
 
-        if (refreshAttempts < maxRefreshAttempts) {
-          isRefreshing = true;
-          refreshAttempts++;
+                    // Create the request info section
+                    const infoElement = document.createElement("div");
+                    infoElement.className = "request-info";
 
-          token = await refreshAccessToken();
-          
+                    const nameElement = document.createElement("span");
+                    nameElement.className = "requester-name";
+                    nameElement.textContent = request.nickname; // Use textContent to prevent XSS
+                    infoElement.appendChild(nameElement);
 
-          if (token) {
-            localStorage.setItem("jwtToken", token);
-            isRefreshing = false;
-            return fetchFriendRequests();
-          } else {
-            localStorage.removeItem("jwtToken");
-            syncSession();
-            navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
-          }
+                    // Create the request actions section
+                    const actionsElement = document.createElement("div");
+                    actionsElement.className = "request-actions";
+
+                    // Create Accept button
+                    const acceptButton = document.createElement("button");
+                    acceptButton.className = "btn btn-success accept-request";
+                    acceptButton.dataset.nickname = request.nickname;
+                    acceptButton.textContent = "Accept"; // Use textContent
+                    actionsElement.appendChild(acceptButton);
+
+                    // Create Cancel button
+                    const cancelButton = document.createElement("button");
+                    cancelButton.className = "btn btn-danger cancel-request";
+                    cancelButton.dataset.nickname = request.nickname;
+                    cancelButton.textContent = "Cancel"; // Use textContent
+                    actionsElement.appendChild(cancelButton);
+
+                    // Append sections to the main request element
+                    requestElement.appendChild(infoElement);
+                    requestElement.appendChild(actionsElement);
+
+                    // Append the request element to the container
+                    friendRequestsContainer.appendChild(requestElement);
+                });
+            }
+
+            // Reattach listeners for Accept and Cancel buttons
+            attachFriendRequestListeners();
+        } else if (response.status === 401) {
+            console.log("Access token expired. Refreshing token...");
+
+            if (refreshAttempts < maxRefreshAttempts) {
+                isRefreshing = true;
+                refreshAttempts++;
+
+                token = await refreshAccessToken();
+
+                if (token) {
+                    localStorage.setItem("jwtToken", token);
+                    isRefreshing = false;
+                    return fetchFriendRequests();
+                } else {
+                    localStorage.removeItem("jwtToken");
+                    syncSession();
+                    navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+                }
+            } else {
+                console.error("Failed to refresh token after multiple attempts.");
+                localStorage.removeItem("jwtToken");
+                syncSession();
+                navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+            }
         } else {
-          
-          console.error("Failed to refresh token after multiple attempts.");
-          localStorage.removeItem("jwtToken");
-          syncSession();
-          navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+            console.error("Failed to fetch friend requests:", response.statusText);
         }
-      }
-      else {
-        console.error("Failed to fetch friend requests:", response.statusText);
-      }
     } catch (err) {
-      console.error("Error fetching friend requests:", err);
-      // localStorage.removeItem('jwtToken');
-      // syncSession();
+        console.error("Error fetching friend requests:", err);
     }
-  }
+}
 
   // Event listener to open the friend requests container when clicking the button
   friendRequestButton.addEventListener("click", () => {
@@ -965,107 +1048,142 @@ function updateUserDisplay(userData, profilePicture) {
     searchContainer.appendChild(searchResults);
   }
 
+
   searchInput.addEventListener("input", async function tessst() {
     const query = searchInput.value.trim();
 
     if (query) {
-      try {
-        const response = await fetch(`https://0.0.0.0:8443/api/search-friends/?query=${query}`, {
-          headers: {
-            "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (response.ok) {
-          refreshAttempts = 0;
-          const data = await response.json();
-          searchResults.innerHTML = data.results
-            .map(
-              (result) => `
-                          <div class="search-result-item" data-friend-id="${result.id}">
-                            <img src="${result.avatar || 'default-avatar.jpg'}" class="result-avatar" alt="Avatar" />
-                            <div class="result-info">
-                                <span class="result-name">${result.name}</span>
-                                <span class="result-bio">${result.bio || "No bio available"}</span>
-                            </div>
-                            <button class="btn btn-sm btn-primary chat-btn" data-friend-id="${result.id}" data-friend-name="${result.name}" data-friend-avatar="${result.avatar}">Chat</button>
-                          </div>`
-            )
-            .join("");
-          // Add click listeners to each Chat button
-          document.querySelectorAll(".chat-btn").forEach((button) => {
-            button.addEventListener("click", () => {
-              const friendId = button.dataset.friendId;
-              const friendName = button.dataset.friendName;
-              const friendAvatar = button.dataset.friendAvatar;
-
-              console.log("Starting chat with:", friendName);
-
-              // Disconnect existing WebSocket (if any)
-              disconnectWebSocket();
-
-              // Connect to the new WebSocket for this friend
-              connectWebSocket(userData.nickname, friendId);
-
-              // Update the chat UI
-              document.getElementById("chatUserAvatar").src = friendAvatar || "default-avatar.jpg";
-              document.getElementById("chatUserName").textContent = friendName;
-
-              // Show the chat window and hide the default content
-              document.getElementById("defaultContent").classList.add("d-none");
-              document.getElementById("chatWindow").classList.remove("d-none");
-
-              // Clear previous messages (if any)
-              const chatMessagesContainer = document.getElementById("chat-messages");
-              chatMessagesContainer.innerHTML = "";
+        try {
+            const response = await fetch(`https://0.0.0.0:8443/api/search-friends/?query=${encodeURIComponent(query)}`, {
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
+                    "Content-Type": "application/json",
+                },
             });
-          });
 
-          document.querySelectorAll(".search-result-item").forEach((item) => {
-            item.addEventListener("click", () => {
-              const friendId = item.dataset.friendId;
-              console.log("Selected friend ID:", friendId);
-              searchInput.value = ""; // Clear search input
-              searchResults.innerHTML = ""; // Clear search results
-            });
-          });
-        } else if (response.status === 401) {
-          console.log("Access token expired. Refreshing token...");
+            if (response.ok) {
+                refreshAttempts = 0;
+                const data = await response.json();
 
-          if (refreshAttempts < maxRefreshAttempts) {
-            isRefreshing = true;
-            refreshAttempts++;
+                // Clear previous search results
+                searchResults.textContent = "";
 
-            token = await refreshAccessToken();
-          
+                data.results.forEach((result) => {
+                    // Create search result item
+                    const resultItem = document.createElement("div");
+                    resultItem.className = "search-result-item";
+                    resultItem.dataset.friendId = result.id;
 
-            if (token) {
-              localStorage.setItem("jwtToken", token);
-              isRefreshing = false;
-              return tessst();
+                    // Create avatar
+                    const avatar = document.createElement("img");
+                    avatar.src = result.avatar || "default-avatar.jpg";
+                    avatar.className = "result-avatar";
+                    avatar.alt = "Avatar";
+
+                    // Create info container
+                    const infoContainer = document.createElement("div");
+                    infoContainer.className = "result-info";
+
+                    // Add name
+                    const name = document.createElement("span");
+                    name.className = "result-name";
+                    name.textContent = result.name;
+                    infoContainer.appendChild(name);
+
+                    // Add bio
+                    const bio = document.createElement("span");
+                    bio.className = "result-bio";
+                    bio.textContent = result.bio || "No bio available";
+                    infoContainer.appendChild(bio);
+
+                    // Create Chat button
+                    const chatButton = document.createElement("button");
+                    chatButton.className = "btn btn-sm btn-primary chat-btn";
+                    chatButton.dataset.friendId = result.id;
+                    chatButton.dataset.friendName = result.name;
+                    chatButton.dataset.friendAvatar = result.avatar || "default-avatar.jpg";
+                    chatButton.textContent = "Chat";
+
+                    // Append elements to the result item
+                    resultItem.appendChild(avatar);
+                    resultItem.appendChild(infoContainer);
+                    resultItem.appendChild(chatButton);
+
+                    // Append result item to search results container
+                    searchResults.appendChild(resultItem);
+
+                    // Add event listener to Chat button
+                    chatButton.addEventListener("click", () => {
+                        const friendId = chatButton.dataset.friendId;
+                        const friendName = chatButton.dataset.friendName;
+                        const friendAvatar = chatButton.dataset.friendAvatar;
+
+                        console.log("Starting chat with:", friendName);
+
+                        // Disconnect existing WebSocket (if any)
+                        disconnectWebSocket();
+
+                        // Connect to the new WebSocket for this friend
+                        connectWebSocket(userData.nickname, friendId);
+
+                        // Update the chat UI
+                        document.getElementById("chatUserAvatar").src = friendAvatar;
+                        document.getElementById("chatUserName").textContent = friendName;
+
+                        // Show the chat window and hide the default content
+                        document.getElementById("defaultContent").classList.add("d-none");
+                        document.getElementById("chatWindow").classList.remove("d-none");
+
+                        // Clear previous messages (if any)
+                        const chatMessagesContainer = document.getElementById("chat-messages");
+                        chatMessagesContainer.textContent = "";
+                    });
+
+                    // Add event listener to result item
+                    resultItem.addEventListener("click", () => {
+                        const friendId = resultItem.dataset.friendId;
+                        console.log("Selected friend ID:", friendId);
+                        searchInput.value = ""; // Clear search input
+                        searchResults.textContent = ""; // Clear search results
+                    });
+                });
+            } else if (response.status === 401) {
+                console.log("Access token expired. Refreshing token...");
+
+                if (refreshAttempts < maxRefreshAttempts) {
+                    isRefreshing = true;
+                    refreshAttempts++;
+
+                    token = await refreshAccessToken();
+
+                    if (token) {
+                        localStorage.setItem("jwtToken", token);
+                        isRefreshing = false;
+                        return tessst();
+                    } else {
+                        localStorage.removeItem("jwtToken");
+                        syncSession();
+                        navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+                    }
+                } else {
+                    console.error("Failed to refresh token after multiple attempts.");
+                    localStorage.removeItem("jwtToken");
+                    syncSession();
+                    navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+                }
             } else {
-              localStorage.removeItem("jwtToken");
-              syncSession();
-              navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+                console.error("Error fetching search results:", response.statusText);
             }
-          } else {
-            console.error("Failed to refresh token after multiple attempts.");
-            localStorage.removeItem("jwtToken");
-            syncSession();
-            navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
-          }
+        } catch (err) {
+            console.error("Error during search:", err);
         }
-        else {
-          console.error("Error fetching search results:", response.statusText);
-        }
-      } catch (err) {
-        console.error("Error during search:", err);
-      }
     } else {
-      searchResults.innerHTML = "";
+        searchResults.textContent = "";
     }
-  });
+});
+
+
+
 
   async function fetchFriendList() {
     if (!token) {
@@ -1126,184 +1244,210 @@ function updateUserDisplay(userData, profilePicture) {
       inviteButton.style.backgroundColor = 'green';
     });
   }
+
+
+
   function renderFriendList(friends) {
     const friendListContainer = document.querySelector(".friend-list");
     if (!friendListContainer) {
-      console.error("Friend list container not found!");
-      return;
+        console.error("Friend list container not found!");
+        return;
     }
 
-    friendListContainer.innerHTML = friends
-      .map(
-        (friend) => `
-            <div class="friend-item" data-friend-id="${friend.id}">
-              <img src="${friend.profile_picture || 'default-avatar.jpg'}" class="friend-avatar" />
-              <div class="friend-info">
-                <div class="friend-name">${friend.nickname}</div>
-                <div class="friend-status">${friend.status || "Offline"}</div>
-              </div>
-            </div>`
-      )
-      .join("");
+    // Clear the container safely
+    friendListContainer.textContent = "";
 
-    // Attach click event listeners to friend items
-    document.querySelectorAll(".friend-item").forEach((friendItem) => {
-      friendItem.addEventListener("click", () => {
-        const friendId = friendItem.dataset.friendId;
-        const friendName = friendItem.querySelector(".friend-name").textContent;
-        const friendAvatar = friendItem.querySelector(".friend-avatar").src;
+    // Loop through the friends list and securely build DOM elements
+    friends.forEach((friend) => {
+        // Create friend item container
+        const friendItem = document.createElement("div");
+        friendItem.className = "friend-item";
+        friendItem.dataset.friendId = friend.id;
 
-        console.log(`Starting chat with: ${friendName}`);
+        // Create friend avatar
+        const avatar = document.createElement("img");
+        avatar.src = friend.profile_picture || "default-avatar.jpg";
+        avatar.className = "friend-avatar";
+        avatar.alt = "Friend Avatar";
 
-        // Disconnect any existing WebSocket and initiate a new one
-        disconnectWebSocket();
-        connectWebSocket(userData.nickname, friendId);
+        // Create friend info container
+        const infoContainer = document.createElement("div");
+        infoContainer.className = "friend-info";
 
-        friendListSection.classList.remove("active");
-        // Update the chat window UI
-        document.getElementById("chatUserAvatar").src = friendAvatar;
-        document.getElementById("chatUserName").textContent = friendName;
+        // Add friend name
+        const name = document.createElement("div");
+        name.className = "friend-name";
+        name.textContent = friend.nickname;
 
-        // Show chat window
-        document.getElementById("defaultContent").classList.add("d-none");
-        document.getElementById("chatWindow").classList.remove("d-none");
+        // Add friend status
+        const status = document.createElement("div");
+        status.className = "friend-status";
+        status.textContent = friend.status || "Offline";
 
-        // Clear previous messages
-        document.getElementById("chat-messages").innerHTML = "";
-      });
+        // Append elements to the friend info container
+        infoContainer.appendChild(name);
+        infoContainer.appendChild(status);
 
-      const friendId = friendItem.dataset.friendId;
+        // Append avatar and info container to the friend item
+        friendItem.appendChild(avatar);
+        friendItem.appendChild(infoContainer);
 
-      blockBtn.addEventListener('click', async function () {
-        console.log("Friend ID to block/unblock:", friendId);
+        // Append the friend item to the friend list container
+        friendListContainer.appendChild(friendItem);
 
-        if (blockBtn.textContent.trim() === 'Block') {
-          await blockUser(friendId);
-          blockBtn.textContent = 'Unblock';
-          blockBtn.classList.remove('btn-danger');
-          blockBtn.classList.add('btn-success');
-        } else {
-          await unblockUser(friendId);
-          blockBtn.textContent = 'Block';
-          blockBtn.classList.remove('btn-success');
-          blockBtn.classList.add('btn-danger');
-        }
-      });
+        // Add click event listener to initiate chat
+        friendItem.addEventListener("click", () => {
+            const friendId = friendItem.dataset.friendId;
+            const friendName = name.textContent;
+            const friendAvatar = avatar.src;
 
+            console.log(`Starting chat with: ${friendName}`);
 
-      const invitePlayBtn = document.getElementById("invitePlayBtn");
+            // Disconnect any existing WebSocket and initiate a new one
+            disconnectWebSocket();
+            connectWebSocket(userData.nickname, friendId);
 
-      invitePlayBtn.addEventListener("click", () => {
-        // const friendId = document.getElementById("blockBtn").dataset.friendId;
-        if (!friendId) {
-          console.error("Friend ID not found!");
-          showNotification("Unable to initiate game invitation.");
-          return;
-        }
+            friendListSection.classList.remove("active");
 
-        console.log("Game invite for Friend ID:", friendId);
+            // Update the chat window UI
+            document.getElementById("chatUserAvatar").src = friendAvatar;
+            document.getElementById("chatUserName").textContent = friendName;
 
-        const invitePayload = {
-          type: "game_invite",
-          sender_id: userData.id,
-          sender_name: userData.nickname,
-          receiver_id: parseInt(friendId),
-          invite_id: new Date().getTime(),
-        };
+            // Show chat window
+            document.getElementById("defaultContent").classList.add("d-none");
+            document.getElementById("chatWindow").classList.remove("d-none");
 
-        console.log("Sending game invite payload:", invitePayload);
-
-        if (socket && socket.readyState === WebSocket.OPEN) {
-          socket.send(JSON.stringify(invitePayload));
-          showNotification("Game invitation sent!");
-        } else {
-          showNotification("WebSocket is not connected. Try again.");
-        }
-      });
-
-      const modalAcceptButton = document.querySelector('#modalAcceptButton');
-      if (modalAcceptButton) {
-        modalAcceptButton.addEventListener('click', function () {
-          respondToInvite(inviteId, 'accept');
+            // Clear previous messages
+            document.getElementById("chat-messages").textContent = "";
         });
-      }
+
+        // Add click event listener for the Block/Unblock button
+        const blockBtn = document.getElementById("blockBtn");
+        blockBtn.addEventListener("click", async function () {
+            console.log("Friend ID to block/unblock:", friend.id);
+
+            if (blockBtn.textContent.trim() === "Block") {
+                await blockUser(friend.id);
+                blockBtn.textContent = "Unblock";
+                blockBtn.classList.remove("btn-danger");
+                blockBtn.classList.add("btn-success");
+            } else {
+                await unblockUser(friend.id);
+                blockBtn.textContent = "Block";
+                blockBtn.classList.remove("btn-success");
+                blockBtn.classList.add("btn-danger");
+            }
+        });
+
+        // Add click event listener for the Game Invite button
+        const invitePlayBtn = document.getElementById("invitePlayBtn");
+        invitePlayBtn.addEventListener("click", () => {
+            if (!friend.id) {
+                console.error("Friend ID not found!");
+                showNotification("Unable to initiate game invitation.");
+                return;
+            }
+
+            console.log("Game invite for Friend ID:", friend.id);
+
+            const invitePayload = {
+                type: "game_invite",
+                sender_id: userData.id,
+                sender_name: userData.nickname,
+                receiver_id: parseInt(friend.id),
+                invite_id: new Date().getTime(),
+            };
+
+            console.log("Sending game invite payload:", invitePayload);
+
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify(invitePayload));
+                showNotification("Game invitation sent!");
+            } else {
+                showNotification("WebSocket is not connected. Try again.");
+            }
+        });
+
+        // Add event listener for the Modal Accept button
+        const modalAcceptButton = document.querySelector("#modalAcceptButton");
+        if (modalAcceptButton) {
+            modalAcceptButton.addEventListener("click", () => {
+                respondToInvite(inviteId, "accept");
+            });
+        }
     });
-  }
+}
+
 
   fetchFriendList();
   async function blockUser(friendId) {
     const blockerId = userData.id;
-    console.log("Blocker ID:", blockerId);
-    console.log("Friend ID:", friendId);
-
     try {
-      console.log("__________DKHAL_________")
-      const response = await fetch(`https://${location.host}/chat/block/${friendId}/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ blocker_id: blockerId }),
-      });
+        const response = await fetch(`https://${location.host}/chat/block/${friendId}/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ blocker_id: blockerId }),
+        });
 
-      const result = await response.json();
-      console.log("User Blocked:", result.message);
+        const result = await response.json();
+        if (result.status === 'blocked') {
+            console.log("User successfully blocked:", result.message);
+            blockBtn.textContent = 'Unblock';
+            blockBtn.classList.remove('btn-danger');
+            blockBtn.classList.add('btn-success');
+        }
     } catch (error) {
-      console.error('Error blocking user:', error);
+        console.error('Error blocking user:', error);
     }
-  }
+}
 
-  async function unblockUser(friendId) {
+async function unblockUser(friendId) {
     const blockerId = userData.id;
-
-    console.log("Unblock Function Triggered! Blocker ID:", blockerId, "Friend ID:", friendId);
-
     try {
-      const response = await fetch(`https://${location.host}/chat/unblock/${friendId}/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ blocker_id: blockerId }),
-      });
+        const response = await fetch(`https://${location.host}/chat/unblock/${friendId}/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ blocker_id: blockerId }),
+        });
 
-      const result = await response.json();
-      console.log("Unblock API Response:", result);
-
-      if (result.status === 'unblocked') {
-        console.log("User successfully unblocked!");
-        blockBtn.textContent = 'Block';
-        blockBtn.classList.remove('btn-success');
-        blockBtn.classList.add('btn-danger');
-      }
-
+        const result = await response.json();
+        if (result.status === 'unblocked') {
+            console.log("User successfully unblocked:", result.message);
+            blockBtn.textContent = 'Block';
+            blockBtn.classList.remove('btn-success');
+            blockBtn.classList.add('btn-danger');
+        }
     } catch (error) {
-      console.error('Error unblocking user:', error);
+        console.error('Error unblocking user:', error);
+    }
+}
+
+
+   async function updateBlockButtonState(friendId) {
+    try {
+      const response = await fetch(`https://${location.host}/chat/status/${friendId}/`);
+      const data = await response.json();
+
+      if (data.is_blocked) {
+        blockBtn.textContent = "Unblock";
+        blockBtn.classList.remove("btn-danger");
+        blockBtn.classList.add("btn-success");
+      } else {
+        blockBtn.textContent = "Block";
+        blockBtn.classList.remove("btn-success");
+        blockBtn.classList.add("btn-danger");
+      }
+    } catch (error) {
+      console.error("Error updating block button:", error);
     }
   }
-
-
-  //  async function updateBlockButtonState(friendId) {
-  //   try {
-  //     const response = await fetch(`http://0.0.0.0:8002/chat/status/${friendId}/`);
-  //     const data = await response.json();
-
-  //     if (data.is_blocked) {
-  //       blockBtn.textContent = "Unblock";
-  //       blockBtn.classList.remove("btn-danger");
-  //       blockBtn.classList.add("btn-success");
-  //     } else {
-  //       blockBtn.textContent = "Block";
-  //       blockBtn.classList.remove("btn-success");
-  //       blockBtn.classList.add("btn-danger");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error updating block button:", error);
-  //   }
-  // }
-  // const blockBtn = document.getElementById('blockBtn');
-  //   if (blockBtn) {
-  //     const friendId = blockBtn.dataset.friendId; // Get the friendId from the button's dataset
-  //     if (friendId) {
-  //       updateBlockButtonState(friendId); // Call the function with the friendId
-  //     }
-  //   }
+  const blockBtn = document.getElementById('blockBtn');
+    if (blockBtn) {
+      const friendId = blockBtn.dataset.friendId; // Get the friendId from the button's dataset
+      if (friendId) {
+        updateBlockButtonState(friendId); // Call the function with the friendId
+      }
+    }
 
   // Initial call to set up listeners in case elements are already present
   // To get the other user profil
