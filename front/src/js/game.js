@@ -7,6 +7,7 @@ export function initGamePage(mode) {
     let gametype = "local";
     let gameMode = "player";
     let difficulty = "easy";
+    let id = 0;
     let socket;
     if (mode === "local") {
       gametype = "local";
@@ -24,6 +25,52 @@ export function initGamePage(mode) {
       console.log("playWithFriend");
       gametype = "playWithFriend";
     }
+    userData();
+    async function userData()
+    {
+      try{
+        const response = await fetch(`https://${location.host}/api/userinfo/` , {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          }
+        });
+        if(response.ok)
+        {
+          const data = await response.json();
+          if(data.inGame === true)
+          {
+            alert("You are already in a game");
+            navigateTo("home");
+          }
+          if(data.id)
+          {
+            id = data.id;
+          }
+          try{
+            const response = await fetch(`https://${location.host}/api/profile/ingame/true/` , {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+              },
+              body: JSON.stringify({
+                user_id : id,
+              }),
+            });
+          }
+          catch(error)
+          {
+            console.error("Error:", error);
+          }
+          
+        } 
+    }
+    catch (error) {
+      console.error("Error:", error);
+    }
+  }
     function handleBeforeUnload() {
       console.error("change body style");
      
@@ -31,10 +78,10 @@ export function initGamePage(mode) {
         console.error("close socket before unload");
         socket.close();
       }
-      console.error("playWithFriend222222222222");
+      // console.error("playWithFriend222222222222");
       if(gametype === "playWithFriend")
       {
-        navigateTo("home");
+        sessionStorage.removeItem("playerReloaded"); // Remove the key
       }
       if (gametype === "tournament") {
         
@@ -54,10 +101,11 @@ export function initGamePage(mode) {
         console.error("close socket on back button");
         socket.close();
       }
-      console.error("playWithFriend222222222222");
+      // console.error("playWithFriend222222222222");
       if(gametype === "playWithFriend")
       {
-        navigateTo("home");
+        sessionStorage.removeItem("playerReloaded"); // Remove the key
+
       }
       if (gametype === "tournament") {
         // document.getElementsByClassName("flex-container").remove();
@@ -89,7 +137,10 @@ export function initGamePage(mode) {
       // window.removeEventListener('resize', sendNewSize);
       // window.removeEventListener('keyup', handleKeyEvent);
       // window.removeEventListener('keydown', handleKeyEvent);
-
+      if(gametype === "playWithFriend")
+      {
+        sessionStorage.removeItem("playerReloaded"); // Remove the key
+      }
       let win_dow = document.createElement("div");
       win_dow.id = "gameover-window";
       let div = document.createElement("div");
@@ -108,15 +159,20 @@ export function initGamePage(mode) {
       let inDiv = document.createElement("div");
       inDiv.id = "inputDiv";
       let button = document.createElement("button");
-      button.id = "restart";
       let span = document.createElement("span");
-      span.innerText = "Restart";
-      button.appendChild(span);
-      button.addEventListener("click", function () {
-        win_dow.remove();
-        firstwindow();
-      });
-      inDiv.appendChild(button);
+      if(gametype === "remote" || gametype === "local" || gametype === "tournament" )
+      {
+        
+        console.error(gametype);
+        button.id = "restart";
+        span.innerText = "Restart";
+        button.appendChild(span);
+        button.addEventListener("click", function () {
+          win_dow.remove();
+          firstwindow();
+        });
+        inDiv.appendChild(button);
+      }
       button = document.createElement("button");
       button.id = "exit";
       span = document.createElement("span");
@@ -282,6 +338,25 @@ export function initGamePage(mode) {
           creatloadingscreen();
         }
         else if (gametype === "playWithFriend") {
+          // Check if the player has reloaded the page
+          if (sessionStorage.getItem("playerReloaded") === null) {
+            // First visit: Set the value to false
+            sessionStorage.setItem("playerReloaded", "true");
+            console.log("This is the first visit.");
+          } else {
+            // Page reload detected
+            if (sessionStorage.getItem("playerReloaded") === "true") {
+              sessionStorage.removeItem("playerReloaded"); // Remove the key
+              console.log("Player reloaded the page.");
+              // socket.close();
+              navigateTo("home");
+              return; // Prevent further execution
+            }
+          }
+          
+          // Mark the page as reloaded on subsequent visits
+          // sessionStorage.setItem("playerReloaded", "true");
+
           const fragment = window.location.href;
           const queryString = fragment.split('?')[1];
           if (queryString) {
@@ -454,6 +529,7 @@ export function initGamePage(mode) {
 
       socket.onclose = function (e) {
         console.error("WebSocket closed unexpectedly");
+        return;
       };
 
       let firstTime = true;
