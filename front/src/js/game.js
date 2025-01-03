@@ -26,9 +26,15 @@ export function initGamePage(mode) {
     }
     function handleBeforeUnload() {
       console.error("change body style");
+     
       if (socket && socket.readyState === WebSocket.OPEN) {
         console.error("close socket before unload");
         socket.close();
+      }
+      console.error("playWithFriend222222222222");
+      if(gametype === "playWithFriend")
+      {
+        navigateTo("home");
       }
       if (gametype === "tournament") {
         
@@ -47,6 +53,11 @@ export function initGamePage(mode) {
       if (socket && socket.readyState === WebSocket.OPEN) {
         console.error("close socket on back button");
         socket.close();
+      }
+      console.error("playWithFriend222222222222");
+      if(gametype === "playWithFriend")
+      {
+        navigateTo("home");
       }
       if (gametype === "tournament") {
         // document.getElementsByClassName("flex-container").remove();
@@ -969,6 +980,21 @@ export function initGamePage(mode) {
       window.addEventListener("resize", sendNewSize);
       window.addEventListener("keyup", handleKeyEvent);
       window.addEventListener("keydown", handleKeyEvent);
+      // if(gametype === "playWithFriend")
+      // {
+      //   console.log("playWithFriend11111111111");
+      //   window.addEventListener("reload", handleload);
+      // }
+
+      // function handleload() {
+      //   console.log("playWithFriend222222222222");
+      //   if(gametype === "playWithFriend")
+      //   {
+      //     navigateTo("home");
+      //     window.removeEventListener("load", handleload);
+      //   }
+      // }
+
       // function handleBeforeUnload() {
       //   console.error("change body style");
       //   if (socket.readyState === WebSocket.OPEN) {

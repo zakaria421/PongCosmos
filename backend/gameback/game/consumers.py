@@ -55,8 +55,10 @@ class pingPongConsumer(AsyncWebsocketConsumer):
         
         if(self.game_type == 'remote'):
             print(self.playerID)
-            # if(self.playerID in player_queue):
-            #     player_queue.remove(self.playerID)
+            
+            if self.gameType == 'playWithFriend':
+                if(self in player_queueFriends):
+                    player_queueFriends.remove(self)
             if(self.playerID in player_queue):
                 player_queue.remove(self.playerID)
                 
