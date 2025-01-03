@@ -166,6 +166,14 @@ h2 {
   gap: 10px; /* Add spacing between username and notification icon */
 }
 
+.notif {
+  display: inline-block !important; margin-left: 10px !important;
+}
+
+.noti {
+  display: none !important;
+}
+
 #user-profile-button {
   font-size: 1rem;
   font-weight: bold;

@@ -41,6 +41,8 @@ export function initHomePage() {
     } catch (error) {
       console.error("Error refreshing access token:", error);
       localStorage.removeItem("jwtToken");
+      localStorage.removeItem("refresh");
+
       syncSession();
       navigateTo("login");
     }
@@ -274,6 +276,7 @@ export function initHomePage() {
             return fetchUserData();
           } else {
             localStorage.removeItem("jwtToken");
+            localStorage.removeItem("refresh");
             syncSession();
             navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
           }
@@ -281,14 +284,14 @@ export function initHomePage() {
           console.log(refreshAttempts, "WTF why", isRefreshing);
           console.error("Failed to refresh token after multiple attempts.");
           localStorage.removeItem("jwtToken");
+          localStorage.removeItem("refresh");
           syncSession();
           navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
         }
       } else {
-        console.error("Error fetching user data:", err);
         localStorage.removeItem("jwtToken");
-        syncSession();
-        navigateTo("error", { message: err.message });
+        localStorage.removeItem("refresh");
+        navigateTo("error", { message: "Error fetching, please relog" });
       }
     } catch (err) {
       console.error("Error fetching user data:", err);
@@ -333,16 +336,18 @@ export function initHomePage() {
 
       const clickedItem = event.target.closest('.dropdown-item');
 
-      if (!clickedItem) return;
+      fetchFriendRequests();
 
-      if (clickedItem.querySelector("#view-profile")) {
+      if (clickedItem && clickedItem.querySelector("#view-profile")) {
         console.log("Viewing profile...");
         navigateTo("profil");
       }
 
-      if (clickedItem.querySelector("#log-out")) {
+      if (clickedItem && clickedItem.querySelector("#log-out")) {
         console.log("Logging out...");
         localStorage.removeItem('jwtToken');
+        localStorage.removeItem("refresh");
+
         syncSession();
         navigateTo("landing");
       }
@@ -427,13 +432,16 @@ export function initHomePage() {
             return fetchUseStatus();
           } else {
             localStorage.removeItem("jwtToken");
+          localStorage.removeItem("refresh");
+
             syncSession();
             navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
           }
         } else {
-          console.log(refreshAttempts, "WTF why", isRefreshing);
           console.error("Failed to refresh token after multiple attempts.");
           localStorage.removeItem("jwtToken");
+          localStorage.removeItem("refresh");
+
           syncSession();
           navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
         }
@@ -813,12 +821,16 @@ export function initHomePage() {
             return test();
           } else {
             localStorage.removeItem("jwtToken");
+          localStorage.removeItem("refresh");
+
             syncSession();
             navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
           }
         } else {
           console.error("Failed to refresh token after multiple attempts.");
           localStorage.removeItem("jwtToken");
+          localStorage.removeItem("refresh");
+
           syncSession();
           navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
         }
@@ -903,6 +915,7 @@ export function initHomePage() {
 
             // Append the request element to the container
             friendRequestsContainer.appendChild(requestElement);
+
           });
         }
 
@@ -922,12 +935,16 @@ export function initHomePage() {
             return fetchFriendRequests();
           } else {
             localStorage.removeItem("jwtToken");
+          localStorage.removeItem("refresh");
+
             syncSession();
             navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
           }
         } else {
           console.error("Failed to refresh token after multiple attempts.");
           localStorage.removeItem("jwtToken");
+          localStorage.removeItem("refresh");
+
           syncSession();
           navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
         }
@@ -963,7 +980,8 @@ export function initHomePage() {
             const result = await response.json();
             console.log(result.message);
             button.closest(".friend-request").remove();
-            fetchFriendRequests(); // Refresh badge and container
+            fetchFriendRequests();
+            fetchFriendList();
           } else if (response.status === 401) {
             console.log("Access token expired. Refreshing token...");
 
@@ -978,12 +996,16 @@ export function initHomePage() {
                 return tz();
               } else {
                 localStorage.removeItem("jwtToken");
+          localStorage.removeItem("refresh");
+
                 syncSession();
                 navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
               }
             } else {
               console.error("Failed to refresh token after multiple attempts.");
               localStorage.removeItem("jwtToken");
+          localStorage.removeItem("refresh");
+
               syncSession();
               navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
             }
@@ -1031,12 +1053,16 @@ export function initHomePage() {
                 return tesst();
               } else {
                 localStorage.removeItem("jwtToken");
+          localStorage.removeItem("refresh");
+
                 syncSession();
                 navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
               }
             } else {
               console.error("Failed to refresh token after multiple attempts.");
               localStorage.removeItem("jwtToken");
+          localStorage.removeItem("refresh");
+
               syncSession();
               navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
             }
@@ -1174,12 +1200,16 @@ export function initHomePage() {
               return tessst();
             } else {
               localStorage.removeItem("jwtToken");
+          localStorage.removeItem("refresh");
+
               syncSession();
               navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
             }
           } else {
             console.error("Failed to refresh token after multiple attempts.");
             localStorage.removeItem("jwtToken");
+          localStorage.removeItem("refresh");
+
             syncSession();
             navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
           }
@@ -1226,6 +1256,8 @@ export function initHomePage() {
             return fetchFriendList();
           } else {
             localStorage.removeItem("jwtToken");
+          localStorage.removeItem("refresh");
+
             syncSession();
             navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
           }
@@ -1233,6 +1265,8 @@ export function initHomePage() {
 
           console.error("Failed to refresh token after multiple attempts.");
           localStorage.removeItem("jwtToken");
+          localStorage.removeItem("refresh");
+
           syncSession();
           navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
         }

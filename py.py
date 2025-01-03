@@ -6,8 +6,8 @@ import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # API endpoints
-create_tournament_url = "http://localhost:8000/smartcontract/create-tournament/"
-record_match_url = "http://localhost:8000/smartcontract/record-match/"
+create_tournament_url = "http://0.0.0.0:8000/smartcontract/create-tournament/"
+record_match_url = "http://0.0.0.0:8000/smartcontract/record-match/"
 
 # Headers
 headers = {"Content-Type": "application/json"}

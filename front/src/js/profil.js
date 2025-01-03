@@ -17,7 +17,7 @@ export function initProfilPage() {
     }
 
     try {
-      const response = await fetch("https://10.12.9.10:8443/api/token/refresh/", {
+      const response = await fetch("https://0.0.0.0:8443/api/token/refresh/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -42,6 +42,8 @@ export function initProfilPage() {
     } catch (error) {
       console.error("Error refreshing access token:", error);
       localStorage.removeItem("jwtToken");
+      localStorage.removeItem("refresh");
+
       syncSession();
       navigateTo("login");
     }
@@ -92,7 +94,7 @@ export function initProfilPage() {
       const div = document.createElement("div");
       div.className = "friend-item";
       div.innerHTML = `
-              <img src="https://10.12.9.10:8443/${friend.profile_picture}" alt="${friend.nickname
+              <img src="https://0.0.0.0:8443/${friend.profile_picture}" alt="${friend.nickname
         }" class="friend-picture">
               <div>
                   <p class="friend-name">${friend.nickname}</p>
@@ -127,7 +129,7 @@ export function initProfilPage() {
                         <h5 class="enemy-name ${playerWon ? "loser" : "winner"
       } mb-2 mb-sm-0 me-sm-2">${match.opponent_name}</h5>
                         <img src="
-                          https://10.12.9.10:8443/${match.opponent_profile_picture}
+                          https://0.0.0.0:8443/${match.opponent_profile_picture}
                         " alt="" class="enemy-icon">
                     </div>
                 </div>
@@ -143,7 +145,7 @@ export function initProfilPage() {
     // matchHistoryContainer.innerHTML = "";
     console.log("WST MATCH HISTORY : ", token);
     try {
-      let response = await fetch(`https://10.12.9.10:8443/api/profile/matchHistory?user_id=${userId}`, {
+      let response = await fetch(`https://0.0.0.0:8443/api/profile/matchHistory?user_id=${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -183,12 +185,16 @@ export function initProfilPage() {
                 return displayMatchHistory();
             } else {
                 localStorage.removeItem("jwtToken");
+          localStorage.removeItem("refresh");
+
                 syncSession();
                 navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
             }
         } else {
             console.error("Failed to refresh token after multiple attempts.");
             localStorage.removeItem("jwtToken");
+          localStorage.removeItem("refresh");
+
             syncSession();
             navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
         }
@@ -205,7 +211,7 @@ export function initProfilPage() {
   async function fetchUserData() {
     console.log(token);
     try {
-      let response = await fetch("https://10.12.9.10:8443/api/userinfo/", {
+      let response = await fetch("https://0.0.0.0:8443/api/userinfo/", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -217,7 +223,7 @@ export function initProfilPage() {
         let userData = sanitizeObject(toSanitize);
         console.log(userData);
         // Decrypt the profile picture and update the user display
-        let profilePicture = "https://10.12.9.10:8443/" + userData.profile_picture;
+        let profilePicture = "https://0.0.0.0:8443/" + userData.profile_picture;
         switchCheckbox.checked = userData.is_2fa_enabled;
         console.log(profilePicture);
         updateUserDisplay(userData, profilePicture);
@@ -247,6 +253,8 @@ export function initProfilPage() {
           } else {
             // Refresh token failed, log out user
             localStorage.removeItem("jwtToken");
+          localStorage.removeItem("refresh");
+
             syncSession();
             navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
           }
@@ -254,14 +262,15 @@ export function initProfilPage() {
           // Too many refresh attempts or token refresh failed
           console.error("Failed to refresh token after multiple attempts.");
           localStorage.removeItem("jwtToken");
+          localStorage.removeItem("refresh");
+
           syncSession();
           navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
         }
       } else {
-        console.error("Error fetching user data:", err);
         localStorage.removeItem("jwtToken");
-        syncSession();
-        navigateTo("error", { message: err.message });
+        localStorage.removeItem("refresh");
+        navigateTo("error", { message: "Error fetching, please relog" });
       }
     } catch (err) {
       console.error("Error fetching user data:", err);
@@ -394,6 +403,7 @@ export function initProfilPage() {
         } else {
           console.error("Unable to refresh access token. Please log in again.");
           localStorage.removeItem("jwtToken");
+          localStorage.removeItem("refresh");
           syncSession();
           navigateTo("login");
         }
@@ -620,7 +630,7 @@ export function initProfilPage() {
 
         try {
           console.log("ACTION : ", action);
-          const response = await fetch(`https://10.12.9.10:8443/api/2fa/${action}/`, {
+          const response = await fetch(`https://0.0.0.0:8443/api/2fa/${action}/`, {
             method: "POST",
             headers: {
               "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -643,12 +653,16 @@ export function initProfilPage() {
                 return handlehone(event);
               } else {
                 localStorage.removeItem("jwtToken");
+          localStorage.removeItem("refresh");
+
                 syncSession();
                 navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
               }
             } else {
               console.error("Failed to refresh token after multiple attempts.");
               localStorage.removeItem("jwtToken");
+          localStorage.removeItem("refresh");
+
               syncSession();
               navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
             }

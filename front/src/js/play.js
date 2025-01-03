@@ -17,7 +17,7 @@ export function initPlayPage() {
     }
 
     try {
-      const response = await fetch("https://10.12.9.10:8443/api/token/refresh/", {
+      const response = await fetch("https://0.0.0.0:8443/api/token/refresh/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -42,6 +42,8 @@ export function initPlayPage() {
     } catch (error) {
       console.error("Error refreshing access token:", error);
       localStorage.removeItem("jwtToken");
+      localStorage.removeItem("refresh");
+
       syncSession();
       navigateTo("login");
     }
@@ -147,7 +149,7 @@ export function initPlayPage() {
 
   async function fetchUserData() {
     try {
-      let response = await fetch("https://10.12.9.10:8443/api/userinfo/", {
+      let response = await fetch("https://0.0.0.0:8443/api/userinfo/", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -158,7 +160,7 @@ export function initPlayPage() {
       if (response.ok) {
         const toSanitize = await response.json();
         const userData = sanitizeObject(toSanitize);
-        const profilePicture = "https://10.12.9.10:8443/" + userData.profile_picture;
+        const profilePicture = "https://0.0.0.0:8443/" + userData.profile_picture;
         switchCheckbox.checked = userData.is_2fa_enabled;
         updateUserDisplay(userData, profilePicture);
         attachUserMenuListeners();
@@ -179,6 +181,8 @@ export function initPlayPage() {
           } else {
             // Refresh token failed, log out user
             localStorage.removeItem("jwtToken");
+          localStorage.removeItem("refresh");
+
             syncSession();
             navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
           }
@@ -186,14 +190,15 @@ export function initPlayPage() {
           // Too many refresh attempts or token refresh failed
           console.error("Failed to refresh token after multiple attempts.");
           localStorage.removeItem("jwtToken");
+          localStorage.removeItem("refresh");
+
           syncSession();
           navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
         }
       } else {
-        console.error("Error fetching user data:", err);
         localStorage.removeItem("jwtToken");
-        syncSession();
-        navigateTo("error", { message: err.message });
+        localStorage.removeItem("refresh");
+        navigateTo("error", { message: "Error fetching, please relog" });
       }
     } catch (err) {
       console.error("Error fetching user data:", err);
@@ -307,7 +312,7 @@ export function initPlayPage() {
 
         try {
           console.log("ACTION : ", action);
-          const response = await fetch(`https://10.12.9.10:8443/api/2fa/${action}/`, {
+          const response = await fetch(`https://0.0.0.0:8443/api/2fa/${action}/`, {
             method: "POST",
             headers: {
               "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,

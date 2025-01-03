@@ -40,6 +40,8 @@ class Match(models.Model):
     score                   = models.IntegerField(default=0)
     opponent_score          = models.IntegerField(default=0)
     match_date              = models.DateTimeField(auto_now_add=True)  # Timestamp of when the match was created
+    #added recently
+    opponent_id             = models.IntegerField()
 
     def save(self, *args, **kwargs):
         if not self.match_id:

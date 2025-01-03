@@ -81,7 +81,7 @@ export function initLoginPage() {
 
     console.log("FORM: ", sanitizedData);
     try {
-      let response = await fetch("https://10.12.9.10:8443/api/signup/", {
+      let response = await fetch("https://0.0.0.0:8443/api/signup/", {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
@@ -119,7 +119,7 @@ export function initLoginPage() {
     const formData = new FormData(this);
     const sanitizedData = sanitizeFormData(formData);
     try {
-      let response = await fetch("https://10.12.9.10:8443/api/signin/", {
+      let response = await fetch("https://0.0.0.0:8443/api/signin/", {
         headers: {
           "Content-Type": "application/json", // Ensure the content type is set to JSON
           Accept: "application/json", // Optionally, specify the format you want the response in
@@ -147,7 +147,7 @@ export function initLoginPage() {
                 alert("Invalid OTP. Please enter a 6-digit code.");
                 return;
               }
-              const response = await fetch(`https://10.12.9.10:8443/api/2fa/verify/`, {
+              const response = await fetch(`https://0.0.0.0:8443/api/2fa/verify/`, {
                 method: "POST",
                 headers: {
                   Authorization: `Bearer ${token}`,

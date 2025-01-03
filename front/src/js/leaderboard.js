@@ -17,7 +17,7 @@ export function initLeaderboardPage() {
     }
 
     try {
-      const response = await fetch("https://10.12.9.10:8443/api/token/refresh/", {
+      const response = await fetch("https://0.0.0.0:8443/api/token/refresh/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -42,6 +42,8 @@ export function initLeaderboardPage() {
     } catch (error) {
       console.error("Error refreshing access token:", error);
       localStorage.removeItem("jwtToken");
+      localStorage.removeItem("refresh");
+
       syncSession();
       navigateTo("login");
     }
@@ -54,40 +56,92 @@ export function initLeaderboardPage() {
   function renderUser(userData, profilePicture) {
     const sanitizedNickname = sanitizeInput(userData.nickname);
     const sanitizedLevel = sanitizeInput(userData.level);
-    return `
-          <button class="user btn p-2 no-border" draggable="false">
-            <div class="d-flex align-items-center gap-2" draggable="false">
-              <!-- Profile Image -->
-              <div id="toggler" draggable="false">
-                <div class="users-container" draggable="false">
-                  <img src="./src/assets/home/border.png" alt="" class="users-border" draggable="false">
-                  <img src="${profilePicture}" alt="Profile Image" class="rounded-circle users" id="profilePicture" draggable="false">
-                  <p class="level text-white text-decoration-none" draggable="false">
-                    <strong draggable="false">${sanitizedLevel}</strong>
-                  </p>
-                  </div>
-  
-                <!-- User Name -->
-                <div class="UserProfile" draggable="false">
-                  <p class="text-white text-decoration-none" draggable="false" id="profileN">
-                    <strong draggable="false">${sanitizedNickname}</strong>
-                  </p>
-                </div>
-              </div>
-              <!-- Notification Icon -->
-              <div class="Notifications" draggable="false">
-                <i class="bi bi-bell-fill text-white" draggable="false"></i>
-              </div>
-            </div>
-          </button>
-      `;
+
+    // Create button
+    const button = document.createElement("button");
+    button.className = "user btn p-2 no-border";
+    button.setAttribute("draggable", "false");
+
+    // Create main container
+    const container = document.createElement("div");
+    container.className = "d-flex align-items-center gap-2";
+    container.setAttribute("draggable", "false");
+    button.appendChild(container);
+
+    // Create profile image section
+    const profileImageWrapper = document.createElement("div");
+    profileImageWrapper.id = "toggler";
+    profileImageWrapper.setAttribute("draggable", "false");
+    container.appendChild(profileImageWrapper);
+
+    const usersContainer = document.createElement("div");
+    usersContainer.className = "users-container";
+    usersContainer.setAttribute("draggable", "false");
+    profileImageWrapper.appendChild(usersContainer);
+
+    const borderImg = document.createElement("img");
+    borderImg.src = "./src/assets/home/border.png";
+    borderImg.alt = "";
+    borderImg.className = "users-border";
+    borderImg.setAttribute("draggable", "false");
+    usersContainer.appendChild(borderImg);
+
+    const profileImg = document.createElement("img");
+    profileImg.src = profilePicture;
+    profileImg.alt = "Profile Image";
+    profileImg.className = "rounded-circle users";
+    profileImg.id = "profilePicture";
+    profileImg.setAttribute("draggable", "false");
+    usersContainer.appendChild(profileImg);
+
+    const levelParagraph = document.createElement("p");
+    levelParagraph.className = "level text-white text-decoration-none";
+    levelParagraph.setAttribute("draggable", "false");
+    const levelStrong = document.createElement("strong");
+    levelStrong.setAttribute("draggable", "false");
+    levelStrong.textContent = sanitizedLevel;
+    levelParagraph.appendChild(levelStrong);
+    usersContainer.appendChild(levelParagraph);
+
+    // Create user name section
+    const userProfile = document.createElement("div");
+    userProfile.className = "UserProfile";
+    userProfile.setAttribute("draggable", "false");
+    container.appendChild(userProfile);
+
+    const nicknameParagraph = document.createElement("p");
+    nicknameParagraph.className = "text-white text-decoration-none";
+    nicknameParagraph.id = "profileN";
+    nicknameParagraph.setAttribute("draggable", "false");
+    const nicknameStrong = document.createElement("strong");
+    nicknameStrong.setAttribute("draggable", "false");
+    nicknameStrong.textContent = sanitizedNickname;
+    nicknameParagraph.appendChild(nicknameStrong);
+    userProfile.appendChild(nicknameParagraph);
+
+    // Create notification icon
+    const notificationsDiv = document.createElement("div");
+    notificationsDiv.className = "Notifications";
+    notificationsDiv.setAttribute("draggable", "false");
+    const notificationIcon = document.createElement("i");
+    notificationIcon.className = "bi bi-bell-fill text-white";
+    notificationIcon.setAttribute("draggable", "false");
+    notificationsDiv.appendChild(notificationIcon);
+    container.appendChild(notificationsDiv);
+
+    return button;
   }
 
   function updateUserDisplay(userData, profilePicture) {
     const userProfileButtonContainer = document.getElementById("user-profile-button");
-    userProfileButtonContainer.innerHTML = renderUser(userData, profilePicture);
-  }
 
+    // Clear existing content
+    userProfileButtonContainer.replaceChildren(); // Clears all child nodes
+
+    // Render new user profile button
+    const userProfileButton = renderUser(userData, profilePicture);
+    userProfileButtonContainer.appendChild(userProfileButton);
+  }
   /*------------------------------------- LeaderBoard -------------- */
   let leaderboardData = [];
   function createPodiumItem(user, place) {
@@ -120,7 +174,7 @@ export function initLeaderboardPage() {
 
     const avatar = document.createElement('img');
     avatar.classList.add('avatar');
-    avatar.src = `https://10.12.9.10:8443${user.profile_picture}`;
+    avatar.src = `https://0.0.0.0:8443${user.profile_picture}`;
     avatar.alt = user.nickname;
 
     const name = document.createElement('div');
@@ -192,7 +246,7 @@ function createLeaderboardItem(user, index) {
               ${index + 1}
           </span>
           <div class="line-horizontal"></div>
-          <img src="https://10.12.9.10:8443${user.profile_picture}" 
+          <img src="https://0.0.0.0:8443${user.profile_picture}" 
                alt="${user.nickname}" 
                class="rounded-circle me-3 ${avatarClass}">
           <div class="flex-grow-1">
@@ -212,7 +266,7 @@ function createLeaderboardItem(user, index) {
     leaderboardList.innerHTML = '';
     // let leaderboardData = [];
     try {
-      const response = await fetch("https://10.12.9.10:8443/api/topplayers/", {
+      const response = await fetch("https://0.0.0.0:8443/api/topplayers/", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -247,7 +301,7 @@ function createLeaderboardItem(user, index) {
             .map((user, index) => {
               if (window.innerWidth > 991) {
                 // On large screens, exclude top 3 from the table
-                return index > 4 ? createLeaderboardItem(user, index) : "";
+                return index > 2 ? createLeaderboardItem(user, index) : "";
               } else {
                 // On small screens, include all players in the table
                 return createLeaderboardItem(user, index);
@@ -273,18 +327,24 @@ function createLeaderboardItem(user, index) {
             return renderLeaderboard();
           } else {
             localStorage.removeItem("jwtToken");
+          localStorage.removeItem("refresh");
+
             syncSession();
             navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
           }
         } else {
           console.error("Failed to refresh token after multiple attempts.");
           localStorage.removeItem("jwtToken");
+          localStorage.removeItem("refresh");
+
           syncSession();
           navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
         }
       }
       else {
-        console.error("Failed to fetch user data:", response.statusText);
+        const toSanitize = await response.json();
+
+        console.error("Failed to fetch user data:", toSanitize);
       }
 
     } catch (error) {
@@ -304,7 +364,7 @@ function createLeaderboardItem(user, index) {
   /**------------------------------------------------------------- */
   async function fetchUserData() {
     try {
-      let response = await fetch("https://10.12.9.10:8443/api/userinfo/", {
+      let response = await fetch("https://0.0.0.0:8443/api/userinfo/", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -315,7 +375,7 @@ function createLeaderboardItem(user, index) {
       if (response.ok) {
         const toSanitize = await response.json();
         const userData = sanitizeObject(toSanitize);
-        const profilePicture = "https://10.12.9.10:8443" + sanitizeInput(userData.profile_picture);
+        const profilePicture = "https://0.0.0.0:8443" + sanitizeInput(userData.profile_picture);
         switchCheckbox.checked = userData.is_2fa_enabled;
         updateUserDisplay(userData, profilePicture);
         attachUserMenuListeners();
@@ -330,20 +390,23 @@ function createLeaderboardItem(user, index) {
             return fetchUserData();
           } else {
             localStorage.removeItem("jwtToken");
+          localStorage.removeItem("refresh");
+
             syncSession();
             navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
           }
         } else {
           console.error("Failed to refresh token after multiple attempts.");
           localStorage.removeItem("jwtToken");
+          localStorage.removeItem("refresh");
+
           syncSession();
           navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
         }
       } else {
-        console.error("Error fetching user data:", err);
         localStorage.removeItem("jwtToken");
-        syncSession();
-        navigateTo("error", { message: err.message });
+        localStorage.removeItem("refresh");
+        navigateTo("error", { message: "Error fetching, please relog" });
       }
     } catch (err) {
       console.error("Error fetching user data:", err);
@@ -479,7 +542,7 @@ function createLeaderboardItem(user, index) {
 
         try {
           console.log("ACTION : ", action);
-          const response = await fetch(`https://10.12.9.10:8443/api/2fa/${action}/`, {
+          const response = await fetch(`https://0.0.0.0:8443/api/2fa/${action}/`, {
             method: "POST",
             headers: {
               "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -500,12 +563,16 @@ function createLeaderboardItem(user, index) {
                 return handlehone();
               } else {
                 localStorage.removeItem("jwtToken");
+          localStorage.removeItem("refresh");
+
                 syncSession();
                 navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
               }
             } else {
               console.error("Failed to refresh token after multiple attempts.");
               localStorage.removeItem("jwtToken");
+          localStorage.removeItem("refresh");
+
               syncSession();
               navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
             }

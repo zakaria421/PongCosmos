@@ -28,7 +28,7 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
   # It will work instead of the default serializer(TokenObtainPairSerializer).
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1), 
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=500), 
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     "TOKEN_OBTAIN_SERIALIZER": "my_app.serializers.MyTokenObtainPairSerializer",
   # ...

@@ -9,6 +9,49 @@ export const eventRegistry = [];
 let socket = null;
 
 statusCheck()
+let isRefreshing = false; // Flag to track if token refresh is in progress
+  let refreshAttempts = 0; // Retry counter for token refresh attempts
+  const maxRefreshAttempts = 100;
+async function refreshAccessToken() {
+  const refreshToken = localStorage.getItem("refresh");
+
+  if (!refreshToken) {
+    console.error("No refresh token found.");
+    return null;
+  }
+
+  try {
+    const response = await fetch("https://0.0.0.0:8443/api/token/refresh/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ refresh: refreshToken }),
+    });
+
+    if (!response.ok) {
+      console.error("Failed to refresh token");
+      return null; // Return null if refresh fails
+    }
+
+    const data = await response.json();
+    const sanitizedData = sanitizeObject(data);
+    const newAccessToken = sanitizedData.access;
+    localStorage.removeItem("jwtToken");
+    syncSession();
+    localStorage.setItem("jwtToken", newAccessToken);
+    token = localStorage.getItem("jwtToken");
+
+    return newAccessToken;
+  } catch (error) {
+    console.error("Error refreshing access token:", error);
+    localStorage.removeItem("jwtToken");
+    localStorage.removeItem("refresh");
+
+    syncSession();
+    navigateTo("login");
+  }
+}
 
 async function statusCheck(){
   try {
@@ -53,7 +96,31 @@ async function statusCheck(){
         }
       };
     } else if (response.status === 401) {
-      console.log("___DBG___ : Authentication required...");
+      console.log("Access token expired. Refreshing token...");
+
+      if (refreshAttempts < maxRefreshAttempts) {
+
+        refreshAttempts++;
+
+        token = await refreshAccessToken();
+
+        if (token) {
+          return statusCheck();
+        } else {
+          localStorage.removeItem("jwtToken");
+      localStorage.removeItem("refresh");
+
+          syncSession();
+          navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+        }
+      } else {
+        console.error("Failed to refresh token after multiple attempts.");
+        localStorage.removeItem("jwtToken");
+      localStorage.removeItem("refresh");
+
+        syncSession();
+        navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+      }
     }
   } catch (err) {
     console.error("Error fetching user data:", err);

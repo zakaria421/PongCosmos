@@ -26,7 +26,7 @@ urlpatterns = [
     path('profile/update/<str:result>/', UpdateWinLossView.as_view()), #this is the url for the win or loss
     
     ### Path to know if the user is already in game
-    path('profile/update/<str:result>/', UserInGame.as_view()),
+    path('profile/ingame/<str:result>/', UserInGame.as_view()),
     ####
     path('user-profile/<str:nickname>/', UserProfileDetailView.as_view(), name='user-profile-detail'),
     # *************************************************************************new
