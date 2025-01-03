@@ -6,7 +6,7 @@ import { sanitizeInput, sanitizeObject } from "./main.js";
 export function initAboutPage() {
   let isRefreshing = false; // Flag to track if token refresh is in progress
     let refreshAttempts = 0; // Retry counter for token refresh attempts
-    const maxRefreshAttempts = 10; // Maximum number of attempts to refresh token
+    const maxRefreshAttempts = 100; // Maximum number of attempts to refresh token
   let token = localStorage.getItem("jwtToken");
   async function refreshAccessToken() {
     const refreshToken = localStorage.getItem("refresh");
@@ -17,7 +17,7 @@ export function initAboutPage() {
     }
 
     try {
-      const response = await fetch("https://0.0.0.0:8443/api/token/refresh/", {
+      const response = await fetch("https://10.12.9.10:8443/api/token/refresh/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -52,7 +52,7 @@ export function initAboutPage() {
   const switchCheckbox = document.getElementById("2fa-switch");
   async function fetchUserData() {  
     try {
-      let response = await fetch("https://0.0.0.0:8443/api/userinfo/", {
+      let response = await fetch("https://10.12.9.10:8443/api/userinfo/", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -63,38 +63,31 @@ export function initAboutPage() {
       if (response.ok) {
         const toSanitize = await response.json();
         const userData = sanitizeObject(toSanitize);  
-        const profilePicture = "https://0.0.0.0:8443/" + sanitizeInput(userData.profile_picture);
+        const profilePicture = "https://10.12.9.10:8443/" + sanitizeInput(userData.profile_picture);
         switchCheckbox.checked = userData.is_2fa_enabled;
         updateUserDisplay(userData, profilePicture);
         attachUserMenuListeners();
       } else if (response.status === 401) {
         console.log("Access token expired. Refreshing token...");
 
-      if (!isRefreshing && refreshAttempts < maxRefreshAttempts) {
-        isRefreshing = true; // Lock refresh to prevent infinite loop
-        refreshAttempts++; // Increment retry counter
+        if (refreshAttempts < maxRefreshAttempts) {
+          refreshAttempts++;
+          token = await refreshAccessToken();
 
-        token = await refreshAccessToken();
-
-        if (token) {
-          // Save the new token and reset the refresh state
-          localStorage.setItem("jwtToken", token);
-          isRefreshing = false;
-          return fetchUserData(); // Retry fetching data with the new token
+          if (token) {
+            return fetchUserData();
+          } else {
+            localStorage.removeItem("jwtToken");
+            syncSession();
+            navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+          }
         } else {
-          // Refresh token failed, log out user
+          console.error("Failed to refresh token after multiple attempts.");
           localStorage.removeItem("jwtToken");
           syncSession();
           navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
         }
       } else {
-        // Too many refresh attempts or token refresh failed
-        console.error("Failed to refresh token after multiple attempts.");
-        localStorage.removeItem("jwtToken");
-        syncSession();
-        navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
-      }
-    } else {
       console.error("Error fetching user data:", err);
       localStorage.removeItem("jwtToken");
       syncSession();
@@ -378,7 +371,7 @@ function renderUser(userData, profilePicture) {
   
           try {
             console.log("ACTION : ", action);
-            const response = await fetch(`https://0.0.0.0:8443/api/2fa/${action}/`, {
+            const response = await fetch(`https://10.12.9.10:8443/api/2fa/${action}/`, {
               method: "POST",
               headers: {
                 "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -388,7 +381,28 @@ function renderUser(userData, profilePicture) {
   
             if (response.ok) {
               console.log(`2FA ${action}d successfully.`);
-            } else {
+            } else if (response.status === 401) {
+              console.log("Access token expired. Refreshing token...");
+      
+              if (refreshAttempts < maxRefreshAttempts) {
+                refreshAttempts++;
+                token = await refreshAccessToken();
+      
+                if (token) {
+                  return handlehone();
+                } else {
+                  localStorage.removeItem("jwtToken");
+                  syncSession();
+                  navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+                }
+              } else {
+                console.error("Failed to refresh token after multiple attempts.");
+                localStorage.removeItem("jwtToken");
+                syncSession();
+                navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+              }
+            }
+            else {
               console.error("Request failed. Reverting switch state.");
               checkbox.checked = !isChecked;
             }

@@ -2,12 +2,11 @@ import { navigateTo } from "./main.js";
 import { eventRegistry } from "./main.js";
 import { syncSession } from "./main.js";
 import { sanitizeInput, sanitizeObject } from "./main.js";
-export let inGame = false;
 
 export function initPlayPage() {
   let isRefreshing = false; // Flag to track if token refresh is in progress
   let refreshAttempts = 0; // Retry counter for token refresh attempts
-  const maxRefreshAttempts = 10; // Maximum number of attempts to refresh token
+  const maxRefreshAttempts = 100; // Maximum number of attempts to refresh token
   let token = localStorage.getItem("jwtToken");
   async function refreshAccessToken() {
     const refreshToken = localStorage.getItem("refresh");
@@ -18,7 +17,7 @@ export function initPlayPage() {
     }
 
     try {
-      const response = await fetch("https://0.0.0.0:8443/api/token/refresh/", {
+      const response = await fetch("https://10.12.9.10:8443/api/token/refresh/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -82,14 +81,9 @@ export function initPlayPage() {
     });
     const activeMode = document.querySelector(".mode-description.active");
     if (activeMode) {
-      const modeName =
+      let modeName =
         activeMode.parentElement.querySelector(".mode-title").textContent;
-      if (!inGame) {
-        inGame = true;
         navigateTo('game', { mode: modeName });
-      } else {
-        alert("User already in game !");
-      }
     } else {
       alert("Please select a game mode first!");
     }
@@ -153,7 +147,7 @@ export function initPlayPage() {
 
   async function fetchUserData() {
     try {
-      let response = await fetch("https://0.0.0.0:8443/api/userinfo/", {
+      let response = await fetch("https://10.12.9.10:8443/api/userinfo/", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -164,7 +158,7 @@ export function initPlayPage() {
       if (response.ok) {
         const toSanitize = await response.json();
         const userData = sanitizeObject(toSanitize);
-        const profilePicture = "https://0.0.0.0:8443/" + userData.profile_picture;
+        const profilePicture = "https://10.12.9.10:8443/" + userData.profile_picture;
         switchCheckbox.checked = userData.is_2fa_enabled;
         updateUserDisplay(userData, profilePicture);
         attachUserMenuListeners();
@@ -313,7 +307,7 @@ export function initPlayPage() {
 
         try {
           console.log("ACTION : ", action);
-          const response = await fetch(`https://0.0.0.0:8443/api/2fa/${action}/`, {
+          const response = await fetch(`https://10.12.9.10:8443/api/2fa/${action}/`, {
             method: "POST",
             headers: {
               "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,

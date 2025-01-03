@@ -16,10 +16,10 @@ profilePics = [
 class UserProfile(models.Model):
     user                    = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user_profile')
     id                      = models.AutoField(primary_key=True)
-    nickname                = models.CharField(max_length=10, unique=True, blank=True, null=True)
+    nickname                = models.CharField(max_length=10, unique=True, )
     profile_picture         = models.ImageField(upload_to="images/", default=random.choice(profilePics), blank=True, null=True)
     mimeType                = models.CharField(max_length=50, default="image/jpg")
-    email                   = models.EmailField(max_length=255, blank=True, null=True)
+    email                   = models.EmailField(max_length=255, )
     bio                     = models.CharField(max_length=100, blank=True)
     friends                 = models.ManyToManyField(User, blank=True, related_name='user_friends')
     wins                    = models.IntegerField(default=0)
@@ -28,6 +28,7 @@ class UserProfile(models.Model):
     otp_secret              = models.CharField(max_length=32, blank=True, null=True)  # Store OTP secret
     is_2fa_enabled          = models.BooleanField(default=False)
     qrcode                  = models.CharField()
+    inGame                  = models.BooleanField(default=False)
 
     def __str__(self):
         return self.nickname

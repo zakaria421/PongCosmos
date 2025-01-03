@@ -6,7 +6,7 @@ import { sanitizeInput, sanitizeObject } from "./main.js";
 export function initProfilPage() {
   let isRefreshing = false; // Flag to track if token refresh is in progress
   let refreshAttempts = 0; // Retry counter for token refresh attempts
-  const maxRefreshAttempts = 10; // Maximum number of attempts to refresh token
+  const maxRefreshAttempts = 100; // Maximum number of attempts to refresh token
   let token = localStorage.getItem("jwtToken");
   async function refreshAccessToken() {
     const refreshToken = localStorage.getItem("refresh");
@@ -17,7 +17,7 @@ export function initProfilPage() {
     }
 
     try {
-      const response = await fetch("https://0.0.0.0:8443/api/token/refresh/", {
+      const response = await fetch("https://10.12.9.10:8443/api/token/refresh/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -92,7 +92,7 @@ export function initProfilPage() {
       const div = document.createElement("div");
       div.className = "friend-item";
       div.innerHTML = `
-              <img src="https://0.0.0.0:8443/${friend.profile_picture}" alt="${friend.nickname
+              <img src="https://10.12.9.10:8443/${friend.profile_picture}" alt="${friend.nickname
         }" class="friend-picture">
               <div>
                   <p class="friend-name">${friend.nickname}</p>
@@ -127,7 +127,7 @@ export function initProfilPage() {
                         <h5 class="enemy-name ${playerWon ? "loser" : "winner"
       } mb-2 mb-sm-0 me-sm-2">${match.opponent_name}</h5>
                         <img src="
-                          https://0.0.0.0:8443/${match.opponent_profile_picture}
+                          https://10.12.9.10:8443/${match.opponent_profile_picture}
                         " alt="" class="enemy-icon">
                     </div>
                 </div>
@@ -143,7 +143,7 @@ export function initProfilPage() {
     // matchHistoryContainer.innerHTML = "";
     console.log("WST MATCH HISTORY : ", token);
     try {
-      let response = await fetch(`https://0.0.0.0:8443/api/profile/matchHistory?user_id=${userId}`, {
+      let response = await fetch(`https://10.12.9.10:8443/api/profile/matchHistory?user_id=${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -170,6 +170,29 @@ export function initProfilPage() {
           });
         }
       }
+      else if (response.status === 401) {
+        console.log("Access token expired. Refreshing token...");
+
+        if (refreshAttempts < maxRefreshAttempts) {
+            isRefreshing = true;
+            refreshAttempts++;
+
+            token = await refreshAccessToken();
+
+            if (token) {
+                return displayMatchHistory();
+            } else {
+                localStorage.removeItem("jwtToken");
+                syncSession();
+                navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+            }
+        } else {
+            console.error("Failed to refresh token after multiple attempts.");
+            localStorage.removeItem("jwtToken");
+            syncSession();
+            navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+        }
+    }
     } catch (err) {
       console.log("error", err);
     }
@@ -182,7 +205,7 @@ export function initProfilPage() {
   async function fetchUserData() {
     console.log(token);
     try {
-      let response = await fetch("https://0.0.0.0:8443/api/userinfo/", {
+      let response = await fetch("https://10.12.9.10:8443/api/userinfo/", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -194,7 +217,7 @@ export function initProfilPage() {
         let userData = sanitizeObject(toSanitize);
         console.log(userData);
         // Decrypt the profile picture and update the user display
-        let profilePicture = "https://0.0.0.0:8443/" + userData.profile_picture;
+        let profilePicture = "https://10.12.9.10:8443/" + userData.profile_picture;
         switchCheckbox.checked = userData.is_2fa_enabled;
         console.log(profilePicture);
         updateUserDisplay(userData, profilePicture);
@@ -214,16 +237,12 @@ export function initProfilPage() {
       } else if (response.status === 401) {
         console.log("Access token expired. Refreshing token...");
 
-        if (!isRefreshing && refreshAttempts < maxRefreshAttempts) {
-          isRefreshing = true; // Lock refresh to prevent infinite loop
+        if (refreshAttempts < maxRefreshAttempts) {
           refreshAttempts++; // Increment retry counter
 
           token = await refreshAccessToken();
 
           if (token) {
-            // Save the new token and reset the refresh state
-            localStorage.setItem("jwtToken", token);
-            isRefreshing = false;
             return fetchUserData(); // Retry fetching data with the new token
           } else {
             // Refresh token failed, log out user
@@ -313,6 +332,11 @@ export function initProfilPage() {
           placeCaretAtEnd(profileName);
         }
       });
+      profileName.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+            event.preventDefault();
+        }
+    });
       function placeCaretAtEnd(el) {
         const range = document.createRange();
         const sel = window.getSelection();
@@ -325,6 +349,7 @@ export function initProfilPage() {
       const updatedName = sanitizeInput(document.getElementById("profileName").textContent);
       const updatedBio = sanitizeInput(document.getElementById("profileBio").textContent);
       await updateProfile(updatedName, updatedBio);
+      saveImage();
 
       document
         .getElementById("profileName")
@@ -359,7 +384,6 @@ export function initProfilPage() {
       if (response.ok) {
         const toSanitize = await response.json();
         const userData = sanitizeObject(toSanitize);
-        console.log("WAAAAAAAAAAAAHT1");
         document.getElementById("profileName").textContent = userData.nickname;
         document.getElementById("profileN").textContent = userData.nickname;
       } else if (response.status === 401) {
@@ -383,7 +407,6 @@ export function initProfilPage() {
     }
   }
 
-  // Image upload logic
   document
     .getElementById("profileImage")
     .addEventListener("click", function handlepl() {
@@ -398,31 +421,47 @@ export function initProfilPage() {
       }
     });
 
-    function handlepls(event) {
-      event.preventDefault();
-    
-      const file = event.target.files[0];
-    
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-      if (!allowedTypes.includes(file.type)) {
-        console.error("Invalid file type. Only image files are allowed.");
-        alert("Please upload a valid image file (JPG, PNG, GIF).");
-        return;
-      }
-      const maxSize = 5 * 1024 * 1024; // 5MB
-      if (file.size > maxSize) {
-        console.error("File size exceeds the limit of 5MB.");
-        alert("File size exceeds the limit of 5MB.");
-        return;
-      }
+  let selectedFile = null;
+
+  function handlepls(event) {
+    event.preventDefault();
+
+    const file = event.target.files[0];
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+      console.error("Invalid file type. Only image files are allowed.");
+      alert("Please upload a valid image file (JPG, PNG, GIF).");
+      return;
+    }
+
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      console.error("File size exceeds the limit of 5MB.");
+      alert("File size exceeds the limit of 5MB.");
+      return;
+    }
+
+    selectedFile = file;
+
+    const reader = new FileReader();
+    reader.onloadend = function () {
+      document.getElementById("profileImage").src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function saveImage() {
+    if (selectedFile) {
       let formData = new FormData();
-      formData.append("profile_picture", file);
-    
+      formData.append("profile_picture", selectedFile);
+
       const token = sanitizeInput(localStorage.getItem("jwtToken"));
       if (!token) {
         navigateTo("error", { message: "Missing or invalid token." });
+        return;
       }
-    
+
       fetch("https://0.0.0.0:8443/api/profile/update/picture/", {
         method: "POST",
         headers: {
@@ -437,21 +476,25 @@ export function initProfilPage() {
           return response.json();
         })
         .then((userData) => {
-          const imageUrl = "https://0.0.0.0:8443/" + sanitizeInput(userData.profile_picture); // Sanitize the returned image URL
+          const imageUrl = "https://0.0.0.0:8443/" + sanitizeInput(userData.profile_picture);
           document.getElementById("profilePicture").src = imageUrl;
           document.getElementById("profileImage").src = imageUrl;
+          selectedFile = null;
         })
         .catch((error) => {
           console.error("Error uploading image:", error);
           alert(error.message);
         });
     }
-    document.getElementById("fileInput").addEventListener("change", handlepls);
-    eventRegistry.push({
-      element: document.getElementById("fileInput"),
-      eventType: "change",
-      handler: handlepls
-    });  
+  }
+
+
+  document.getElementById("fileInput").addEventListener("change", handlepls);
+  eventRegistry.push({
+    element: document.getElementById("fileInput"),
+    eventType: "change",
+    handler: handlepls
+  });
   /******************************************************************************** */
   const homebtn = document.getElementsByClassName("home");
   if (homebtn[0]) {
@@ -577,7 +620,7 @@ export function initProfilPage() {
 
         try {
           console.log("ACTION : ", action);
-          const response = await fetch(`https://0.0.0.0:8443/api/2fa/${action}/`, {
+          const response = await fetch(`https://10.12.9.10:8443/api/2fa/${action}/`, {
             method: "POST",
             headers: {
               "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -587,7 +630,30 @@ export function initProfilPage() {
 
           if (response.ok) {
             console.log(`2FA ${action}d successfully.`);
-          } else {
+          } else if (response.status === 401) {
+            console.log("Access token expired. Refreshing token...");
+    
+            if (refreshAttempts < maxRefreshAttempts) {
+              isRefreshing = true;
+              refreshAttempts++;
+    
+              token = await refreshAccessToken();
+    
+              if (token) {
+                return handlehone(event);
+              } else {
+                localStorage.removeItem("jwtToken");
+                syncSession();
+                navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+              }
+            } else {
+              console.error("Failed to refresh token after multiple attempts.");
+              localStorage.removeItem("jwtToken");
+              syncSession();
+              navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+            }
+          }
+          else {
             console.error("Request failed. Reverting switch state.");
             checkbox.checked = !isChecked; // Revert state if request fails
           }

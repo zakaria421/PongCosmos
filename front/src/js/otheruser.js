@@ -6,7 +6,7 @@ import { sanitizeInput, sanitizeObject } from "./main.js";
 export function initOtherUserPage(name) {
   let isRefreshing = false; // Flag to track if token refresh is in progress
   let refreshAttempts = 0; // Retry counter for token refresh attempts
-  const maxRefreshAttempts = 10; // Maximum number of attempts to refresh token
+  const maxRefreshAttempts = 100; // Maximum number of attempts to refresh token
   let token = localStorage.getItem("jwtToken");
   async function refreshAccessToken() {
     const refreshToken = localStorage.getItem("refresh");
@@ -17,7 +17,7 @@ export function initOtherUserPage(name) {
     }
 
     try {
-      const response = await fetch("https://0.0.0.0:8443/api/token/refresh/", {
+      const response = await fetch("https://10.12.9.10:8443/api/token/refresh/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -80,7 +80,7 @@ export function initOtherUserPage(name) {
       const div = document.createElement("div");
       div.className = "friend-item";
       div.innerHTML = `
-              <img src="https://0.0.0.0:8443/${friend.profile_picture}" alt="${friend.nickname
+              <img src="https://10.12.9.10:8443/${friend.profile_picture}" alt="${friend.nickname
         }" class="friend-picture">
               <div>
                   <p class="friend-name">${friend.nickname}</p>
@@ -122,7 +122,7 @@ export function initOtherUserPage(name) {
                         <h5 class="enemy-name ${playerWon ? "loser" : "winner"
       } mb-2 mb-sm-0 me-sm-2">${match.opponent_name}</h5>
                         <img src="
-                          https://0.0.0.0:8443/${match.opponent_profile_picture}
+                          https://10.12.9.10:8443/${match.opponent_profile_picture}
                         " alt="" class="enemy-icon">
                     </div>
                 </div>
@@ -154,7 +154,7 @@ export function initOtherUserPage(name) {
    */
   async function fetchUserData() {
     try {
-      let response = await fetch("https://0.0.0.0:8443/api/userinfo/", {
+      let response = await fetch("https://10.12.9.10:8443/api/userinfo/", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -165,32 +165,25 @@ export function initOtherUserPage(name) {
       if (response.ok) {
         const toSanitize = await response.json();
         const userData = sanitizeObject(toSanitize);
-        const profilePicture = "https://0.0.0.0:8443/" + userData.profile_picture;
+        const profilePicture = "https://10.12.9.10:8443/" + userData.profile_picture;
         switchCheckbox.checked = userData.is_2fa_enabled;
         updateUserDisplay(userData, profilePicture);
         attachUserMenuListeners();
       } else if (response.status === 401) {
         console.log("Access token expired. Refreshing token...");
 
-        if (!isRefreshing && refreshAttempts < maxRefreshAttempts) {
-          isRefreshing = true; // Lock refresh to prevent infinite loop
-          refreshAttempts++; // Increment retry counter
-
+        if (refreshAttempts < maxRefreshAttempts) {
+          refreshAttempts++;
           token = await refreshAccessToken();
 
           if (token) {
-            // Save the new token and reset the refresh state
-            localStorage.setItem("jwtToken", token);
-            isRefreshing = false;
-            return fetchUserData(); // Retry fetching data with the new token
+            return fetchUserData();
           } else {
-            // Refresh token failed, log out user
             localStorage.removeItem("jwtToken");
             syncSession();
             navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
           }
         } else {
-          // Too many refresh attempts or token refresh failed
           console.error("Failed to refresh token after multiple attempts.");
           localStorage.removeItem("jwtToken");
           syncSession();
@@ -211,7 +204,7 @@ export function initOtherUserPage(name) {
   async function fetchProfilPlayer() {
     console.log(token);
     try {
-      let response = await fetch(`https://0.0.0.0:8443/api/user-profile/${name}/`, {
+      let response = await fetch(`https://10.12.9.10:8443/api/user-profile/${name}/`, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -223,7 +216,7 @@ export function initOtherUserPage(name) {
         let userData = sanitizeObject(toSanitize);
         console.log(userData);
         // Decrypt the profile picture and update the user display
-        let profilePicture = "https://0.0.0.0:8443/" + userData.profile_picture;
+        let profilePicture = "https://10.12.9.10:8443/" + userData.profile_picture;
         document.getElementById("profileName").textContent = userData.nickname;
         document.getElementById("profileBio").textContent = userData.bio;
         document.getElementById("profileImage").src = profilePicture;
@@ -238,7 +231,28 @@ export function initOtherUserPage(name) {
         renderFriends(userData.friends);
         displayMatchHistory();
 
-      } else {
+      }  else if (response.status === 401) {
+        console.log("Access token expired. Refreshing token...");
+
+        if (refreshAttempts < maxRefreshAttempts) {
+          refreshAttempts++;
+          token = await refreshAccessToken();
+
+          if (token) {
+            return fetchProfilPlayer();
+          } else {
+            localStorage.removeItem("jwtToken");
+            syncSession();
+            navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+          }
+        } else {
+          console.error("Failed to refresh token after multiple attempts.");
+          localStorage.removeItem("jwtToken");
+          syncSession();
+          navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+        }
+      }
+      else {
         console.log("ERROR : 11");
         navigateTo("error", { message: "User can not be found !" });
       }
@@ -422,7 +436,7 @@ export function initOtherUserPage(name) {
 
         try {
           console.log("ACTION : ", action);
-          const response = await fetch(`https://0.0.0.0:8443/2fa/${action}/`, {
+          const response = await fetch(`https://10.12.9.10:8443/2fa/${action}/`, {
             method: "POST",
             headers: {
               "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -432,7 +446,28 @@ export function initOtherUserPage(name) {
 
           if (response.ok) {
             console.log(`2FA ${action}d successfully.`);
-          } else {
+          } else if (response.status === 401) {
+            console.log("Access token expired. Refreshing token...");
+    
+            if (refreshAttempts < maxRefreshAttempts) {
+              refreshAttempts++;
+              token = await refreshAccessToken();
+    
+              if (token) {
+                return handlehone(event);
+              } else {
+                localStorage.removeItem("jwtToken");
+                syncSession();
+                navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+              }
+            } else {
+              console.error("Failed to refresh token after multiple attempts.");
+              localStorage.removeItem("jwtToken");
+              syncSession();
+              navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+            }
+          } 
+          else {
             console.error("Request failed. Reverting switch state.");
             checkbox.checked = !isChecked; // Revert state if request fails
           }

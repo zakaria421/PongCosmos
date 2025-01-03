@@ -46,7 +46,6 @@ async function fetchOAuthCode(authCode) {
       localStorage.setItem("refresh", refresh);
       const bool = rewind.twoFa;
       if (bool) {
-        // document.getElementById("qrcode").style.display = "block";
         const QR = rewind.qr_code;
         let image = "data:image/jpg;base64," + QR;
         showQRCodeModal(image);

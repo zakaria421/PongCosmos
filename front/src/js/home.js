@@ -126,9 +126,9 @@ export function initHomePage() {
     container.appendChild(notificationsDiv);
 
     return button;
-}
+  }
 
-function updateUserDisplay(userData, profilePicture) {
+  function updateUserDisplay(userData, profilePicture) {
     const userProfileButtonContainer = document.getElementById("user-profile-button");
 
     // Clear existing content
@@ -137,7 +137,7 @@ function updateUserDisplay(userData, profilePicture) {
     // Render new user profile button
     const userProfileButton = renderUser(userData, profilePicture);
     userProfileButtonContainer.appendChild(userProfileButton);
-}
+  }
 
 
   console.log("BEFORE FETCHING DATA: will it be twice and why");
@@ -265,14 +265,12 @@ function updateUserDisplay(userData, profilePicture) {
         console.log("Access token expired. Refreshing token...");
 
         if (refreshAttempts < maxRefreshAttempts) {
-          isRefreshing = true;
+
           refreshAttempts++;
-          
+
           token = await refreshAccessToken();
 
           if (token) {
-            localStorage.setItem("jwtToken", token);
-            isRefreshing = false;
             return fetchUserData();
           } else {
             localStorage.removeItem("jwtToken");
@@ -395,35 +393,56 @@ function updateUserDisplay(userData, profilePicture) {
 
 
 
-fetchUseStatus();
+  fetchUseStatus();
 
-async function fetchUseStatus() {
+  async function fetchUseStatus() {
 
-  try {
-    // await new Promise((resolve) => setTimeout(resolve, 30000));
-    const token = localStorage.getItem("jwtToken");
-    
-    let response = await fetch("https://0.0.0.0:8443/api/online-offline/", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      method: "GET",
-    });
+    try {
+      // await new Promise((resolve) => setTimeout(resolve, 30000));
+      // const token = localStorage.getItem("jwtToken");
 
-    if (response.ok) {
-      const userData = await response.json();
+      let response = await fetch("https://0.0.0.0:8443/api/online-offline/", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        method: "GET",
+      });
 
-      console.log("___DBG___ : Connection established", userData); 
+      if (response.ok) {
+        const userData = await response.json();
+
+        console.log("___DBG___ : Connection established", userData);
+      }
+      else if (response.status === 401) {
+        console.log("Access token expired. Refreshing token...");
+
+        if (refreshAttempts < maxRefreshAttempts) {
+
+          refreshAttempts++;
+
+          token = await refreshAccessToken();
+
+          if (token) {
+            return fetchUseStatus();
+          } else {
+            localStorage.removeItem("jwtToken");
+            syncSession();
+            navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+          }
+        } else {
+          console.log(refreshAttempts, "WTF why", isRefreshing);
+          console.error("Failed to refresh token after multiple attempts.");
+          localStorage.removeItem("jwtToken");
+          syncSession();
+          navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+        }
+      }
     }
-    else if (response.status === 401) {
-      console.log("___DBG___ : Authentication required...");
+    catch (err) {
+      console.error("Error fetching user data:", err);
     }
   }
-  catch (err) {
-    console.error("Error fetching user data:", err);
-  }
-}
 
 
   function connectWebSocket(username, receiverId) {
@@ -606,8 +625,8 @@ async function fetchUseStatus() {
   function appendMessageToChat(username, message, timestamp) {
     const chatMessagesContainer = document.getElementById("chat-messages");
     if (!chatMessagesContainer) {
-        console.error("Chat messages container not found!");
-        return;
+      console.error("Chat messages container not found!");
+      return;
     }
 
     // Create message container
@@ -633,7 +652,7 @@ async function fetchUseStatus() {
 
     // Scroll to the bottom of the chat
     chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
-}
+  }
 
 
   // Friend selection logic to initiate chat
@@ -752,175 +771,173 @@ async function fetchUseStatus() {
     const nickname = addFriendInput.value.trim();
 
     if (!nickname) {
-        const errorElement = document.createElement("p");
-        errorElement.style.color = "red";
-        errorElement.textContent = "Please enter a nickname.";
-        addFriendResult.textContent = ""; // Clear previous messages
-        addFriendResult.appendChild(errorElement);
-        return;
+      const errorElement = document.createElement("p");
+      errorElement.style.color = "red";
+      errorElement.textContent = "Please enter a nickname.";
+      addFriendResult.textContent = ""; // Clear previous messages
+      addFriendResult.appendChild(errorElement);
+      return;
     }
 
     console.log("Sending friend request for nickname:", nickname);
 
     try {
-        const response = await fetch(`https://0.0.0.0:8443/api/friends/send-friend-request/${nickname}/`, {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
-                "Content-Type": "application/json",
-            },
-        });
+      const response = await fetch(`https://0.0.0.0:8443/api/friends/send-friend-request/${nickname}/`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
+          "Content-Type": "application/json",
+        },
+      });
 
-        if (response.ok) {
-            const result = await response.json();
-            const successElement = document.createElement("p");
-            successElement.style.color = "green";
-            successElement.textContent = result.message;
-            addFriendResult.textContent = ""; // Clear previous messages
-            addFriendResult.appendChild(successElement);
-            addFriendInput.value = "";
-            refreshAttempts = 0;
-        } else if (response.status === 401) {
-            console.log("Access token expired. Refreshing token...");
+      if (response.ok) {
+        const result = await response.json();
+        const successElement = document.createElement("p");
+        successElement.style.color = "green";
+        successElement.textContent = result.message;
+        addFriendResult.textContent = ""; // Clear previous messages
+        addFriendResult.appendChild(successElement);
+        addFriendInput.value = "";
+        refreshAttempts = 0;
+      } else if (response.status === 401) {
+        console.log("Access token expired. Refreshing token...");
 
-            if (refreshAttempts < maxRefreshAttempts) {
-                isRefreshing = true;
-                refreshAttempts++;
+        if (refreshAttempts < maxRefreshAttempts) {
 
-                token = await refreshAccessToken();
+          refreshAttempts++;
 
-                if (token) {
-                    localStorage.setItem("jwtToken", token);
-                    isRefreshing = false;
-                    return test();
-                } else {
-                    localStorage.removeItem("jwtToken");
-                    syncSession();
-                    navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
-                }
-            } else {
-                console.error("Failed to refresh token after multiple attempts.");
-                localStorage.removeItem("jwtToken");
-                syncSession();
-                navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
-            }
+          token = await refreshAccessToken();
+
+          if (token) {
+
+            return test();
+          } else {
+            localStorage.removeItem("jwtToken");
+            syncSession();
+            navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+          }
         } else {
-            const error = await response.json();
-            const errorElement = document.createElement("p");
-            errorElement.style.color = "red";
-            errorElement.textContent = error.error || "Error sending friend request.";
-            addFriendResult.textContent = ""; // Clear previous messages
-            addFriendResult.appendChild(errorElement);
+          console.error("Failed to refresh token after multiple attempts.");
+          localStorage.removeItem("jwtToken");
+          syncSession();
+          navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
         }
-    } catch (err) {
-        console.error("Error sending friend request:", err);
+      } else {
+        const error = await response.json();
         const errorElement = document.createElement("p");
         errorElement.style.color = "red";
-        errorElement.textContent = "An error occurred. Please try again.";
+        errorElement.textContent = error.error || "Error sending friend request.";
         addFriendResult.textContent = ""; // Clear previous messages
         addFriendResult.appendChild(errorElement);
+      }
+    } catch (err) {
+      console.error("Error sending friend request:", err);
+      const errorElement = document.createElement("p");
+      errorElement.style.color = "red";
+      errorElement.textContent = "An error occurred. Please try again.";
+      addFriendResult.textContent = ""; // Clear previous messages
+      addFriendResult.appendChild(errorElement);
     }
-});
+  });
 
 
 
   async function fetchFriendRequests() {
     try {
-        const response = await fetch("https://0.0.0.0:8443/api/friends/friend-requests/", {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-                "Content-Type": "application/json",
-            },
-        });
+      const response = await fetch("https://0.0.0.0:8443/api/friends/friend-requests/", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          "Content-Type": "application/json",
+        },
+      });
 
-        if (response.ok) {
-            refreshAttempts = 0;
-            const requests = await response.json();
+      if (response.ok) {
+        refreshAttempts = 0;
+        const requests = await response.json();
 
-            // Update the badge count
-            friendRequestBadge.textContent = requests.length;
-            friendRequestBadge.style.display = requests.length > 0 ? "inline-block" : "none";
+        // Update the badge count
+        friendRequestBadge.textContent = requests.length;
+        friendRequestBadge.style.display = requests.length > 0 ? "inline-block" : "none";
 
-            // Update the friend requests container
-            if (friendRequestsContainer) {
-                // Clear the container
-                friendRequestsContainer.textContent = "";
+        // Update the friend requests container
+        if (friendRequestsContainer) {
+          // Clear the container
+          friendRequestsContainer.textContent = "";
 
-                requests.forEach((request) => {
-                    // Create the friend request container
-                    const requestElement = document.createElement("div");
-                    requestElement.className = "friend-request";
+          requests.forEach((request) => {
+            // Create the friend request container
+            const requestElement = document.createElement("div");
+            requestElement.className = "friend-request";
 
-                    // Create the request info section
-                    const infoElement = document.createElement("div");
-                    infoElement.className = "request-info";
+            // Create the request info section
+            const infoElement = document.createElement("div");
+            infoElement.className = "request-info";
 
-                    const nameElement = document.createElement("span");
-                    nameElement.className = "requester-name";
-                    nameElement.textContent = request.nickname; // Use textContent to prevent XSS
-                    infoElement.appendChild(nameElement);
+            const nameElement = document.createElement("span");
+            nameElement.className = "requester-name";
+            nameElement.textContent = request.nickname; // Use textContent to prevent XSS
+            infoElement.appendChild(nameElement);
 
-                    // Create the request actions section
-                    const actionsElement = document.createElement("div");
-                    actionsElement.className = "request-actions";
+            // Create the request actions section
+            const actionsElement = document.createElement("div");
+            actionsElement.className = "request-actions";
 
-                    // Create Accept button
-                    const acceptButton = document.createElement("button");
-                    acceptButton.className = "btn btn-success accept-request";
-                    acceptButton.dataset.nickname = request.nickname;
-                    acceptButton.textContent = "Accept"; // Use textContent
-                    actionsElement.appendChild(acceptButton);
+            // Create Accept button
+            const acceptButton = document.createElement("button");
+            acceptButton.className = "btn btn-success accept-request";
+            acceptButton.dataset.nickname = request.nickname;
+            acceptButton.textContent = "Accept"; // Use textContent
+            actionsElement.appendChild(acceptButton);
 
-                    // Create Cancel button
-                    const cancelButton = document.createElement("button");
-                    cancelButton.className = "btn btn-danger cancel-request";
-                    cancelButton.dataset.nickname = request.nickname;
-                    cancelButton.textContent = "Cancel"; // Use textContent
-                    actionsElement.appendChild(cancelButton);
+            // Create Cancel button
+            const cancelButton = document.createElement("button");
+            cancelButton.className = "btn btn-danger cancel-request";
+            cancelButton.dataset.nickname = request.nickname;
+            cancelButton.textContent = "Cancel"; // Use textContent
+            actionsElement.appendChild(cancelButton);
 
-                    // Append sections to the main request element
-                    requestElement.appendChild(infoElement);
-                    requestElement.appendChild(actionsElement);
+            // Append sections to the main request element
+            requestElement.appendChild(infoElement);
+            requestElement.appendChild(actionsElement);
 
-                    // Append the request element to the container
-                    friendRequestsContainer.appendChild(requestElement);
-                });
-            }
-
-            // Reattach listeners for Accept and Cancel buttons
-            attachFriendRequestListeners();
-        } else if (response.status === 401) {
-            console.log("Access token expired. Refreshing token...");
-
-            if (refreshAttempts < maxRefreshAttempts) {
-                isRefreshing = true;
-                refreshAttempts++;
-
-                token = await refreshAccessToken();
-
-                if (token) {
-                    localStorage.setItem("jwtToken", token);
-                    isRefreshing = false;
-                    return fetchFriendRequests();
-                } else {
-                    localStorage.removeItem("jwtToken");
-                    syncSession();
-                    navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
-                }
-            } else {
-                console.error("Failed to refresh token after multiple attempts.");
-                localStorage.removeItem("jwtToken");
-                syncSession();
-                navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
-            }
-        } else {
-            console.error("Failed to fetch friend requests:", response.statusText);
+            // Append the request element to the container
+            friendRequestsContainer.appendChild(requestElement);
+          });
         }
+
+        // Reattach listeners for Accept and Cancel buttons
+        attachFriendRequestListeners();
+      } else if (response.status === 401) {
+        console.log("Access token expired. Refreshing token...");
+
+        if (refreshAttempts < maxRefreshAttempts) {
+
+          refreshAttempts++;
+
+          token = await refreshAccessToken();
+
+          if (token) {
+
+            return fetchFriendRequests();
+          } else {
+            localStorage.removeItem("jwtToken");
+            syncSession();
+            navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+          }
+        } else {
+          console.error("Failed to refresh token after multiple attempts.");
+          localStorage.removeItem("jwtToken");
+          syncSession();
+          navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+        }
+      } else {
+        console.error("Failed to fetch friend requests:", response.statusText);
+      }
     } catch (err) {
-        console.error("Error fetching friend requests:", err);
+      console.error("Error fetching friend requests:", err);
     }
-}
+  }
 
   // Event listener to open the friend requests container when clicking the button
   friendRequestButton.addEventListener("click", () => {
@@ -930,7 +947,7 @@ async function fetchUseStatus() {
   // Function to attach event listeners for Accept and Cancel buttons
   function attachFriendRequestListeners() {
     document.querySelectorAll(".accept-request").forEach((button) => {
-      button.addEventListener("click", async () => {
+      button.addEventListener("click", async function tz()  {
         const nickname = button.dataset.nickname;
         try {
           const response = await fetch(`https://0.0.0.0:8443/api/friends/accept-friend-request/${nickname}/`, {
@@ -949,18 +966,16 @@ async function fetchUseStatus() {
             fetchFriendRequests(); // Refresh badge and container
           } else if (response.status === 401) {
             console.log("Access token expired. Refreshing token...");
-            
+
             if (refreshAttempts < maxRefreshAttempts) {
-              isRefreshing = true;
+
               refreshAttempts++;
-              
-              
+
+
               token = await refreshAccessToken();
 
               if (token) {
-                localStorage.setItem("jwtToken", token);
-                isRefreshing = false;
-                return attachFriendRequestListeners();
+                return tz();
               } else {
                 localStorage.removeItem("jwtToken");
                 syncSession();
@@ -1005,15 +1020,14 @@ async function fetchUseStatus() {
             console.log("Access token expired. Refreshing token...");
 
             if (refreshAttempts < maxRefreshAttempts) {
-              isRefreshing = true;
+
               refreshAttempts++;
-          
-            
+
+
               token = await refreshAccessToken();
 
               if (token) {
-                localStorage.setItem("jwtToken", token);
-                isRefreshing = false;
+
                 return tesst();
               } else {
                 localStorage.removeItem("jwtToken");
@@ -1053,134 +1067,132 @@ async function fetchUseStatus() {
     const query = searchInput.value.trim();
 
     if (query) {
-        try {
-            const response = await fetch(`https://0.0.0.0:8443/api/search-friends/?query=${encodeURIComponent(query)}`, {
-                headers: {
-                    "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
-                    "Content-Type": "application/json",
-                },
+      try {
+        const response = await fetch(`https://0.0.0.0:8443/api/search-friends/?query=${encodeURIComponent(query)}`, {
+          headers: {
+            "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (response.ok) {
+          refreshAttempts = 0;
+          const data = await response.json();
+
+          // Clear previous search results
+          searchResults.textContent = "";
+
+          data.results.forEach((result) => {
+            // Create search result item
+            const resultItem = document.createElement("div");
+            resultItem.className = "search-result-item";
+            resultItem.dataset.friendId = result.id;
+
+            // Create avatar
+            const avatar = document.createElement("img");
+            avatar.src = result.avatar || "default-avatar.jpg";
+            avatar.className = "result-avatar";
+            avatar.alt = "Avatar";
+
+            // Create info container
+            const infoContainer = document.createElement("div");
+            infoContainer.className = "result-info";
+
+            // Add name
+            const name = document.createElement("span");
+            name.className = "result-name";
+            name.textContent = result.name;
+            infoContainer.appendChild(name);
+
+            // Add bio
+            const bio = document.createElement("span");
+            bio.className = "result-bio";
+            bio.textContent = result.bio || "No bio available";
+            infoContainer.appendChild(bio);
+
+            // Create Chat button
+            const chatButton = document.createElement("button");
+            chatButton.className = "btn btn-sm btn-primary chat-btn";
+            chatButton.dataset.friendId = result.id;
+            chatButton.dataset.friendName = result.name;
+            chatButton.dataset.friendAvatar = result.avatar || "default-avatar.jpg";
+            chatButton.textContent = "Chat";
+
+            // Append elements to the result item
+            resultItem.appendChild(avatar);
+            resultItem.appendChild(infoContainer);
+            resultItem.appendChild(chatButton);
+
+            // Append result item to search results container
+            searchResults.appendChild(resultItem);
+
+            // Add event listener to Chat button
+            chatButton.addEventListener("click", () => {
+              const friendId = chatButton.dataset.friendId;
+              const friendName = chatButton.dataset.friendName;
+              const friendAvatar = chatButton.dataset.friendAvatar;
+
+              console.log("Starting chat with:", friendName);
+
+              // Disconnect existing WebSocket (if any)
+              disconnectWebSocket();
+
+              // Connect to the new WebSocket for this friend
+              connectWebSocket(userData.nickname, friendId);
+
+              // Update the chat UI
+              document.getElementById("chatUserAvatar").src = friendAvatar;
+              document.getElementById("chatUserName").textContent = friendName;
+
+              // Show the chat window and hide the default content
+              document.getElementById("defaultContent").classList.add("d-none");
+              document.getElementById("chatWindow").classList.remove("d-none");
+
+              // Clear previous messages (if any)
+              const chatMessagesContainer = document.getElementById("chat-messages");
+              chatMessagesContainer.textContent = "";
             });
 
-            if (response.ok) {
-                refreshAttempts = 0;
-                const data = await response.json();
+            // Add event listener to result item
+            resultItem.addEventListener("click", () => {
+              const friendId = resultItem.dataset.friendId;
+              console.log("Selected friend ID:", friendId);
+              searchInput.value = ""; // Clear search input
+              searchResults.textContent = ""; // Clear search results
+            });
+          });
+        } else if (response.status === 401) {
+          console.log("Access token expired. Refreshing token...");
 
-                // Clear previous search results
-                searchResults.textContent = "";
+          if (refreshAttempts < maxRefreshAttempts) {
 
-                data.results.forEach((result) => {
-                    // Create search result item
-                    const resultItem = document.createElement("div");
-                    resultItem.className = "search-result-item";
-                    resultItem.dataset.friendId = result.id;
+            refreshAttempts++;
 
-                    // Create avatar
-                    const avatar = document.createElement("img");
-                    avatar.src = result.avatar || "default-avatar.jpg";
-                    avatar.className = "result-avatar";
-                    avatar.alt = "Avatar";
+            token = await refreshAccessToken();
 
-                    // Create info container
-                    const infoContainer = document.createElement("div");
-                    infoContainer.className = "result-info";
-
-                    // Add name
-                    const name = document.createElement("span");
-                    name.className = "result-name";
-                    name.textContent = result.name;
-                    infoContainer.appendChild(name);
-
-                    // Add bio
-                    const bio = document.createElement("span");
-                    bio.className = "result-bio";
-                    bio.textContent = result.bio || "No bio available";
-                    infoContainer.appendChild(bio);
-
-                    // Create Chat button
-                    const chatButton = document.createElement("button");
-                    chatButton.className = "btn btn-sm btn-primary chat-btn";
-                    chatButton.dataset.friendId = result.id;
-                    chatButton.dataset.friendName = result.name;
-                    chatButton.dataset.friendAvatar = result.avatar || "default-avatar.jpg";
-                    chatButton.textContent = "Chat";
-
-                    // Append elements to the result item
-                    resultItem.appendChild(avatar);
-                    resultItem.appendChild(infoContainer);
-                    resultItem.appendChild(chatButton);
-
-                    // Append result item to search results container
-                    searchResults.appendChild(resultItem);
-
-                    // Add event listener to Chat button
-                    chatButton.addEventListener("click", () => {
-                        const friendId = chatButton.dataset.friendId;
-                        const friendName = chatButton.dataset.friendName;
-                        const friendAvatar = chatButton.dataset.friendAvatar;
-
-                        console.log("Starting chat with:", friendName);
-
-                        // Disconnect existing WebSocket (if any)
-                        disconnectWebSocket();
-
-                        // Connect to the new WebSocket for this friend
-                        connectWebSocket(userData.nickname, friendId);
-
-                        // Update the chat UI
-                        document.getElementById("chatUserAvatar").src = friendAvatar;
-                        document.getElementById("chatUserName").textContent = friendName;
-
-                        // Show the chat window and hide the default content
-                        document.getElementById("defaultContent").classList.add("d-none");
-                        document.getElementById("chatWindow").classList.remove("d-none");
-
-                        // Clear previous messages (if any)
-                        const chatMessagesContainer = document.getElementById("chat-messages");
-                        chatMessagesContainer.textContent = "";
-                    });
-
-                    // Add event listener to result item
-                    resultItem.addEventListener("click", () => {
-                        const friendId = resultItem.dataset.friendId;
-                        console.log("Selected friend ID:", friendId);
-                        searchInput.value = ""; // Clear search input
-                        searchResults.textContent = ""; // Clear search results
-                    });
-                });
-            } else if (response.status === 401) {
-                console.log("Access token expired. Refreshing token...");
-
-                if (refreshAttempts < maxRefreshAttempts) {
-                    isRefreshing = true;
-                    refreshAttempts++;
-
-                    token = await refreshAccessToken();
-
-                    if (token) {
-                        localStorage.setItem("jwtToken", token);
-                        isRefreshing = false;
-                        return tessst();
-                    } else {
-                        localStorage.removeItem("jwtToken");
-                        syncSession();
-                        navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
-                    }
-                } else {
-                    console.error("Failed to refresh token after multiple attempts.");
-                    localStorage.removeItem("jwtToken");
-                    syncSession();
-                    navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
-                }
+            if (token) {
+              return tessst();
             } else {
-                console.error("Error fetching search results:", response.statusText);
+              localStorage.removeItem("jwtToken");
+              syncSession();
+              navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
             }
-        } catch (err) {
-            console.error("Error during search:", err);
+          } else {
+            console.error("Failed to refresh token after multiple attempts.");
+            localStorage.removeItem("jwtToken");
+            syncSession();
+            navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+          }
+        } else {
+          console.error("Error fetching search results:", response.statusText);
         }
+      } catch (err) {
+        console.error("Error during search:", err);
+      }
     } else {
-        searchResults.textContent = "";
+      searchResults.textContent = "";
     }
-});
+  });
 
 
 
@@ -1205,14 +1217,12 @@ async function fetchUseStatus() {
         console.log("Access token expired. Refreshing token...");
 
         if (refreshAttempts < maxRefreshAttempts) {
-          isRefreshing = true;
+
           refreshAttempts++;
-          
+
           token = await refreshAccessToken();
 
           if (token) {
-            localStorage.setItem("jwtToken", token);
-            isRefreshing = false;
             return fetchFriendList();
           } else {
             localStorage.removeItem("jwtToken");
@@ -1220,7 +1230,7 @@ async function fetchUseStatus() {
             navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
           }
         } else {
-          
+
           console.error("Failed to refresh token after multiple attempts.");
           localStorage.removeItem("jwtToken");
           syncSession();
@@ -1250,8 +1260,8 @@ async function fetchUseStatus() {
   function renderFriendList(friends) {
     const friendListContainer = document.querySelector(".friend-list");
     if (!friendListContainer) {
-        console.error("Friend list container not found!");
-        return;
+      console.error("Friend list container not found!");
+      return;
     }
 
     // Clear the container safely
@@ -1259,171 +1269,171 @@ async function fetchUseStatus() {
 
     // Loop through the friends list and securely build DOM elements
     friends.forEach((friend) => {
-        // Create friend item container
-        const friendItem = document.createElement("div");
-        friendItem.className = "friend-item";
-        friendItem.dataset.friendId = friend.id;
+      // Create friend item container
+      const friendItem = document.createElement("div");
+      friendItem.className = "friend-item";
+      friendItem.dataset.friendId = friend.id;
 
-        // Create friend avatar
-        const avatar = document.createElement("img");
-        avatar.src = friend.profile_picture || "default-avatar.jpg";
-        avatar.className = "friend-avatar";
-        avatar.alt = "Friend Avatar";
+      // Create friend avatar
+      const avatar = document.createElement("img");
+      avatar.src = friend.profile_picture || "default-avatar.jpg";
+      avatar.className = "friend-avatar";
+      avatar.alt = "Friend Avatar";
 
-        // Create friend info container
-        const infoContainer = document.createElement("div");
-        infoContainer.className = "friend-info";
+      // Create friend info container
+      const infoContainer = document.createElement("div");
+      infoContainer.className = "friend-info";
 
-        // Add friend name
-        const name = document.createElement("div");
-        name.className = "friend-name";
-        name.textContent = friend.nickname;
+      // Add friend name
+      const name = document.createElement("div");
+      name.className = "friend-name";
+      name.textContent = friend.nickname;
 
-        // Add friend status
-        const status = document.createElement("div");
-        status.className = "friend-status";
-        status.textContent = friend.status || "Offline";
+      // Add friend status
+      const status = document.createElement("div");
+      status.className = "friend-status";
+      status.textContent = friend.status || "Offline";
 
-        // Append elements to the friend info container
-        infoContainer.appendChild(name);
-        infoContainer.appendChild(status);
+      // Append elements to the friend info container
+      infoContainer.appendChild(name);
+      infoContainer.appendChild(status);
 
-        // Append avatar and info container to the friend item
-        friendItem.appendChild(avatar);
-        friendItem.appendChild(infoContainer);
+      // Append avatar and info container to the friend item
+      friendItem.appendChild(avatar);
+      friendItem.appendChild(infoContainer);
 
-        // Append the friend item to the friend list container
-        friendListContainer.appendChild(friendItem);
+      // Append the friend item to the friend list container
+      friendListContainer.appendChild(friendItem);
 
-        // Add click event listener to initiate chat
-        friendItem.addEventListener("click", () => {
-            const friendId = friendItem.dataset.friendId;
-            const friendName = name.textContent;
-            const friendAvatar = avatar.src;
+      // Add click event listener to initiate chat
+      friendItem.addEventListener("click", () => {
+        const friendId = friendItem.dataset.friendId;
+        const friendName = name.textContent;
+        const friendAvatar = avatar.src;
 
-            console.log(`Starting chat with: ${friendName}`);
+        console.log(`Starting chat with: ${friendName}`);
 
-            // Disconnect any existing WebSocket and initiate a new one
-            disconnectWebSocket();
-            connectWebSocket(userData.nickname, friendId);
+        // Disconnect any existing WebSocket and initiate a new one
+        disconnectWebSocket();
+        connectWebSocket(userData.nickname, friendId);
 
-            friendListSection.classList.remove("active");
+        friendListSection.classList.remove("active");
 
-            // Update the chat window UI
-            document.getElementById("chatUserAvatar").src = friendAvatar;
-            document.getElementById("chatUserName").textContent = friendName;
+        // Update the chat window UI
+        document.getElementById("chatUserAvatar").src = friendAvatar;
+        document.getElementById("chatUserName").textContent = friendName;
 
-            // Show chat window
-            document.getElementById("defaultContent").classList.add("d-none");
-            document.getElementById("chatWindow").classList.remove("d-none");
+        // Show chat window
+        document.getElementById("defaultContent").classList.add("d-none");
+        document.getElementById("chatWindow").classList.remove("d-none");
 
-            // Clear previous messages
-            document.getElementById("chat-messages").textContent = "";
-        });
+        // Clear previous messages
+        document.getElementById("chat-messages").textContent = "";
+      });
 
-        // Add click event listener for the Block/Unblock button
-        const blockBtn = document.getElementById("blockBtn");
-        blockBtn.addEventListener("click", async function () {
-            console.log("Friend ID to block/unblock:", friend.id);
+      // Add click event listener for the Block/Unblock button
+      const blockBtn = document.getElementById("blockBtn");
+      blockBtn.addEventListener("click", async function () {
+        console.log("Friend ID to block/unblock:", friend.id);
 
-            if (blockBtn.textContent.trim() === "Block") {
-                await blockUser(friend.id);
-                blockBtn.textContent = "Unblock";
-                blockBtn.classList.remove("btn-danger");
-                blockBtn.classList.add("btn-success");
-            } else {
-                await unblockUser(friend.id);
-                blockBtn.textContent = "Block";
-                blockBtn.classList.remove("btn-success");
-                blockBtn.classList.add("btn-danger");
-            }
-        });
-
-        // Add click event listener for the Game Invite button
-        const invitePlayBtn = document.getElementById("invitePlayBtn");
-        invitePlayBtn.addEventListener("click", () => {
-            if (!friend.id) {
-                console.error("Friend ID not found!");
-                showNotification("Unable to initiate game invitation.");
-                return;
-            }
-
-            console.log("Game invite for Friend ID:", friend.id);
-
-            const invitePayload = {
-                type: "game_invite",
-                sender_id: userData.id,
-                sender_name: userData.nickname,
-                receiver_id: parseInt(friend.id),
-                invite_id: new Date().getTime(),
-            };
-
-            console.log("Sending game invite payload:", invitePayload);
-
-            if (socket && socket.readyState === WebSocket.OPEN) {
-                socket.send(JSON.stringify(invitePayload));
-                showNotification("Game invitation sent!");
-            } else {
-                showNotification("WebSocket is not connected. Try again.");
-            }
-        });
-
-        // Add event listener for the Modal Accept button
-        const modalAcceptButton = document.querySelector("#modalAcceptButton");
-        if (modalAcceptButton) {
-            modalAcceptButton.addEventListener("click", () => {
-                respondToInvite(inviteId, "accept");
-            });
+        if (blockBtn.textContent.trim() === "Block") {
+          await blockUser(friend.id);
+          blockBtn.textContent = "Unblock";
+          blockBtn.classList.remove("btn-danger");
+          blockBtn.classList.add("btn-success");
+        } else {
+          await unblockUser(friend.id);
+          blockBtn.textContent = "Block";
+          blockBtn.classList.remove("btn-success");
+          blockBtn.classList.add("btn-danger");
         }
+      });
+
+      // Add click event listener for the Game Invite button
+      const invitePlayBtn = document.getElementById("invitePlayBtn");
+      invitePlayBtn.addEventListener("click", () => {
+        if (!friend.id) {
+          console.error("Friend ID not found!");
+          showNotification("Unable to initiate game invitation.");
+          return;
+        }
+
+        console.log("Game invite for Friend ID:", friend.id);
+
+        const invitePayload = {
+          type: "game_invite",
+          sender_id: userData.id,
+          sender_name: userData.nickname,
+          receiver_id: parseInt(friend.id),
+          invite_id: new Date().getTime(),
+        };
+
+        console.log("Sending game invite payload:", invitePayload);
+
+        if (socket && socket.readyState === WebSocket.OPEN) {
+          socket.send(JSON.stringify(invitePayload));
+          showNotification("Game invitation sent!");
+        } else {
+          showNotification("WebSocket is not connected. Try again.");
+        }
+      });
+
+      // Add event listener for the Modal Accept button
+      const modalAcceptButton = document.querySelector("#modalAcceptButton");
+      if (modalAcceptButton) {
+        modalAcceptButton.addEventListener("click", () => {
+          respondToInvite(inviteId, "accept");
+        });
+      }
     });
-}
+  }
 
 
   fetchFriendList();
   async function blockUser(friendId) {
     const blockerId = userData.id;
     try {
-        const response = await fetch(`https://${location.host}/chat/block/${friendId}/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ blocker_id: blockerId }),
-        });
+      const response = await fetch(`https://${location.host}/chat/block/${friendId}/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ blocker_id: blockerId }),
+      });
 
-        const result = await response.json();
-        if (result.status === 'blocked') {
-            console.log("User successfully blocked:", result.message);
-            blockBtn.textContent = 'Unblock';
-            blockBtn.classList.remove('btn-danger');
-            blockBtn.classList.add('btn-success');
-        }
+      const result = await response.json();
+      if (result.status === 'blocked') {
+        console.log("User successfully blocked:", result.message);
+        blockBtn.textContent = 'Unblock';
+        blockBtn.classList.remove('btn-danger');
+        blockBtn.classList.add('btn-success');
+      }
     } catch (error) {
-        console.error('Error blocking user:', error);
+      console.error('Error blocking user:', error);
     }
-}
+  }
 
-async function unblockUser(friendId) {
+  async function unblockUser(friendId) {
     const blockerId = userData.id;
     try {
-        const response = await fetch(`https://${location.host}/chat/unblock/${friendId}/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ blocker_id: blockerId }),
-        });
+      const response = await fetch(`https://${location.host}/chat/unblock/${friendId}/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ blocker_id: blockerId }),
+      });
 
-        const result = await response.json();
-        if (result.status === 'unblocked') {
-            console.log("User successfully unblocked:", result.message);
-            blockBtn.textContent = 'Block';
-            blockBtn.classList.remove('btn-success');
-            blockBtn.classList.add('btn-danger');
-        }
+      const result = await response.json();
+      if (result.status === 'unblocked') {
+        console.log("User successfully unblocked:", result.message);
+        blockBtn.textContent = 'Block';
+        blockBtn.classList.remove('btn-success');
+        blockBtn.classList.add('btn-danger');
+      }
     } catch (error) {
-        console.error('Error unblocking user:', error);
+      console.error('Error unblocking user:', error);
     }
-}
+  }
 
 
-   async function updateBlockButtonState(friendId) {
+  async function updateBlockButtonState(friendId) {
     try {
       const response = await fetch(`https://${location.host}/chat/status/${friendId}/`);
       const data = await response.json();
@@ -1442,12 +1452,12 @@ async function unblockUser(friendId) {
     }
   }
   const blockBtn = document.getElementById('blockBtn');
-    if (blockBtn) {
-      const friendId = blockBtn.dataset.friendId; // Get the friendId from the button's dataset
-      if (friendId) {
-        updateBlockButtonState(friendId); // Call the function with the friendId
-      }
+  if (blockBtn) {
+    const friendId = blockBtn.dataset.friendId; // Get the friendId from the button's dataset
+    if (friendId) {
+      updateBlockButtonState(friendId); // Call the function with the friendId
     }
+  }
 
   // Initial call to set up listeners in case elements are already present
   // To get the other user profil

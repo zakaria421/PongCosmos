@@ -81,7 +81,7 @@ export function initLoginPage() {
 
     console.log("FORM: ", sanitizedData);
     try {
-      let response = await fetch("https://0.0.0.0:8443/api/signup/", {
+      let response = await fetch("https://10.12.9.10:8443/api/signup/", {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
@@ -118,13 +118,8 @@ export function initLoginPage() {
     event.preventDefault(); // Prevent the default signUp submission
     const formData = new FormData(this);
     const sanitizedData = sanitizeFormData(formData);
-    // console.log(formData.get("nickname"));
-    // console.log(formData.get("password"));
-    // console.log(formData.get('email'));
-    // console.log(formData);
     try {
-      let response = await fetch("https://0.0.0.0:8443/api/signin/", {
-        // Specify the server endpoint directly
+      let response = await fetch("https://10.12.9.10:8443/api/signin/", {
         headers: {
           "Content-Type": "application/json", // Ensure the content type is set to JSON
           Accept: "application/json", // Optionally, specify the format you want the response in
@@ -152,7 +147,7 @@ export function initLoginPage() {
                 alert("Invalid OTP. Please enter a 6-digit code.");
                 return;
               }
-              const response = await fetch(`https://0.0.0.0:8443/api/2fa/verify/`, {
+              const response = await fetch(`https://10.12.9.10:8443/api/2fa/verify/`, {
                 method: "POST",
                 headers: {
                   Authorization: `Bearer ${token}`,
@@ -171,7 +166,28 @@ export function initLoginPage() {
                 syncSession();
                 hideQRCodeModal();
                 navigateTo("home");
-              } else {
+              } else if (response.status === 401) {
+                console.log("Access token expired. Refreshing token...");
+        
+                if (refreshAttempts < maxRefreshAttempts) {
+                  refreshAttempts++;
+                  token = await refreshAccessToken();
+        
+                  if (token) {
+                    return handlef();
+                  } else {
+                    localStorage.removeItem("jwtToken");
+                    syncSession();
+                    navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+                  }
+                } else {
+                  console.error("Failed to refresh token after multiple attempts.");
+                  localStorage.removeItem("jwtToken");
+                  syncSession();
+                  navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+                }
+              } 
+              else {
                 alert("Failed to verify 2FA. Please try again.");
               }
             } catch (error) {
