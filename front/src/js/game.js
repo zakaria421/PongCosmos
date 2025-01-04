@@ -78,7 +78,6 @@ export function initGamePage(mode) {
         console.error("close socket before unload");
         socket.close();
       }
-      // console.error("playWithFriend222222222222");
       if(gametype === "playWithFriend")
       {
         sessionStorage.removeItem("playerReloaded"); // Remove the key

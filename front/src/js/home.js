@@ -1,8 +1,10 @@
 // document.addEventListener("DOMContentLoaded", function () {
-import { navigateTo } from "./main.js";
+import { getOnlineUsers, navigateTo } from "./main.js";
 import { eventRegistry } from "./main.js";
 import { syncSession } from "./main.js";
 import { sanitizeInput, sanitizeObject } from "./main.js";
+import { disconnectSocket } from "./main.js";
+import StatusSocket from "./main.js";
 
 
 export function initHomePage() {
@@ -345,9 +347,9 @@ export function initHomePage() {
 
       if (clickedItem && clickedItem.querySelector("#log-out")) {
         console.log("Logging out...");
+        await disconnectSocket();
         localStorage.removeItem('jwtToken');
         localStorage.removeItem("refresh");
-
         syncSession();
         navigateTo("landing");
       }
@@ -1326,7 +1328,7 @@ export function initHomePage() {
       // Add friend status
       const status = document.createElement("div");
       status.className = "friend-status";
-      status.textContent = friend.status || "Offline";
+      status.textContent = friend.status;
 
       // Append elements to the friend info container
       infoContainer.appendChild(name);
@@ -1338,7 +1340,7 @@ export function initHomePage() {
 
       // Append the friend item to the friend list container
       friendListContainer.appendChild(friendItem);
-
+      getOnlineUsers();
       // Add click event listener to initiate chat
       friendItem.addEventListener("click", () => {
         const friendId = friendItem.dataset.friendId;
@@ -1436,12 +1438,30 @@ export function initHomePage() {
               showNotification("One of the users is already in a game. Try again later.");
               return;
             }
+          }else if (response.status === 401) {
+            console.log("Access token expired. Refreshing token...");
+      
+            if (refreshAttempts < maxRefreshAttempts) {
+      
+              refreshAttempts++;
+      
+              token = await refreshAccessToken();
+      
+              if (token) {
+                return inviteButton();
+              } else {
+                localStorage.removeItem("jwtToken");
+            localStorage.removeItem("refresh");
+      
+                syncSession();
+                navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+              }
+            }
           }
+          
         }catch(error){
           console.error("Error fetching user status:", error);
         }
-
-
       });
 
       // Add event listener for the Modal Accept button
@@ -1452,6 +1472,7 @@ export function initHomePage() {
         });
       }
     });
+    console.log("Friend list rendered successfully.", !!StatusSocket);
   }
 
 
@@ -1459,56 +1480,60 @@ export function initHomePage() {
   async function blockUser(friendId) {
     const blockerId = userData.id;
     try {
-      const response = await fetch(`https://${location.host}/chat/block/${friendId}/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ blocker_id: blockerId }),
-      });
+        const response = await fetch(`https://${location.host}/chat/block/${friendId}/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ blocker_id: blockerId }),
+        });
 
-      const result = await response.json();
-      if (result.status === 'blocked') {
-        console.log("User successfully blocked:", result.message);
-        blockBtn.textContent = 'Unblock';
-        blockBtn.classList.remove('btn-danger');
-        blockBtn.classList.add('btn-success');
-      }
+        const result = await response.json();
+        if (result.status === 'blocked') {
+            console.log("User successfully blocked:", result.message);
+            blockBtn.textContent = 'Unblock';
+            blockBtn.classList.remove('btn-danger');
+            blockBtn.classList.add('btn-success');
+        }
     } catch (error) {
-      console.error('Error blocking user:', error);
+        console.error('Error blocking user:', error);
     }
-  }
+}
 
-  async function unblockUser(friendId) {
+async function unblockUser(friendId) {
     const blockerId = userData.id;
     try {
-      const response = await fetch(`https://${location.host}/chat/unblock/${friendId}/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ blocker_id: blockerId }),
-      });
+        const response = await fetch(`https://${location.host}/chat/unblock/${friendId}/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ blocker_id: blockerId }),
+        });
 
-      const result = await response.json();
-      if (result.status === 'unblocked') {
-        console.log("User successfully unblocked:", result.message);
-        blockBtn.textContent = 'Block';
-        blockBtn.classList.remove('btn-success');
-        blockBtn.classList.add('btn-danger');
-      }
+        const result = await response.json();
+        // console.log("______________Unblock result_______: ", result);
+        if (result.status === 'unblocked') {
+            console.log("User successfully unblocked:", result.message);
+            blockBtn.textContent = 'Block';
+            blockBtn.classList.remove('btn-success');
+            blockBtn.classList.add('btn-danger');
+        }
     } catch (error) {
-      console.error('Error unblocking user:', error);
+        console.error('Error unblocking user:', error);
     }
-  }
+}
 
 
-  async function updateBlockButtonState(friendId) {
+   async function updateBlockButtonState(friendId) {
     try {
       const response = await fetch(`https://${location.host}/chat/status/${friendId}/`);
       const data = await response.json();
+      // console.log("Block button data:", data);
 
       if (data.is_blocked) {
+        // console.log("User is blocked.");
         blockBtn.textContent = "Unblock";
         blockBtn.classList.remove("btn-danger");
         blockBtn.classList.add("btn-success");
       } else {
+        // console.log("User is not blocked.");
         blockBtn.textContent = "Block";
         blockBtn.classList.remove("btn-success");
         blockBtn.classList.add("btn-danger");
@@ -1517,13 +1542,13 @@ export function initHomePage() {
       console.error("Error updating block button:", error);
     }
   }
-  const blockBtn = document.getElementById('blockBtn');
-  if (blockBtn) {
-    const friendId = blockBtn.dataset.friendId; // Get the friendId from the button's dataset
-    if (friendId) {
-      updateBlockButtonState(friendId); // Call the function with the friendId
-    }
-  }
+  // const blockBtn = document.getElementById('blockBtn');
+  // if (blockBtn) {
+  //   const friendId = blockBtn.dataset.friendId; // Get the friendId from the button's dataset
+  //   if (friendId) {
+  //     updateBlockButtonState(friendId); // Call the function with the friendId
+  //   }
+  // }
 
   // Initial call to set up listeners in case elements are already present
   // To get the other user profil

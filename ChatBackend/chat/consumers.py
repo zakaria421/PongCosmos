@@ -591,7 +591,41 @@ class StatusConsumer(AsyncWebsocketConsumer):
             await self.broadcast_user_status(self.user.id, "offline")
             logger.info(f"___DBG___11___: User {self.online_id} marked offline.")
 
+    # async def handle_onlineCheck(self, event):
+    #     logger.info("___DBG___12___: Received onlineCheck event")
 
+    #     online_id = event.get("online_id")
+    #     if not online_id:
+    #         logger.warning("___DBG___: No 'online_id' provided in the event")
+    #         await self.send(text_data=json.dumps({
+    #             "type": "error",
+    #             "message": "Missing 'online_id' in request."
+    #         }))
+    #         return
+
+    #     if self.online_ids.get(online_id, 0) > 0:
+    #         status = "online"
+    #     else: 
+    #         status = "offline"
+
+    #     await self.send(text_data=json.dumps({
+    #         "type": "onlineCheckResponse",
+    #         "online_id": online_id,
+    #         "status": status,
+    #     }))
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
 # class StatusConsumer(AsyncWebsocketConsumer):
 #     async def connect(self):
 #         self.user = self.scope["user"]

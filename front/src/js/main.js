@@ -6,12 +6,12 @@ export const eventRegistry = [];
 
 
 
-let socket = null;
+// let socket = null;
 
-statusCheck()
+// statusCheck()
 let isRefreshing = false; // Flag to track if token refresh is in progress
-  let refreshAttempts = 0; // Retry counter for token refresh attempts
-  const maxRefreshAttempts = 100;
+let refreshAttempts = 0; // Retry counter for token refresh attempts
+const maxRefreshAttempts = 100;
 async function refreshAccessToken() {
   const refreshToken = localStorage.getItem("refresh");
 
@@ -53,11 +53,120 @@ async function refreshAccessToken() {
   }
 }
 
-async function statusCheck(){
-  try {
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+// async function statusCheck(){
+//   try {
+//     await new Promise((resolve) => setTimeout(resolve, 3000));
 
+//     const token = localStorage.getItem("jwtToken");
+//     let response = await fetch("https://0.0.0.0:8443/api/userinfo/", {
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//         "Content-Type": "application/json",
+//       },
+//       method: "GET",
+//     });
+
+//     if (response.ok) {
+//       const userData = await response.json();
+
+//       socket = new WebSocket(`wss://${location.host}/ws/status/?online_id=${userData.id}`);
+//       socket.onopen = async function (event) {
+//         socket.send(JSON.stringify({ type: "onlineCheck" }));
+//       }
+      
+//       socket.onmessage = function (event) {
+//         const data = JSON.parse(event.data);
+//         console.log("___DATA___DBG___ : ", data);
+//         if (data.type === "onlineCheckResponse") {
+//           console.log("___DBG___ : Online check response received");
+//           console.log("User ID:", data.online_id, "Status:", data.status);
+//           // Handle the onlineCheckResponse message here
+//         } else if (data.type === "user.status") {
+//           console.log("___DBG___ : User status update received");
+//           console.log("User ID:", data.user_id, "Status:", data.status);
+//           // if (data.status == 'online') {
+//           //   console.log("___FREIND____STATUS_____DBG___ :", friend.status);
+//           // }
+//           // else if (data.status == 'offline') {
+
+//           // }
+//         } 
+//         else {
+//           console.log("___DBG___ : Unhandled message type:", data.type);
+//         }
+//       };
+//     } else if (response.status === 401) {
+//       console.log("Access token expired. Refreshing token...");
+
+//       if (refreshAttempts < maxRefreshAttempts) {
+
+//         refreshAttempts++;
+
+//         token = await refreshAccessToken();
+
+//         if (token) {
+//           return statusCheck();
+//         } else {
+//           localStorage.removeItem("jwtToken");
+//       localStorage.removeItem("refresh");
+
+//           syncSession();
+//           navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+//         }
+//       } else {
+//         console.error("Failed to refresh token after multiple attempts.");
+//         localStorage.removeItem("jwtToken");
+//       localStorage.removeItem("refresh");
+
+//         syncSession();
+//         navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+//       }
+//     }
+//   } catch (err) {
+//     console.error("Error fetching user data:", err);
+//   }
+// }
+
+
+
+
+// export async function disconnectSocket() {
+//   console.log('___DISCONNECT___SOCKET___CALLED___');
+//   if (socket) {
+//     socket.send(JSON.stringify({ type: "set_offline" }));
+//     socket.close();
+//     console.log("WebSocket disconnected.");
+//     socket = null; // Ensure the socket variable is cleared
+//   } else {
+//     console.log("No active WebSocket connection to disconnect.");
+//   }
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const ss = { socket: null };
+
+export default ss;
+
+let userData = null;
+
+statusCheck();
+
+async function statusCheck() {
+  try {
     const token = localStorage.getItem("jwtToken");
+
     let response = await fetch("https://0.0.0.0:8443/api/userinfo/", {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -67,35 +176,13 @@ async function statusCheck(){
     });
 
     if (response.ok) {
-      const userData = await response.json();
+      userData = await response.json();
+      console.log("___DBG___ : User data fetched successfully:", userData);
 
-      socket = new WebSocket(`wss://${location.host}/ws/status/?online_id=${userData.id}`);
-      socket.onopen = async function (event) {
-        socket.send(JSON.stringify({ type: "onlineCheck" }));
-      }
-      
-      socket.onmessage = function (event) {
-        const data = JSON.parse(event.data);
-        console.log("___DATA___DBG___ : ", data);
-        if (data.type === "onlineCheckResponse") {
-          console.log("___DBG___ : Online check response received");
-          console.log("User ID:", data.online_id, "Status:", data.status);
-          // Handle the onlineCheckResponse message here
-        } else if (data.type === "user.status") {
-          console.log("___DBG___ : User status update received");
-          console.log("User ID:", data.user_id, "Status:", data.status);
-          // if (data.status == 'online') {
-          //   console.log("___FREIND____STATUS_____DBG___ :", friend.status);
-          // }
-          // else if (data.status == 'offline') {
+      await markUserOnline(token);
 
-          // }
-        } 
-        else {
-          console.log("___DBG___ : Unhandled message type:", data.type);
-        }
-      };
-    } else if (response.status === 401) {
+      setupWebSocket(userData.id);
+    }else if (response.status === 401) {
       console.log("Access token expired. Refreshing token...");
 
       if (refreshAttempts < maxRefreshAttempts) {
@@ -113,30 +200,205 @@ async function statusCheck(){
           syncSession();
           navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
         }
-      } else {
-        console.error("Failed to refresh token after multiple attempts.");
-        localStorage.removeItem("jwtToken");
-      localStorage.removeItem("refresh");
-
-        syncSession();
-        navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
       }
     }
+
   } catch (err) {
     console.error("Error fetching user data:", err);
   }
 }
 
+async function markUserOnline(token) {
+  try {
+    let response = await fetch("https://0.0.0.0:8443/api/online-offline/", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    });
+
+    if (response.ok) {
+      console.log("___DBG___ : User marked as online.");
+    } else if (response.status === 401) {
+      console.log("Access token expired. Refreshing token...");
+
+      if (refreshAttempts < maxRefreshAttempts) {
+
+        refreshAttempts++;
+
+        token = await refreshAccessToken();
+
+        if (token) {
+          return markUserOnline();
+        } else {
+          localStorage.removeItem("jwtToken");
+      localStorage.removeItem("refresh");
+
+          syncSession();
+          navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Error marking user online:", err);
+  }
+}
+
+async function markUserOffline() {
+  try {
+    const token = localStorage.getItem("jwtToken");
+    let response = await fetch("https://0.0.0.0:8443/api/online-offline/", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      method: "DELETE",
+    });
+
+    if (response.ok) {
+      console.log("___DBG___ : User marked as offline.");
+    } else if (response.status === 401) {
+      console.log("Access token expired. Refreshing token...");
+
+      if (refreshAttempts < maxRefreshAttempts) {
+
+        refreshAttempts++;
+
+        token = await refreshAccessToken();
+
+        if (token) {
+          return markUserOffline();
+        } else {
+          localStorage.removeItem("jwtToken");
+      localStorage.removeItem("refresh");
+
+          syncSession();
+          navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Error marking user offline:", err);
+  }
+}
+
+function setupWebSocket(userId) {
+  ss.socket = new WebSocket(`wss://${location.host}/ws/status/?online_id=${userId}`);
+
+  ss.socket.onopen = function () {
+    console.log("WebSocket connection opened.");
+    ss.socket.send(JSON.stringify({ type: "onlineCheck" }));
+  };
+
+  ss.socket.onmessage = function (event) {
+    const data = JSON.parse(event.data);
+    console.log("___DATA___DBG___ : ", data);
+
+    if (data.type === "onlineCheckResponse") {
+      console.log("___DBG___ : Online check response received");
+      console.log("User ID:", data.online_id, "Status:", data.status);
+    } else if (data.type === "user.status") {
+        console.log("___DBG___ : User status update received");
+        console.log("User ID:", data.user_id, "Status:", data.status);
+        if (data.status == 'online') {
+            console.log("_____________________User is online_________________");
+            updateFriendStatus(data.user_id, 'online');
+        } else if (data.status == 'offline') {
+            updateFriendStatus(data.user_id, 'offline');
+        }
+    }
+  };
+}
+
+function updateFriendStatus(userId, status) {
+  const friendItem = document.querySelector(`.friend-item[data-friend-id="${userId}"]`);
+  if (friendItem) {
+    const statusElement = friendItem.querySelector('.friend-status');
+    console.log("_____________CHECK_________STATUS__________", statusElement);
+    if (statusElement) {
+      statusElement.textContent = status;
+      console.log(`Status updated fooooor user ${userId}: ${status}`);
+    }
+  } else {
+    console.log("Friend not found");
+  }
+}
 
 
+export async function getOnlineUsers() {
+  try {
+    const token = localStorage.getItem("jwtToken");
+    const response = await fetch("https://0.0.0.0:8443/api/online-offline/", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      method: "GET",
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log("___DBG___ : Online users fetched successfully:", data.online_users);
+      updateOnlineUsersUI(data.online_users);
+    }else if (response.status === 401) {
+      console.log("Access token expired. Refreshing token...");
+
+      if (refreshAttempts < maxRefreshAttempts) {
+
+        refreshAttempts++;
+
+        token = await refreshAccessToken();
+
+        if (token) {
+          return getOnlineUsers();
+        } else {
+          localStorage.removeItem("jwtToken");
+      localStorage.removeItem("refresh");
+
+          syncSession();
+          navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Error fetching online users:", err);
+  }
+}
+
+function updateOnlineUsersUI(onlineUsers) {
+  const friendItems = document.querySelectorAll(".friend-item");
+  console.log("_____________________FRIEND ID_________________ :", friendItems);
+  friendItems.forEach((item) => {
+    const friendId = item.getAttribute("data-friend-id");
+
+    if (onlineUsers.includes(parseInt(friendId))) {
+      const statusElement = item.querySelector(".friend-status");
+      if (statusElement) {
+        statusElement.textContent = "online";
+        console.log(`User ${friendId} is online.`);
+      }
+    } else {
+      // Mark as offline
+      const statusElement = item.querySelector(".friend-status");
+      if (statusElement) {
+        statusElement.textContent = "offline";
+        console.log(`User ${friendId} is offline.`);
+      }
+    }
+  });
+}
+
+getOnlineUsers();
 
 export async function disconnectSocket() {
   console.log('___DISCONNECT___SOCKET___CALLED___');
-  if (socket) {
-    socket.send(JSON.stringify({ type: "set_offline" }));
-    socket.close();
+  if (ss.socket) {
+    ss.socket.send(JSON.stringify({ type: "set_offline" }));
+    markUserOffline();
+    ss.socket.close();
     console.log("WebSocket disconnected.");
-    socket = null; // Ensure the socket variable is cleared
+    ss.socket = null;
   } else {
     console.log("No active WebSocket connection to disconnect.");
   }
@@ -144,34 +406,27 @@ export async function disconnectSocket() {
 
 
 
-// fetchUseStatus();
 
-// async function fetchUseStatus() {
-//   const token = localStorage.getItem("jwtToken");
-//   try {
-//     await new Promise((resolve) => setTimeout(resolve, 6000));
-//     console.log("___________SLEEP________DBG__________");
-//     let response = await fetch("https://0.0.0.0:8443/api/online-offline/", {
-//       headers: {
-//         Authorization: `Bearer ${token}`,
-//         "Content-Type": "application/json",
-//       },
-//       method: "GET",
-//     });
 
-//     if (response.ok) {
-//       const userData = await response.json();
 
-//       console.log("___DBG___ : Connection established", userData); 
-//     }
-//     else if (response.status === 401) {
-//       console.log("___DBG___ : Authentication required...");
-//     }
-//   }
-//   catch (err) {
-//     console.error("Error fetching user data:", err);
-//   }
-// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -68,68 +68,6 @@ class MessageListView(APIView):
 
 
 
-# @csrf_exempt
-# def block_user(request, friend_id):
-#     if request.method == "POST":
-#         try:
-#             data = json.loads(request.body.decode('utf-8'))
-#             blocker_id = data.get('blocker_id')
-
-#             # Check if blocker and blocked user exist
-#             blocker = User.objects.get(id=blocker_id)
-#             blocked_user = User.objects.get(id=friend_id)
-
-#             # Create a block relationship
-#             Block.objects.get_or_create(blocker=blocker, blocked_user=blocked_user)
-
-#             return JsonResponse({"status": "blocked", "message": f"User {blocked_user.username} has been blocked."})
-
-#         except User.DoesNotExist:
-#             return JsonResponse({"error": "User not found."}, status=404)
-#         except Exception as e:
-#             return JsonResponse({"error": str(e)}, status=500)
-#     return JsonResponse({"error": "Invalid request method."}, status=400)
-
-# @csrf_exempt
-# def unblock_user(request, friend_id):
-#     if request.method == "POST":
-#         try:
-#             data = json.loads(request.body.decode('utf-8'))
-#             blocker_id = data.get('blocker_id')
-
-#             # Fetch the blocker and blocked users
-#             blocker = User.objects.get(id=blocker_id)
-#             blocked_user = User.objects.get(id=friend_id)
-
-            
-#             # Delete the block entry    
-#             deleted, _ = Block.objects.filter(blocker=blocker, blocked_user=blocked_user).delete()
-
-#             if deleted > 0:
-#                 return JsonResponse({"status": "unblocked", "message": f"User {blocked_user.username} has been unblocked."}, status=200)
-#             else:
-#                 return JsonResponse({"error": "No block entry found to delete."}, status=404)
-
-#         except User.DoesNotExist:
-#             return JsonResponse({"error": "User not found."}, status=404)
-#         except Exception as e:
-#             return JsonResponse({"error": str(e)}, status=500)
-#     return JsonResponse({"error": "Invalid request method."}, status=400)
-
-
-
-# @csrf_exempt
-# def block_status(request, friend_id):
-#     if request.method == "GET":
-#         try:
-#             blocker_id = request.user.id
-#             is_blocked = Block.objects.filter(blocker_id=blocker_id, blocked_user_id=friend_id).exists()
-#             return JsonResponse({"is_blocked": is_blocked}, status=200)
-#         except Exception as e:
-#             return JsonResponse({"error": str(e)}, status=500)
-#     return JsonResponse({"error": "Invalid request method."}, status=400)
-
-
 @csrf_exempt
 def block_user(request, friend_id):
     if request.method == "POST":
@@ -141,24 +79,16 @@ def block_user(request, friend_id):
             blocker = User.objects.get(id=blocker_id)
             blocked_user = User.objects.get(id=friend_id)
 
-            # Create or update the block relationship
-            block, created = Block.objects.update_or_create(
-                blocker=blocker,
-                blocked_user=blocked_user,
-                defaults={"status": "blocked"}
-            )
+            # Create a block relationship
+            Block.objects.get_or_create(blocker=blocker, blocked_user=blocked_user)
 
-            return JsonResponse({
-                "status": "blocked",
-                "message": f"User {blocked_user.username} has been blocked."
-            }, status=201 if created else 200)
+            return JsonResponse({"status": "blocked", "message": f"User {blocked_user.username} has been blocked."})
 
         except User.DoesNotExist:
             return JsonResponse({"error": "User not found."}, status=404)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
     return JsonResponse({"error": "Invalid request method."}, status=400)
-
 
 @csrf_exempt
 def unblock_user(request, friend_id):
@@ -171,18 +101,14 @@ def unblock_user(request, friend_id):
             blocker = User.objects.get(id=blocker_id)
             blocked_user = User.objects.get(id=friend_id)
 
-            # Update or delete the block entry
-            block = Block.objects.filter(blocker=blocker, blocked_user=blocked_user).first()
+            
+            # Delete the block entry    
+            deleted, _ = Block.objects.filter(blocker=blocker, blocked_user=blocked_user).delete()
 
-            if block:
-                block.status = "unblocked"
-                block.save()
-                return JsonResponse({
-                    "status": "unblocked",
-                    "message": f"User {blocked_user.username} has been unblocked."
-                }, status=200)
+            if deleted > 0:
+                return JsonResponse({"status": "unblocked", "message": f"User {blocked_user.username} has been unblocked."}, status=200)
             else:
-                return JsonResponse({"error": "No block entry found."}, status=404)
+                return JsonResponse({"error": "No block entry found to delete."}, status=404)
 
         except User.DoesNotExist:
             return JsonResponse({"error": "User not found."}, status=404)
@@ -191,17 +117,91 @@ def unblock_user(request, friend_id):
     return JsonResponse({"error": "Invalid request method."}, status=400)
 
 
+
 @csrf_exempt
 def block_status(request, friend_id):
     if request.method == "GET":
         try:
             blocker_id = request.user.id
-            is_blocked = Block.objects.filter(
-                blocker_id=blocker_id,
-                blocked_user_id=friend_id,
-                status="blocked"
-            ).exists()
+            is_blocked = Block.objects.filter(blocker_id=blocker_id, blocked_user_id=friend_id).exists()
             return JsonResponse({"is_blocked": is_blocked}, status=200)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
     return JsonResponse({"error": "Invalid request method."}, status=400)
+
+
+# @csrf_exempt
+# def block_user(request, friend_id):
+#     if request.method == "POST":
+#         try:
+#             data = json.loads(request.body.decode('utf-8'))
+#             blocker_id = data.get('blocker_id')
+
+#             # Check if blocker and blocked user exist
+#             blocker = User.objects.get(id=blocker_id)
+#             blocked_user = User.objects.get(id=friend_id)
+
+#             # Create or update the block relationship
+#             block, created = Block.objects.update_or_create(
+#                 blocker=blocker,
+#                 blocked_user=blocked_user,
+#                 defaults={"status": "blocked"}
+#             )
+
+#             return JsonResponse({
+#                 "status": "blocked",
+#                 "message": f"User {blocked_user.username} has been blocked."
+#             }, status=201 if created else 200)
+
+#         except User.DoesNotExist:
+#             return JsonResponse({"error": "User not found."}, status=404)
+#         except Exception as e:
+#             return JsonResponse({"error": str(e)}, status=500)
+#     return JsonResponse({"error": "Invalid request method."}, status=400)
+
+
+# @csrf_exempt
+# def unblock_user(request, friend_id):
+#     if request.method == "POST":
+#         try:
+#             data = json.loads(request.body.decode('utf-8'))
+#             blocker_id = data.get('blocker_id')
+
+#             # Fetch the blocker and blocked users
+#             blocker = User.objects.get(id=blocker_id)
+#             blocked_user = User.objects.get(id=friend_id)
+
+#             # Update or delete the block entry
+#             block = Block.objects.filter(blocker=blocker, blocked_user=blocked_user).first()
+
+#             if block:
+#                 block.status = "unblocked"
+#                 block.save()
+#                 return JsonResponse({
+#                     "status": "unblocked",
+#                     "message": f"User {blocked_user.username} has been unblocked."
+#                 }, status=200)
+#             else:
+#                 return JsonResponse({"error": "No block entry found."}, status=404)
+
+#         except User.DoesNotExist:
+#             return JsonResponse({"error": "User not found."}, status=404)
+#         except Exception as e:
+#             return JsonResponse({"error": str(e)}, status=500)
+#     return JsonResponse({"error": "Invalid request method."}, status=400)
+
+
+# @csrf_exempt
+# def block_status(request, friend_id):
+#     if request.method == "GET":
+#         try:
+#             blocker_id = request.user.id
+#             is_blocked = Block.objects.filter(
+#                 blocker_id=blocker_id,
+#                 blocked_user_id=friend_id,
+#                 status="blocked"
+#             ).exists()
+#             return JsonResponse({"is_blocked": is_blocked}, status=200)
+#         except Exception as e:
+#             return JsonResponse({"error": str(e)}, status=500)
+#     return JsonResponse({"error": "Invalid request method."}, status=400)

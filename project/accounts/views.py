@@ -128,102 +128,35 @@ class Disable2FAView(APIView):
 
 
 
-online_users = {}
-
-# class OnlineOfflineView(APIView):
-#     permission_classes = [IsAuthenticated]
-
-#     def post(self, request):
-#         logger.info(f"________marking user {request.user.id} as online")
-#         logger.info("__________Marking user as online_________")
-#         user_id = request.user.id
-#         logger.info(f"________marking user {user_id} as online")
-
-#         online_users[user_id] = online_users.get(user_id, 0) + 1
-#         logger.info(f"Current online users: {online_users}")
-
-#         return Response({"message": f"User {user_id} marked as online"}, status=200)
-
-#     def delete(self, request):
-        
-#         user_id = request.user.id
-#         logger.info(f"Marking user {user_id} as offline")
-
-#         if user_id in online_users:
-#             online_users[user_id] -= 1
-#             if online_users[user_id] <= 0:
-#                 del online_users[user_id]
-#                 logger.info(f"User {user_id} fully removed from online list")
-#         else:
-#             logger.warning(f"User {user_id} is not in the online list")
-
-#         logger.info(f"Current online users: {online_users}")
-#         return Response({"message": f"User {user_id} marked as offline"}, status=200)
-
-#     def get(self, request):
-        
-#         logger.info("__________Fetching list of onlineusers_________")
-#         return Response({"online_users": list(online_users.keys())}, status=200)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 class OnlineOfflineView(APIView):
     permission_classes = [IsAuthenticated]
+    online_users = {} 
 
     def post(self, request):
-        """
-        Mark the user as online or increment their session count.
-        """
         user_id = request.user.id
-        print(f"Marking user {user_id} as online.")
+        print(f"___________+Marking user {user_id} as online.______")
+        self.online_users[user_id] = self.online_users.get(user_id, 0) + 1
 
-        # Increment the session count for the user
-        if user_id in online_users:
-            online_users[user_id] += 1
-        else:
-            online_users[user_id] = 1
-
-        print(f"Current online users: {online_users}")
+        print(f"Current online users: {self.online_users}")
         return Response({"message": f"User {user_id} marked as online."}, status=200)
 
     def delete(self, request):
-        """
-        Mark the user as offline or decrement their session count.
-        """
         user_id = request.user.id
-        print(f"Marking user {user_id} as offline.")
+        print(f"_____________Marking user {user_id} as offline.________________")
 
-        if user_id in online_users:
-            online_users[user_id] -= 1
-            if online_users[user_id] <= 0:
-                del online_users[user_id]
+        if user_id in self.online_users:
+            self.online_users[user_id] -= 1
+
+            if self.online_users[user_id] <= 0:
+                del self.online_users[user_id]
                 print(f"User {user_id} fully removed from online list.")
         else:
-            logger.warning(f"User {user_id} is not in the online list.")
+            print(f"User {user_id} is not in the online list.")
 
-        print(f"Current online users: {online_users}")
+        print(f"Current online users: {self.online_users}")
         return Response({"message": f"User {user_id} marked as offline."}, status=200)
 
     def get(self, request):
-        """
-        Retrieve the list of currently online users.
-        """
+        
         print("Fetching the list of online users.")
-        return Response({"online_users": list(online_users.keys())}, status=200)
-
-
-
-
-
+        return Response({"online_users": list(self.online_users.keys())}, status=200)
