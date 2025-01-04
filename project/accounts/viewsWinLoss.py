@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .models import UserProfile, Match
+from .serializers import UserProfileSerializer
 from django.shortcuts import get_object_or_404
 
 
@@ -40,23 +41,23 @@ class UpdateWinLossView(APIView):
             # Fetch the opponent user profile
             opponent_profile = get_object_or_404(UserProfile, nickname=opponent_name)
             match = Match.objects.create(
-                user=user_profile,
-                opponent_name=opponent_name,
-                score=score,
-                opponent_score=opponent_score
-            )
+                    user=user_profile,
+                    opponent=opponent_profile,  # Use the UserProfile object instead of the opponent's name
+                    score=score,
+                    opponent_score=opponent_score
+                )
             opponent_profile_picture = opponent_profile.profile_picture.url
             return Response({
                 "message": f"User {user_profile.nickname} updated successfully.",
                 "wins": user_profile.wins,
                 "losses": user_profile.losses,
-                "id":user_profile.id,
-                "get_id":user_id,
+                "id": user_profile.id,
+                "get_id": user_id,
                 "match": {
                     "match_id": match.match_id,
                     "score": score,
                     "opponent_score": opponent_score,
-                    "opponent_name" : opponent_name,
+                    "opponent_name": opponent_profile.nickname,  # Corrected opponent name retrieval
                     "opponent_profile_picture": opponent_profile_picture
                 }
             }, status=200)
@@ -68,47 +69,13 @@ class UpdateWinLossView(APIView):
         
 
 
-
 class matchHistory(APIView):
-    permission_classes = [IsAuthenticated]  # Ensure the user is authenticated
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        user_id = request.query_params.get('user_id')  # Get the user ID from query params
-        if not user_id:
-            return Response({"error": "User ID is required"}, status=400)
+        user_profile = request.user.user_profile  # Assuming user is authenticated and has a OneToOne relation with UserProfile
         
-        try:
-            # Fetch the user profile
-            user_profile = UserProfile.objects.get(user__id=user_id)
-
-            # Get all matches for the user
-            matches = Match.objects.filter(user=user_profile).values(
-                'match_id', 'score', 'opponent_score', 'opponent_name', 'match_date'
-            )
-
-            # Fetch the opponent profile picture for each match
-            match_details = []
-            for match in matches:
-                opponent_profile = get_object_or_404(UserProfile, id=match['opponent_name'])
-                opponent_profile_picture_url = opponent_profile.profile_picture.url
-                match_details.append({
-                    "match_id": match['match_id'],
-                    "score": match['score'],
-                    "opponent_score": match['opponent_score'],
-                    "opponent_name": match['opponent_name'],
-                    "opponent_profile_picture": opponent_profile_picture_url,
-                    "match_date": match['match_date']
-                })
-
-            return Response({
-                "wins": user_profile.wins,
-                "losses": user_profile.losses,
-                "id": user_profile.id,
-                "get_id": user_id,
-                "matches": match_details
-            }, status=200)
-
-        except UserProfile.DoesNotExist:
-            return Response({"error": "User not found"}, status=404)
-        except Exception as e:
-            return Response({"error": str(e)}, status=500)
+        # Serialize the user profile data including the match history
+        serializer = UserProfileSerializer(user_profile)
+        
+        return Response(serializer.data)

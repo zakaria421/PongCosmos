@@ -36,15 +36,15 @@ class UserProfile(models.Model):
 class Match(models.Model):
     match_id                = models.IntegerField()  # Manually managed
     user                    = models.ForeignKey('UserProfile', on_delete=models.CASCADE, related_name='matches')  # The user who played the match
-    opponent_name           = models.CharField(max_length=255)  # The opponent user
+    opponent                = models.ForeignKey('UserProfile', on_delete=models.CASCADE, related_name='opponent_matches')  # The opponent user
+    opponent_name           = models.CharField(max_length=255)  # Store the nickname at the time of the match
     score                   = models.IntegerField(default=0)
     opponent_score          = models.IntegerField(default=0)
     match_date              = models.DateTimeField(auto_now_add=True)  # Timestamp of when the match was created
-    #added recently
-    opponent_id             = models.IntegerField()
 
     def save(self, *args, **kwargs):
         if not self.match_id:
             # Get the count of matches for this user and increment it by 1
             self.match_id = Match.objects.filter(user=self.user).count() + 1
+        self.opponent_name = self.opponent.nickname  # Set opponent_name before saving
         super().save(*args, **kwargs)

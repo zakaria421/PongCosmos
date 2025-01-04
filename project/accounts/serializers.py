@@ -45,7 +45,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'nickname', 'profile_picture', 'mimeType', 'email', 
             'bio', 'friends', 'level', 'wins', 'losses', 'is_2fa_enabled',
-            'match_details','inGame'
+            'inGame', 'match_details'
         ]
 
     def get_profile_picture(self, obj):
@@ -54,26 +54,24 @@ class UserProfileSerializer(serializers.ModelSerializer):
         return None
 
     def get_match_details(self, obj):
-        """ Get match details including the opponent's profile picture. """
-        matches = Match.objects.filter(user=obj).values(
-            'match_id', 'score', 'opponent_score', 'opponent_name', 'match_date'
-        )
-
-        match_details = []
+        # Get the last 10 matches for the user
+        matches = Match.objects.filter(user=obj).order_by('-match_date')[:10]
+        
+        # Prepare match data
+        match_data = []
         for match in matches:
-            # Fetch opponent profile
-            opponent_profile = get_object_or_404(UserProfile, nickname=match['opponent_name'])
-            opponent_profile_picture_url = opponent_profile.profile_picture.url
-            match_details.append({
-                "match_id": match['match_id'],
-                "score": match['score'],
-                "opponent_score": match['opponent_score'],
-                "opponent_name": match['opponent_name'],
-                "opponent_profile_picture": opponent_profile_picture_url,
-                "match_date": match['match_date']
+            opponent_profile = match.opponent
+            match_data.append({
+                "match_id": match.match_id,
+                "score": match.score,
+                "opponent_score": match.opponent_score,
+                "opponent_name": opponent_profile.nickname,
+                "opponent_profile_picture": f"{settings.MEDIA_URL}{opponent_profile.profile_picture.name}",
+                "match_date": match.match_date
             })
         
-        return match_details
+        return match_data
+
 
 # Serializer for registration
 class RegistreSerializer(serializers.ModelSerializer):
