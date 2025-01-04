@@ -1385,31 +1385,63 @@ export function initHomePage() {
 
       // Add click event listener for the Game Invite button
       const invitePlayBtn = document.getElementById("invitePlayBtn");
-      invitePlayBtn.addEventListener("click", () => {
+      invitePlayBtn.addEventListener("click", async function test() {
+        console.log("Friend ID to invite for game______________");
         if (!friend.id) {
           console.error("Friend ID not found!");
           showNotification("Unable to initiate game invitation.");
           return;
         }
+        try{
+          const currentUserResponse = await fetch(`https://${location.host}/api/profile/ingame/?user_id=${userData.id}` , {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+            }
+          });
 
-        console.log("Game invite for Friend ID:", friend.id);
-
-        const invitePayload = {
-          type: "game_invite",
-          sender_id: userData.id,
-          sender_name: userData.nickname,
-          receiver_id: parseInt(friend.id),
-          invite_id: new Date().getTime(),
-        };
-
-        console.log("Sending game invite payload:", invitePayload);
-
-        if (socket && socket.readyState === WebSocket.OPEN) {
-          socket.send(JSON.stringify(invitePayload));
-          showNotification("Game invitation sent!");
-        } else {
-          showNotification("WebSocket is not connected. Try again.");
+          const friendResponse = await fetch(`https://${location.host}/api/profile/ingame/?user_id=${friend.id}` , {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+            }
+          });
+          if(currentUserResponse.ok && friendResponse.ok){
+            const currentUserStatus = await currentUserResponse.json();
+            const friendStatus = await friendResponse.json();
+            console.log("User status:", currentUserStatus.inGameStatus);
+            console.log("Friend status:", friendStatus.inGameStatus);
+            if(currentUserStatus.inGameStatus === false && friendStatus.inGameStatus === false){
+              console.log("Game invite for Friend ID:", friend.id);
+      
+              const invitePayload = {
+                type: "game_invite",
+                sender_id: userData.id,
+                sender_name: userData.nickname,
+                receiver_id: parseInt(friend.id),
+                invite_id: new Date().getTime(),
+              };
+      
+              console.log("Sending game invite payload:", invitePayload);
+      
+              if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify(invitePayload));
+                showNotification("Game invitation sent!");
+              } else {
+                showNotification("WebSocket is not connected. Try again.");
+              }
+            }else{
+              showNotification("One of the users is already in a game. Try again later.");
+              return;
+            }
+          }
+        }catch(error){
+          console.error("Error fetching user status:", error);
         }
+
+
       });
 
       // Add event listener for the Modal Accept button

@@ -1,0 +1,34 @@
+try{
+        const response = await fetch(`https://${location.host}/api/userinfo/` , {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          }
+        });
+        if(response.ok)
+        {
+          const data = await response.json();
+          if(data.inGame === true)
+          {
+            alert("You are already in a game");
+            navigateTo("home");
+          }
+          if(data.id)
+          {
+            id = data.id;
+          }
+          try{
+            const response = await fetch(`https://${location.host}/api/profile/ingame/true/` , {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+              },
+              body: JSON.stringify({
+                user_id : id,
+              }),
+            });
+          }
+        }
+    }

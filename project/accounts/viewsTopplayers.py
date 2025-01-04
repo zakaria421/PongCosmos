@@ -37,3 +37,17 @@ class UserInGame(APIView):
 
         user_profile.save()
         return Response({"success": "User game status updated"}, status=200)
+
+
+
+    def get(self, request):
+        user_id = request.query_params.get('user_id')
+        if not user_id:
+            return Response({"error": "User ID is required"}, status=400)
+
+        try:
+            user_profile = UserProfile.objects.get(user__id=user_id)
+        except UserProfile.DoesNotExist:
+            return Response({"error": "User profile not found"}, status=404)
+
+        return Response({"inGameStatus": user_profile.inGame}, status=200)

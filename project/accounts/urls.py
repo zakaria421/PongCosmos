@@ -27,6 +27,9 @@ urlpatterns = [
     
     ### Path to know if the user is already in game
     path('profile/ingame/<str:result>/', UserInGame.as_view()),
+    path('profile/ingame/', UserInGame.as_view()),
+
+    # path('profile/ingame/', UserInGame.as_view()),
     ####
     path('user-profile/<str:nickname>/', UserProfileDetailView.as_view(), name='user-profile-detail'),
     # *************************************************************************new
