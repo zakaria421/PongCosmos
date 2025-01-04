@@ -99,6 +99,8 @@ export function initGamePage(mode) {
   }
     function handleBeforeUnload() {
       console.error("change body style");
+      // event.preventDefault();
+      // event.returnValue = ""; 
       changeInGame();
       if (socket && socket.readyState === WebSocket.OPEN) {
         console.error("close socket before unload");
@@ -122,9 +124,12 @@ export function initGamePage(mode) {
       }
       window.removeEventListener("beforeunload", handleBeforeUnload);
       window.removeEventListener("popstate", handlePopState);
+      navigateTo("play");
     }
     function handlePopState() {
-      console.error("change body style");
+      console.error("change body style1");
+      // event.preventDefault();
+      // event.returnValue = ""; 
       changeInGame();
       if (socket && socket.readyState === WebSocket.OPEN) {
         console.error("close socket on back button");
@@ -149,6 +154,8 @@ export function initGamePage(mode) {
       }
       window.removeEventListener("beforeunload", handleBeforeUnload);
       window.removeEventListener("popstate", handlePopState);
+      navigateTo("play");
+      return;
     }
 
     firstwindow();

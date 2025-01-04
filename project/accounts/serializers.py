@@ -45,7 +45,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'nickname', 'profile_picture', 'mimeType', 'email', 
             'bio', 'friends', 'level', 'wins', 'losses', 'is_2fa_enabled',
-            'match_details'
+            'match_details','inGame'
         ]
 
     def get_profile_picture(self, obj):
