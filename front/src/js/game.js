@@ -3,7 +3,7 @@ import { navigateTo } from "./main.js";
 
 export function initGamePage(mode) {
 
- function game(mode) {
+  async function game(mode) {
     let gametype = "local";
     let gameMode = "player";
     let difficulty = "easy";
@@ -25,11 +25,35 @@ export function initGamePage(mode) {
       console.log("playWithFriend");
       gametype = "playWithFriend";
     }
-    userData();
+    let a =  await userData();
+    if(a === 1)
+    {
+      return;
+    }
+     async function changeInGame()
+    {
+      console.error("changeInGame");
+      try{
+        const response =  await fetch(`https://${location.host}/api/profile/ingame/false/` , {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          },
+          body: JSON.stringify({
+            user_id : id,
+          }),
+        });
+      }
+      catch(error)
+      {
+        console.error("Error:", error);
+      }
+    }
     async function userData()
     {
       try{
-        const response = await fetch(`https://${location.host}/api/userinfo/` , {
+        const response =  await fetch(`https://${location.host}/api/userinfo/` , {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -38,18 +62,20 @@ export function initGamePage(mode) {
         });
         if(response.ok)
         {
-          const data = await response.json();
+          const data = await  response.json();
+          console.log("___________USER______INFO_______",data);
           if(data.inGame === true)
           {
             alert("You are already in a game");
             navigateTo("home");
+            return 1;
           }
           if(data.id)
           {
             id = data.id;
           }
           try{
-            const response = await fetch(`https://${location.host}/api/profile/ingame/true/` , {
+            const response =  await fetch(`https://${location.host}/api/profile/ingame/true/` , {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -73,11 +99,12 @@ export function initGamePage(mode) {
   }
     function handleBeforeUnload() {
       console.error("change body style");
-     
+      changeInGame();
       if (socket && socket.readyState === WebSocket.OPEN) {
         console.error("close socket before unload");
         socket.close();
       }
+      // console.error("playWithFriend222222222222");
       if(gametype === "playWithFriend")
       {
         sessionStorage.removeItem("playerReloaded"); // Remove the key
@@ -87,15 +114,18 @@ export function initGamePage(mode) {
           document.querySelectorAll(".flex-container").forEach(element => element.remove());
         console.log(document.body.classList.remove("body-style"));
       }
-      window.removeEventListener("resize", sendNewSize);
-      window.removeEventListener("keyup", handleKeyEvent);
-      window.removeEventListener("keydown", handleKeyEvent);
+      if (typeof sendNewSize === "function" && typeof handleKeyEvent === "function") {
+        console.log("sendNewSize is defined");
+        window.removeEventListener("resize", sendNewSize);
+        window.removeEventListener("keyup", handleKeyEvent);
+        window.removeEventListener("keydown", handleKeyEvent);
+      }
       window.removeEventListener("beforeunload", handleBeforeUnload);
       window.removeEventListener("popstate", handlePopState);
     }
     function handlePopState() {
       console.error("change body style");
-
+      changeInGame();
       if (socket && socket.readyState === WebSocket.OPEN) {
         console.error("close socket on back button");
         socket.close();
@@ -179,6 +209,7 @@ export function initGamePage(mode) {
       button.appendChild(span);
       button.addEventListener("click", function () {
         win_dow.remove();
+        changeInGame();
         navigateTo("home");
       });
       inDiv.appendChild(button);
@@ -189,6 +220,7 @@ export function initGamePage(mode) {
       button.appendChild(span);
       button.addEventListener("click", function () {
         win_dow.remove();
+        changeInGame();
         navigateTo("play");
       });
       inDiv.appendChild(button);
@@ -197,7 +229,7 @@ export function initGamePage(mode) {
     }
     function firstwindow() {
       // add event listener to close the socket on beforeunload and popstate
-      if(gametype === "remote" || gametype === "playWithFriend" || gametype === "tournament" )
+      if(gametype === "remote" || gametype === "playWithFriend" || gametype === "tournament"  || gametype === "local")
         {
           window.addEventListener("beforeunload", handleBeforeUnload);
         }
@@ -348,6 +380,7 @@ export function initGamePage(mode) {
               sessionStorage.removeItem("playerReloaded"); // Remove the key
               console.log("Player reloaded the page.");
               // socket.close();
+              changeInGame();
               navigateTo("home");
               return; // Prevent further execution
             }
