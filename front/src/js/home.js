@@ -1385,7 +1385,7 @@ export function initHomePage() {
 
       // Add click event listener for the Game Invite button
       const invitePlayBtn = document.getElementById("invitePlayBtn");
-      invitePlayBtn.addEventListener("click", async function test() {
+      invitePlayBtn.addEventListener("click", async function inviteButton() {
         console.log("Friend ID to invite for game______________");
         if (!friend.id) {
           console.error("Friend ID not found!");
