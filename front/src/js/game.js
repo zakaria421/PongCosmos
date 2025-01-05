@@ -2,6 +2,7 @@ import * as tournamentFile from "./tournement.js";
 import { navigateTo } from "./main.js";
 
 export function initGamePage(mode) {
+
   async function game(mode) {
     let gametype = "local";
     let gameMode = "player";
@@ -33,7 +34,7 @@ export function initGamePage(mode) {
     {
       console.error("changeInGame");
       try{
-        const response =  await fetch(`https://${location.host}/api/profile/ingame/` , {
+        const response =  await fetch(`https://${location.host}/api/profile/ingame/false/` , {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -41,7 +42,6 @@ export function initGamePage(mode) {
           },
           body: JSON.stringify({
             user_id : id,
-            result: 'false',
           }),
         });
       }
@@ -63,12 +63,19 @@ export function initGamePage(mode) {
         if(response.ok)
         {
           const data = await  response.json();
+          console.log("___________USER______INFO_______",data);
+          if(data.inGame === true)
+          {
+            alert("You are already in a game");
+            navigateTo("home");
+            return 1;
+          }
           if(data.id)
           {
             id = data.id;
           }
           try{
-            const response =  await fetch(`https://${location.host}/api/profile/ingame/` , {
+            const response =  await fetch(`https://${location.host}/api/profile/ingame/true/` , {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -76,11 +83,8 @@ export function initGamePage(mode) {
               },
               body: JSON.stringify({
                 user_id : id,
-                result: 'true',
               }),
             });
-            const data = await response.json();
-            console.log(data)
           }
           catch(error)
           {
@@ -97,7 +101,7 @@ export function initGamePage(mode) {
       console.error("change body style");
       // event.preventDefault();
       // event.returnValue = ""; 
-      // changeInGame();
+      changeInGame();
       if (socket && socket.readyState === WebSocket.OPEN) {
         console.error("close socket before unload");
         socket.close();
@@ -121,217 +125,7 @@ export function initGamePage(mode) {
       window.removeEventListener("beforeunload", handleBeforeUnload);
       window.removeEventListener("popstate", handlePopState);
       navigateTo("play");
-}
-  /**
-   * 
-   * @returns // Function to set the 'isInGame' flag when entering the game
-function enterGame() {
-  localStorage.setItem('isInGame', 'true');
-}
-
-// Function to remove the 'isInGame' flag when the game ends
-function endGame() {
-  localStorage.removeItem('isInGame');
-}
-
-// Main game function to handle different game modes
-async function game(mode) {
-  let gametype = "local";
-  let gameMode = "player";
-  let difficulty = "easy";
-  let id = 0;
-  let socket;
-
-  // Determine game type based on the mode
-  switch (mode) {
-      case "local":
-          gametype = "local";
-          gameMode = "player";
-          break;
-      case "bot":
-          gametype = "local";
-          gameMode = "bot";
-          break;
-      case "remote":
-          gametype = "remote";
-          break;
-      case "tournament":
-          gametype = "tournament";
-          break;
-      case "playWithFriend":
-          console.log("playWithFriend");
-          gametype = "playWithFriend";
-          break;
-      default:
-          console.log("Unknown game mode");
-          return;
-  }
-
-  const user = await userData();
-  if (user === 1) {
-      return;
-  }
-
-  // Function to handle when the user data is fetched
-  async function userData() {
-      try {
-          const response = await fetch(`https://0.0.0.0:8443/api/userinfo/`, {
-              method: "GET",
-              headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-              },
-          });
-
-          if (response.ok) {
-              const data = await response.json();
-              console.log("___________USER______INFO_______", data);
-
-              if (localStorage.getItem('isInGame') === 'true') {
-                  endGame();
-                  navigateTo("home");
-                  return 1;
-              }
-
-              if (data.id) {
-                  enterGame();
-                  id = data.id;
-              }
-          }
-      } catch (error) {
-          console.error("Error:", error);
-      }
-  }
-
-  // Function to update the server when the user exits the game
-  async function changeInGame() {
-      console.error("changeInGame");
-      try {
-          const response = await fetch(`https://0.0.0.0:8443/api/profile/ingame/false/`, {
-              method: "POST",
-              keepalive: true,
-              headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-              },
-              body: JSON.stringify({
-                  user_id: id,
-              }),
-          });
-      } catch (error) {
-          console.error("Error:", error);
-      }
-  }
-
-  // Function to handle cleanup tasks when leaving the game
-  async function handleBeforeUnload() {
-      if (socket && socket.readyState === WebSocket.OPEN) {
-          socket.close();
-          console.log("WebSocket closed.");
-      }
-
-      // Cleanup sessionStorage, DOM elements, and event listeners
-      if (gametype === "playWithFriend") {
-          sessionStorage.removeItem("playerReloaded");
-      }
-      if (gametype === "tournament") {
-          document.querySelectorAll(".flex-container").forEach(el => el.remove());
-          document.body.classList.remove("body-style");
-      }
-
-      // Remove resize and keyboard event listeners if defined
-      if (typeof sendNewSize === "function" && typeof handleKeyEvent === "function") {
-          window.removeEventListener("resize", sendNewSize);
-          window.removeEventListener("keyup", handleKeyEvent);
-          window.removeEventListener("keydown", handleKeyEvent);
-      }
-  }
-
-  // Listen for the beforeunload event to handle cleanup
-  window.addEventListener('beforeunload', async function (event) {
-      if (localStorage.getItem('isInGame') === 'true') {
-          document.addEventListener('visibilitychange', handleVisibilityChange);
-      }
-  });
-
-  // Handle the visibilitychange event to perform cleanup before unloading
-  async function handleVisibilityChange() {
-      if (document.hidden) {
-          console.log("Page is becoming hidden. Performing cleanup...");
-
-          await handleBeforeUnload();
-
-          document.removeEventListener('visibilitychange', handleVisibilityChange);
-
-          localStorage.removeItem('isInGame');
-          // changeInGame();
-
-          history.replaceState(null, null, `${window.location.origin}`);
-          navigateTo("play");
-      }
-  }
-
-   */
-  
-
-  // async function handleBeforeUnload(event) {
-    // console.log("Cleaning up before unload...");
-  
-    // // Change the backend state to false
-    // const payload = JSON.stringify({ user_id: id });
-    // const url = `https://0.0.0.0:8443/api/profile/ingame/false/`;
-  
-    // try {
-    //   let response = await fetch(url, {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //       Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-    //     },
-    //     body: payload,
-    //     keepalive: true,
-    //   });
-    //   console.log("State updated using fetch with keepalive.");
-    // } catch (error) {
-    //   console.error("Error updating state with fetch:", error);
-    // }
-  
-    // // Cleanup events
-    // if (socket && socket.readyState === WebSocket.OPEN) {
-    //   socket.close();
-    //   console.log("WebSocket closed.");
-    // }
-  
-    // if (gametype === "playWithFriend") {
-    //   sessionStorage.removeItem("playerReloaded");
-    // }
-  
-    // if (gametype === "tournament") {
-    //   document.querySelectorAll(".flex-container").forEach((el) => el.remove());
-    //   document.body.classList.remove("body-style");
-    // }
-  
-    // if (typeof sendNewSize === "function" && typeof handleKeyEvent === "function") {
-    //   window.removeEventListener("resize", sendNewSize);
-    //   window.removeEventListener("keyup", handleKeyEvent);
-    //   window.removeEventListener("keydown", handleKeyEvent);
-    // }
-  
-    // // Clean up SPA-specific events
-    // window.removeEventListener("beforeunload", handleBeforeUnload);
-    // window.removeEventListener("popstate", handlePopState);
-  
-    // // Navigate to the "play" page
-    // console.log("eeeeeeeeeeeeeeeeeeeeeeeeeeeee1");
-    // history.replaceState(null, null, `${window. location.origin}/#play`);
-    // console.log("eeeeeeeeeeeeeeeeeeeeeeeeeeeee2");
-    // navigateTo("play");
-    // changeInGame();
-
-    // event.preventDefault();
-    // event.returnValue = '';
-  // }
-  
+    }
     function handlePopState() {
       console.error("change body style1");
       // event.preventDefault();
@@ -358,12 +152,9 @@ async function game(mode) {
         window.removeEventListener("keyup", handleKeyEvent);
         window.removeEventListener("keydown", handleKeyEvent);
       }
-      // window.removeEventListenterGameener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
       window.removeEventListener("popstate", handlePopState);
-      window.removeEventListener("popstate", handlePopState);
-      history.replaceState(null, null, `${window.location.origin}/#play`);
       navigateTo("play");
-
       return;
     }
 
@@ -443,8 +234,6 @@ async function game(mode) {
       win_dow.appendChild(inDiv);
       document.body.appendChild(win_dow);
     }
-    // window.addEventListener("beforeunload", handleBeforeUnload);
-
     function firstwindow() {
       // add event listener to close the socket on beforeunload and popstate
       if(gametype === "remote" || gametype === "playWithFriend" || gametype === "tournament"  || gametype === "local")
@@ -563,12 +352,12 @@ async function game(mode) {
       }
 
       if (gametype === "local") {
-        socket = new WebSocket(`wss://0.0.0.0:8443/ws/pingPong/local`);
+        socket = new WebSocket(`wss://${location.host}/ws/pingPong/local`);
       } else if (gametype === "remote" || gametype === "playWithFriend") {
         // Use backticks for string interpolation
-        socket = new WebSocket(`wss://0.0.0.0:8443/ws/pingPong/remote/`);
+        socket = new WebSocket(`wss://${location.host}/ws/pingPong/remote/`);
       } else if (gametype === "tournament") {
-        socket = new WebSocket(`wss://0.0.0.0:8443/ws/pingPong/tournament/`);
+        socket = new WebSocket(`wss://${location.host}/ws/pingPong/tournament/`);
       }
       // const socket = new WebSocket('ws://localhost:8001/ws/pingPong/');
       let id = 0;
@@ -723,7 +512,7 @@ async function game(mode) {
             window.removeEventListener("resize", sendNewSize);
             window.removeEventListener("keyup", handleKeyEvent);
             window.removeEventListener("keydown", handleKeyEvent);
-            // window.removeEventListener("beforeunload", handleBeforeUnload);
+            window.removeEventListener("beforeunload", handleBeforeUnload);
             window.removeEventListener("popstate", handlePopState);
             gameOver(data.winner);
           }
@@ -1150,7 +939,7 @@ async function game(mode) {
                 window.removeEventListener("resize", sendNewSize);
                 window.removeEventListener("keyup", handleKeyEvent);
                 window.removeEventListener("keydown", handleKeyEvent);
-                // window.removeEventListener("beforeunload", handleBeforeUnload);
+                window.removeEventListener("beforeunload", handleBeforeUnload);
                 window.removeEventListener("popstate", handlePopState);
                 window.cancelAnimationFrame(animationControle);
                 navigateTo("home");

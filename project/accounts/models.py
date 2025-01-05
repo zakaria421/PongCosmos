@@ -19,7 +19,7 @@ class UserProfile(models.Model):
     nickname                = models.CharField(max_length=10, unique=True, )
     profile_picture         = models.ImageField(upload_to="images/", default=random.choice(profilePics), blank=True, null=True)
     mimeType                = models.CharField(max_length=50, default="image/jpg")
-    email                   = models.EmailField(max_length=255, )
+    email                   = models.EmailField(max_length=255,)
     bio                     = models.CharField(max_length=100, blank=True)
     friends                 = models.ManyToManyField(User, blank=True, related_name='user_friends')
     wins                    = models.IntegerField(default=0)

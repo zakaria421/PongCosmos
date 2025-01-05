@@ -4,7 +4,6 @@ import { syncSession } from "./main.js";
 import { sanitizeInput, sanitizeObject } from "./main.js";
 
 export function initPlayPage() {
-  let id = 0;
   let isRefreshing = false; // Flag to track if token refresh is in progress
   let refreshAttempts = 0; // Retry counter for token refresh attempts
   const maxRefreshAttempts = 100; // Maximum number of attempts to refresh token
@@ -76,6 +75,21 @@ export function initPlayPage() {
     });
   });
 
+  confirmButton.addEventListener("click", function handley() {
+    eventRegistry.push({
+      element: confirmButton,
+      eventType: "click",
+      handler: handley
+    });
+    const activeMode = document.querySelector(".mode-description.active");
+    if (activeMode) {
+      let modeName =
+        activeMode.parentElement.querySelector(".mode-title").textContent;
+        navigateTo('game', { mode: modeName });
+    } else {
+      alert("Please select a game mode first!");
+    }
+  });
   /******************************************************************************** */
   const homebtn = document.getElementsByClassName("home");
   if (homebtn[0]) {
@@ -148,7 +162,6 @@ export function initPlayPage() {
         const userData = sanitizeObject(toSanitize);
         const profilePicture = "https://0.0.0.0:8443/" + userData.profile_picture;
         switchCheckbox.checked = userData.is_2fa_enabled;
-        id = userData.id;
         updateUserDisplay(userData, profilePicture);
         attachUserMenuListeners();
       } else if (response.status === 401) {
@@ -192,41 +205,6 @@ export function initPlayPage() {
       navigateTo("error", { message: err.message });
     }
   }
-
-  confirmButton.addEventListener("click", async function handley() {
-    eventRegistry.push({
-      element: confirmButton,
-      eventType: "click",
-      handler: handley
-    });
-
-    const activeMode = document.querySelector(".mode-description.active");
-    if (activeMode) {
-      let modeName =
-        activeMode.parentElement.querySelector(".mode-title").textContent;
-        console.log(token, id, "weeeeeeeee");
-        const response = await fetch(`https://0.0.0.0:8443/api/profile/ingame/`, {
-          method: "POST",
-          headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-              user_id: id,
-          }),
-      });
-      if (response.ok) {
-        let data = await response.json();
-        if (!data.inGameStatus)
-          navigateTo('game', { mode: modeName });
-        else
-          alert('You are already in game');
-      }
-      
-    } else {
-      alert("Please select a game mode first!");
-    }
-  });
 
   function renderUser(userData, profilePicture) {
     return `
