@@ -78,7 +78,7 @@ def oauth_callback(request):
     except User.DoesNotExist:
         # If user does not exist, create a new one
         user = User.objects.create(username=login, email=email, first_name=login)
-        user_profile = UserProfile.objects.create(user=user, nickname=login)
+        user_profile = UserProfile.objects.create(user=user, nickname=login, email=email)
 
         # Save the profile picture for new users only
         if picture:
