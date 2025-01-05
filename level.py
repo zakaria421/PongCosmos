@@ -78,72 +78,126 @@
 #         # Update loser's level
 #         loser_level = calculate_next_level_loser(loser_level, games_played)
 
-# # Run simulation
-# simulate_game_results()
+import math
 
 def calculate_next_level(level, games_played):
     """
     Calculate the player's level based on games played as a winner.
     Winning increases progress faster.
     """
-    required_games_for_current_level = sum(i for i in range(1, int(level) + 1))
-    required_games_for_next_level = sum(i for i in range(1, int(level) + 2))
+    required_games_for_current_level = sum(i for i in range(1, math.floor(level) + 1))
+    required_games_for_next_level = sum(i for i in range(1, math.floor(level) + 2))
 
     if games_played >= required_games_for_next_level:
-        level = int(level) + 1
+        level = math.floor(level) + 1
         print(f"Level up! You are now level {level}.")
     else:
         progress_within_level = (games_played - required_games_for_current_level) / (
             required_games_for_next_level - required_games_for_current_level
         )
-        level = int(level) + progress_within_level
-        print(f"Current progress: Level {level:.1f}.")
+        level = math.floor(level) + progress_within_level
+        print(f"Current progress: Level {level:.2f}.")
 
     return level
-
 
 def calculate_next_level_loser(level, games_played):
     """
     Calculate the player's level based on games played as a loser.
     Losing increases progress more slowly (e.g., at 50% efficiency).
     """
-    # Scale down "games played" for losers to ensure slower progression.
-    effective_games_played = games_played * 0.25
+    required_games_for_current_level = sum(i for i in range(1, math.floor(level) + 1))
+    required_games_for_next_level = sum(i for i in range(1, math.floor(level) + 2))
 
-    required_games_for_current_level = sum(i for i in range(1, int(level) + 1))
-    required_games_for_next_level = sum(i for i in range(1, int(level) + 2))
+    # Calculate the effective progress of the loser
+    effective_progress = (games_played * 0.5)  # Slower progress, 50% efficiency
 
-    if effective_games_played >= required_games_for_next_level:
-        level = int(level) + 1
+    # Check if the effective progress allows for a level up
+    if effective_progress >= required_games_for_next_level:
+        level = math.floor(level) + 1
         print(f"Level up (loser)! You are now level {level}.")
     else:
-        progress_within_level = (effective_games_played - required_games_for_current_level) / (
-            required_games_for_next_level - required_games_for_current_level
-        )
-        level = int(level) + progress_within_level
-        print(f"Current progress (loser): Level {level:.1f}.")
+        # Calculate progress within the current level
+        if effective_progress >= required_games_for_current_level:
+            progress_within_level = (effective_progress - required_games_for_current_level) / (
+                required_games_for_next_level - required_games_for_current_level
+            )
+            level = math.floor(level) + progress_within_level
+        else:
+            level = math.floor(level)  # Keep the level the same if not enough progress
+
+        print(f"Current progress (loser): Level {level:.2f}.")
 
     return level
 
 
 # Simulate games for winners and losers
+# def simulate_game_results():
+#     winner_level = 0
+#     loser_level = 1.5
+#     winner_games_played = 0
+#     loser_games_played = 2
+
+#     # Simulate 15 games
+#     for i in range(1):
+#         print(f"\nGame {i + 1}:")
+#         # Winner progresses
+#         winner_games_played += 1
+#         winner_level = calculate_next_level(winner_level, winner_games_played)
+
+#         # Loser progresses slowly
+#         loser_games_played += 1
+#         loser_level = calculate_next_level_loser(loser_level, loser_games_played)
+
+
+# Run the simulation
+# simulate_game_results()
+
+import math
+
+def calculate_xp(level, games_played, is_winner):
+    """
+    Calculate the XP based on games played.
+    Winners gain XP faster than losers.
+    """
+    if is_winner:
+        return games_played * 2  # Winners gain 2 XP per game
+    else:
+        return games_played * 0.5  # Losers gain 0.5 XP per game
+
+def calculate_level(xp):
+    """
+    Calculate the player's level based on total XP.
+    The level is determined by the total XP accumulated.
+    """
+    level = 0
+    required_xp = 0
+    while xp >= required_xp:
+        level += 1
+        required_xp += level  # Level 1 requires 1 XP, Level 2 requires 2 XP, etc.
+    return level - 1  # Subtract 1 because we incremented one extra in the loop
+
 def simulate_game_results():
     winner_level = 0
-    loser_level = 0
-    winner_games_played = 0
-    loser_games_played = 0
+    loser_level = 1
+    winner_xp = 0
+    loser_xp = 3
 
     # Simulate 15 games
-    for i in range(15):
+    for i in range():
         print(f"\nGame {i + 1}:")
-        # Winner plays a game and levels up
-        winner_games_played += 1
-        winner_level = calculate_next_level(winner_level, winner_games_played)
+        
+        # Calculate games played as i + 1
+        games_played = i + 1
+        
+        # Winner progresses
+        winner_xp = calculate_xp(winner_level, games_played, True)
+        winner_level = calculate_level(winner_xp)
+        print(f"Winner's Level: {winner_level}")
 
-        # Loser plays a game and levels up more slowly
-        loser_games_played += 1
-        loser_level = calculate_next_level_loser(loser_level, loser_games_played)
-
+        # Loser progresses
+        loser_xp = calculate_xp(loser_level, games_played, False)
+        loser_level = calculate_level(loser_xp)
+        print(f"Loser's Level: {loser_level}")
 
 # Run the simulation
 simulate_game_results()
