@@ -1395,26 +1395,20 @@ export function initHomePage() {
           return;
         }
         try{
-          const currentUserResponse = await fetch(`https://${location.host}/api/profile/ingame/` , {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-            },
-            body: JSON.stringify({
-              user_id : userData.id,
-            })
-          });
-
-          const friendResponse = await fetch(`https://${location.host}/api/profile/ingame/` , {
+          const currentUserResponse = await fetch(`https://${location.host}/api/profile/ingame/?user_id=${userData.id}` , {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
             },
-            body: JSON.stringify({
-              user_id : friend.id,
-            })
+          });
+
+          const friendResponse = await fetch(`https://${location.host}/api/profile/ingame/?user_id=${friend.id}` , {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+            },
           });
           if(currentUserResponse.ok && friendResponse.ok){
             const currentUserStatus = await currentUserResponse.json();
