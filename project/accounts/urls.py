@@ -33,8 +33,9 @@ urlpatterns = [
     ####
     path('user-profile/<str:nickname>/', UserProfileDetailView.as_view(), name='user-profile-detail'),
     # *************************************************************************new
-    path('api/search-friends/', viewsUserInfo.search_friends, name='search_friends'),
+    path('search-friends/', viewsUserInfo.search_friends, name='search_friends'),
     path('api/add-friend/', viewsUserInfo.add_friend, name='add_friend'),
+    # path('search-friends/', viewsUserInfo.search_friends, name='search_friends'),
 
     path('2fa/enable/', Enable2FAView.as_view(), name='enable_2fa'),
     path("2fa/verify/", VerifyOTPView.as_view(), name="verify_otp"),

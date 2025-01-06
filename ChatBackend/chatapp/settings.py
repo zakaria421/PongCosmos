@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta 
 import os
 
 
@@ -22,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-k7$t8=yr!$rpeia@xklji0^f-#uo&)g)5%*x4pt(_nb1js$dr2'
+SECRET_KEY = 'django-insecure-4i%@946h$i&9-f0o5sh0z9pazinic)!&=e-n=1=5v9!s0n_gqc'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -35,8 +36,20 @@ CORS_ALLOWED_ORIGINS = [
     "http://0.0.0.0:8080", 
     "https://10.12.8.11:8002", 
     "https://10.12.8.11:8443", 
+    "https://0.0.0.0:8443",
 ]
 
+
+
+SIMPLE_JWT = {
+  # It will work instead of the default serializer(TokenObtainPairSerializer).
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=500), 
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    "TOKEN_OBTAIN_SERIALIZER": "my_app.serializers.MyTokenObtainPairSerializer",
+    'SIGNING_KEY': SECRET_KEY,  # Use Django's SECRET_KEY
+
+  # ...
+}
 
 # Application definition
 
@@ -53,6 +66,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'channels',
     'chat',
+    'rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [
@@ -99,9 +113,10 @@ DATABASES = {
 
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-    ],
+
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
 }
 CHANNEL_LAYERS = {
     'default': {

@@ -31,17 +31,6 @@ class MessageListView(ListView):
         # Get the friend ID from the URL and filter messages accordingly
         friend_id = self.kwargs.get('friend_id')
         return Message.objects.filter(receiver_id=friend_id).order_by('timestamp')
-    
-# class Block(models.Model):
-#     blocker = models.ForeignKey(User, on_delete=models.CASCADE, related_name="blocker")
-#     blocked_user = models.ForeignKey(
-#         User,
-#         on_delete=models.CASCADE,
-#         related_name="blocked_user",
-#         null=True,  # Allow null values temporarily
-#         blank=True
-#     )
-#     created_at = models.DateTimeField(auto_now_add=True)
 
 class Block(models.Model):
     BLOCK_STATUS_CHOICES = [

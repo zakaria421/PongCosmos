@@ -245,6 +245,7 @@ export function initHomePage() {
   let socket = null;
   let currentRoomId = null;
   let currentFriendId = null;
+  let blockId = null;
   // Fetch User Data
   async function fetchUserData() {
     try {
@@ -398,15 +399,12 @@ export function initHomePage() {
     });
   }
 
-
-
   fetchUseStatus();
 
   async function fetchUseStatus() {
 
     try {
-      // await new Promise((resolve) => setTimeout(resolve, 30000));
-      // const token = localStorage.getItem("jwtToken");
+      await new Promise((resolve) => setTimeout(resolve, 30000));
 
       let response = await fetch("https://0.0.0.0:8443/api/online-offline/", {
         headers: {
@@ -419,7 +417,7 @@ export function initHomePage() {
       if (response.ok) {
         const userData = await response.json();
 
-        console.log("___DBG___ : Connection established", userData);
+        // console.log("___DBG___ : Connection established", userData);
       }
       else if (response.status === 401) {
         console.log("Access token expired. Refreshing token...");
@@ -454,56 +452,74 @@ export function initHomePage() {
     }
   }
 
+  async function connectWebSocket(username, receiverId) {
+    try{
+      const roomId = `${Math.min(userData.id, receiverId)}_${Math.max(userData.id, receiverId)}`;
+      console.log("Connecting to room:", roomId);
 
-  function connectWebSocket(username, receiverId) {
-    const roomId = `${Math.min(userData.id, receiverId)}_${Math.max(userData.id, receiverId)}`;
-    console.log("Connecting to room:", roomId);
+        blockId = receiverId;
+        const blockBtn = document.getElementById("blockBtn");
 
-    if (socket && currentRoomId !== roomId) {
-      disconnectWebSocket();
-    }
-    if (currentRoomId === roomId) {
-      console.log("Already connected to room:", roomId);
-      return;
-    }
-    console.log(userData.id, receiverId)
-    console.log("____________OPEN________DBG________");
-    socket = new WebSocket(`wss://${location.host}/ws/chat/${roomId}/?receiver_id=${roomId}`);
+        let prossecced = false;
+        blockBtn.onclick = async function () {
+          if (prossecced) return;
+          prossecced = true;
+          if (blockBtn.textContent.trim() === "Block") {
+            await blockUser(blockId);
+            blockBtn.textContent = "Unblock";
+            blockBtn.classList.remove("btn-danger");
+            blockBtn.classList.add("btn-success");
+          } else {
+            await unblockUser(blockId);
+            blockBtn.textContent = "Block";
+            blockBtn.classList.remove("btn-success");
+            blockBtn.classList.add("btn-danger");
+          }
+          prossecced = false;
+        };
+        updateBlockButtonState(blockId, userData.id);
+        
+        if (socket && currentRoomId !== roomId) {
+        blockId = null;
+        disconnectWebSocket();
+      }
+      if (currentRoomId === roomId) {
+        console.log("Already connected to room:", roomId);
+        return;
+      }
 
-    socket.onopen = () => {
-      console.log(`WebSocket connected to room: ${roomId}`);
-      socket.send(JSON.stringify({ type: "join", username }));
-    };
+      socket = new WebSocket(`wss://${location.host}/ws/chat/${roomId}/?receiver_id=${roomId}&token=${token}`);
 
-    socket.onmessage = (event) => {
-      try {
-        console.log("WebSocket message received:", event.data);
-        const data = JSON.parse(event.data);
-        console.log("________TYPE____DBG______", data.type);
-        console.log("________INVITEID____DBG______", data.invite_id);
-        if (data.type === "game_invite" && data.sender_id !== userData.id) {
-          console.log("Game invitation received", data);
-          showGameInviteModal(data.sender_name, data.invite_id);
-        } else if (data.type === "invite_response" && data.sender_id !== userData.id) {
-          console.log("Invite response received");
-          console.log("________SENDERNAME____DBG______", data.sender_name);
-          handleInviteResponse(data.status, data.sender_name, data.invite_id);
-        } else if (data.message) {
-          appendMessageToChat(data.username, data.message, data.timestamp);
-        } else {
-          console.log("Unknown WebSocket data:", data);
+      socket.onopen = () => {
+        socket.send(JSON.stringify({ type: "join", username }));
+      };
+
+      socket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === "game_invite" && data.sender_id !== userData.id) {
+            showGameInviteModal(data.sender_name, data.invite_id);
+          } else if (data.type === "invite_response" && data.sender_id !== userData.id) {
+            handleInviteResponse(data.status, data.sender_name, data.invite_id);
+          } else if (data.message) {
+            appendMessageToChat(data.username, data.message, data.timestamp);
+          } else {
+            console.log("Unknown WebSocket data:", data);
+          }
         }
-      }
-      catch (error) {
-        console.error("Error processing WebSocket message:", error);
-      }
-    };
+        catch (error) {
+          console.error("Error processing WebSocket message:", error);
+        }
+      };
 
 
-    socket.onclose = () => {
-      console.log("WebSocket disconnected.");
-      currentRoomId = null;
-    };
+      socket.onclose = () => {
+        // console.log("WebSocket disconnected.");
+        currentRoomId = null;
+      };
+    }catch(err){
+      console.error("Error connecting to WebSocket:", err);
+    }
 
     socket.onerror = (error) => console.error("WebSocket error:", error);
   }
@@ -571,7 +587,6 @@ export function initHomePage() {
   }
 
   function showNotification(message) {
-    console.log("_________GAME INVT ACCEPTED______DBG____!");
     const notification = document.createElement('div');
     notification.className = 'custom-notification';
     notification.style.cssText = `
@@ -1063,7 +1078,7 @@ export function initHomePage() {
             } else {
               console.error("Failed to refresh token after multiple attempts.");
               localStorage.removeItem("jwtToken");
-          localStorage.removeItem("refresh");
+              localStorage.removeItem("refresh");
 
               syncSession();
               navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
@@ -1111,7 +1126,7 @@ export function initHomePage() {
           searchResults.textContent = "";
 
           data.results.forEach((result) => {
-            // Create search result item
+
             const resultItem = document.createElement("div");
             resultItem.className = "search-result-item";
             resultItem.dataset.friendId = result.id;
@@ -1131,12 +1146,6 @@ export function initHomePage() {
             name.className = "result-name";
             name.textContent = result.name;
             infoContainer.appendChild(name);
-
-            // Add bio
-            const bio = document.createElement("span");
-            bio.className = "result-bio";
-            bio.textContent = result.bio || "No bio available";
-            infoContainer.appendChild(bio);
 
             // Create Chat button
             const chatButton = document.createElement("button");
@@ -1367,28 +1376,9 @@ export function initHomePage() {
         document.getElementById("chat-messages").textContent = "";
       });
 
-      // Add click event listener for the Block/Unblock button
-      const blockBtn = document.getElementById("blockBtn");
-      blockBtn.addEventListener("click", async function () {
-        console.log("Friend ID to block/unblock:", friend.id);
 
-        if (blockBtn.textContent.trim() === "Block") {
-          await blockUser(friend.id);
-          blockBtn.textContent = "Unblock";
-          blockBtn.classList.remove("btn-danger");
-          blockBtn.classList.add("btn-success");
-        } else {
-          await unblockUser(friend.id);
-          blockBtn.textContent = "Block";
-          blockBtn.classList.remove("btn-success");
-          blockBtn.classList.add("btn-danger");
-        }
-      });
-
-      // Add click event listener for the Game Invite button
       const invitePlayBtn = document.getElementById("invitePlayBtn");
       invitePlayBtn.addEventListener("click", async function inviteButton() {
-        console.log("Friend ID to invite for game______________");
         if (!friend.id) {
           console.error("Friend ID not found!");
           showNotification("Unable to initiate game invitation.");
@@ -1489,6 +1479,7 @@ export function initHomePage() {
         const result = await response.json();
         if (result.status === 'blocked') {
             console.log("User successfully blocked:", result.message);
+            updateBlockButtonState(friendId, blockerId);
             blockBtn.textContent = 'Unblock';
             blockBtn.classList.remove('btn-danger');
             blockBtn.classList.add('btn-success');
@@ -1508,8 +1499,8 @@ async function unblockUser(friendId) {
         });
 
         const result = await response.json();
-        // console.log("______________Unblock result_______: ", result);
         if (result.status === 'unblocked') {
+            updateBlockButtonState(friendId, blockerId);
             console.log("User successfully unblocked:", result.message);
             blockBtn.textContent = 'Block';
             blockBtn.classList.remove('btn-success');
@@ -1521,19 +1512,17 @@ async function unblockUser(friendId) {
 }
 
 
-   async function updateBlockButtonState(friendId) {
+   async function updateBlockButtonState(friendId, blockerId) {
     try {
-      const response = await fetch(`https://${location.host}/chat/status/${friendId}/`);
-      const data = await response.json();
-      // console.log("Block button data:", data);
+        const response = await fetch(`https://${location.host}/chat/status/${friendId}/?blocker_id=${blockerId}`);
+        
+        const data = await response.json();
 
       if (data.is_blocked) {
-        // console.log("User is blocked.");
         blockBtn.textContent = "Unblock";
         blockBtn.classList.remove("btn-danger");
         blockBtn.classList.add("btn-success");
       } else {
-        // console.log("User is not blocked.");
         blockBtn.textContent = "Block";
         blockBtn.classList.remove("btn-success");
         blockBtn.classList.add("btn-danger");
@@ -1542,14 +1531,6 @@ async function unblockUser(friendId) {
       console.error("Error updating block button:", error);
     }
   }
-  // const blockBtn = document.getElementById('blockBtn');
-  // if (blockBtn) {
-  //   const friendId = blockBtn.dataset.friendId; // Get the friendId from the button's dataset
-  //   if (friendId) {
-  //     updateBlockButtonState(friendId); // Call the function with the friendId
-  //   }
-  // }
-
   // Initial call to set up listeners in case elements are already present
   // To get the other user profil
   // Add an event listener to the entire chat-user-info container

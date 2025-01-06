@@ -13,7 +13,7 @@ let isRefreshing = false; // Flag to track if token refresh is in progress
 let refreshAttempts = 0; // Retry counter for token refresh attempts
 const maxRefreshAttempts = 100;
 async function refreshAccessToken() {
-  const refreshToken = localStorage.getItem("refresh");
+const refreshToken = localStorage.getItem("refresh");
 
   if (!refreshToken) {
     console.error("No refresh token found.");
@@ -142,19 +142,6 @@ async function refreshAccessToken() {
 //   }
 // }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 const ss = { socket: null };
 
 export default ss;
@@ -163,7 +150,7 @@ let userData = null;
 
 statusCheck();
 
-async function statusCheck() {
+export async function statusCheck() {
   try {
     const token = localStorage.getItem("jwtToken");
 

@@ -31,6 +31,7 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=500), 
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     "TOKEN_OBTAIN_SERIALIZER": "my_app.serializers.MyTokenObtainPairSerializer",
+    'SIGNING_KEY': SECRET_KEY,  # Use Django's SECRET_KEY
   # ...
 }
 # Application definition

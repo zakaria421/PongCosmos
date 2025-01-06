@@ -165,6 +165,7 @@ export function initLoginPage() {
                 localStorage.setItem("jwtToken", token);
                 syncSession();
                 hideQRCodeModal();
+                await statusCheck();
                 navigateTo("home");
               } else if (response.status === 401) {
                 console.log("Access token expired. Refreshing token...");

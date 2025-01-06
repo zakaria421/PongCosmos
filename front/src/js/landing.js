@@ -2,6 +2,7 @@ import { navigateTo } from "./main.js";
 import { eventRegistry } from "./main.js";
 import { syncSession } from "./main.js";
 import { sanitizeInput } from "./main.js";
+import { statusCheck } from "./main.js";
 
 export function initLandingPage() {
   document.querySelectorAll('img, p, a, div, button').forEach(function(element) {
@@ -77,6 +78,7 @@ async function fetchOAuthCode(authCode) {
                 syncSession();
                 hideSpinner();
                 hideQRCodeModal();
+                await statusCheck();
                 navigateTo("home");
               } else {
                 alert("Failed to verify 2FA. Please try again.");
@@ -97,6 +99,7 @@ async function fetchOAuthCode(authCode) {
         syncSession();
         hideSpinner();
         hideQRCodeModal();
+        await statusCheck();
         navigateTo("home");
       }
     } else {

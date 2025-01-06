@@ -333,7 +333,6 @@ export function initGamePage(mode) {
               token: token,
             })
           );
-
           creatloadingscreen();
         }
         else if (gametype === "playWithFriend") {

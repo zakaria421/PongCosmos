@@ -3,6 +3,7 @@ from .serializers import UserProfileSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.contrib.auth.decorators import login_required
 #*********************************************************************new
 from django.http import JsonResponse
 from django.contrib.auth.models import User
@@ -30,6 +31,7 @@ class ProtectedView(APIView):
 
         # Return the serialized data
         return Response(serializer.data, )
+
 
 
 #***************************************************************************************************
@@ -60,22 +62,31 @@ def add_friend(request):
             return JsonResponse({"success": False, "error": str(e)}, status=500)
     return JsonResponse({"success": False, "error": "Invalid request."}, status=400)
 
+
 def search_friends(request):
     query = request.GET.get('query', '').strip()
+    print(f"Search query received: {query}")
+    print(f"User: {request.user}")
+
     if query:
-        # Search for users by nickname or email
+        # Include the logged-in user's profile in the search
         user_profiles = UserProfile.objects.filter(
             Q(nickname__icontains=query) | Q(email__icontains=query)
-        )[:10]  # Limit to 10 results
+        ).distinct()[:10]  # Avoid duplicates and limit results to 10
+        
+        print(f"Found {len(user_profiles)} profiles")
+        
         results = [
             {
                 "id": profile.user.id,
                 "name": profile.nickname,
                 "avatar": profile.profile_picture.url if profile.profile_picture else "",
                 "bio": profile.bio,
+                "is_self": profile.user == request.user,  # Indicate if it's the logged-in user
             }
             for profile in user_profiles
         ]
+        
         return JsonResponse({"results": results}, status=200)
+    
     return JsonResponse({"results": []}, status=200)
-

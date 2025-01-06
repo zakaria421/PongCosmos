@@ -7,9 +7,9 @@ from .models import ChatRoom, Message, Block
 from django.db.models import Q
 from urllib.parse import parse_qs
 from rest_framework.permissions import IsAuthenticated
-from django.contrib.auth.models import User
 # from .models import UserProfile
 from urllib.parse import parse_qs
+from django.contrib.auth.models import AnonymousUser
 
 import traceback
 
@@ -19,31 +19,39 @@ logger = logging.getLogger(__name__)
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         logger.info("_________USER______DBG______ : " + str(self.scope["user"]))
-        self.room_name = self.scope['url_route']['kwargs']['room_name']
-        self.room_group_name = f"chat_{self.room_name}"
+        # self.user = self.scope['user']
+        # if self.user == AnonymousUser():
+        #     await self.close()
+        #     return 
+        user = self.scope["user"]
+        if user.is_authenticated:
+            self.room_name = self.scope['url_route']['kwargs']['room_name']
+            self.room_group_name = f"chat_{self.room_name}"
 
 
-        logger.info(f"Connecting to room: {self.room_name}")
-        query_params = parse_qs(self.scope['query_string'].decode())
-        receiver_id = query_params.get('receiver_id', [None])[0]
-        logger.info(f"Receiver IIIIID: {receiver_id}")
+            logger.info(f"Connecting to room: {self.room_name}")
+            query_params = parse_qs(self.scope['query_string'].decode())
+            receiver_id = query_params.get('receiver_id', [None])[0]
+            logger.info(f"Receiver IIIIID: {receiver_id}")
 
-        if receiver_id:
-            receiver_group_name = f"user_{receiver_id}"
+            if receiver_id:
+                receiver_group_name = f"user_{receiver_id}"
+                await self.channel_layer.group_add(
+                    receiver_group_name,
+                    self.channel_name
+                )
+                logger.info(f"User connected to group: {receiver_group_name}")
+            else:
+                logger.error("Receiver ID not found in the query parameters")
             await self.channel_layer.group_add(
-                receiver_group_name,
+                self.room_group_name,
                 self.channel_name
             )
-            logger.info(f"User connected to group: {receiver_group_name}")
-        else:
-            logger.error("Receiver ID not found in the query parameters")
-        await self.channel_layer.group_add(
-            self.room_group_name,
-            self.channel_name
-        )
 
-        await self.accept()
-        
+            await self.accept()
+            
+        else:
+            await self.close()
         try:
             messages = await self.get_messages()
             for message in messages:
@@ -353,103 +361,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
 
 
-
-# class StatusConsumer(AsyncWebsocketConsumer):
-#     async def connect(self):
-#         logger.info('___DBG___00___')
-#         self.user = self.scope["user"]
-#         logger.info('___DBG___01___')
-#         # if not self.user.is_authenticated:
-#         #     # Reject connection if the user is not authenticated
-#         #     await self.close()
-#         #     return
-
-#         # Create a unique group name for the user
-#         self.user_group_name = f"userXXXX"
-#         logger.info('___DBG___02___')
-#         # Join the user-specific group
-#         await self.channel_layer.group_add(
-#             self.user_group_name,
-#             self.channel_name
-#         )
-#         logger.info('___DBG___03___')
-#         await self.accept()
-#         logger.info('___DBG___04___')
-#         # Optionally, join a global group for other notifications
-#         self.global_group_name = "global_notifications"
-#         logger.info('___DBG___05___')
-#         await self.channel_layer.group_add(
-#             self.global_group_name,
-#             self.channel_name
-#         )
-#         logger.info('___DBG___06___')
-#         # Notify others that the user is online
-#         await self.broadcast_user_status(self.user.id, "online")
-#         logger.info('___DBG___07___')
-
-#     async def disconnect(self, close_code):
-#         # Leave the user-specific group
-#         await self.channel_layer.group_discard(
-#             self.user_group_name,
-#             self.channel_name
-#         )
-
-#         # Leave the global group
-#         if hasattr(self, "global_group_name"):
-#             await self.channel_layer.group_discard(
-#                 self.global_group_name,
-#                 self.channel_name
-#             )
-
-#         # Notify others that the user is offline
-#         await self.broadcast_user_status(self.user.id, "offline")
-
-#     async def broadcast_user_status(self, user_id, status):
-#         """
-#         Broadcast user status to the global notifications group.
-#         """
-#         logger.info('___DBG___08___')
-#         await self.channel_layer.group_send(
-#             self.global_group_name,
-#             {
-#                 "type": "onlineCheck",
-#                 "user_id": user_id,
-#                 "status": status,
-#             }
-#         )
-
-#     async def send_to_user(self, target_user_id, message):
-#         """
-#         Send a message directly to a specific user.
-#         """
-#         target_group_name = f"user_{target_user_id}"
-#         await self.channel_layer.group_send(
-#             target_group_name,
-#             {
-#                 "type": "onlineCheck",
-#                 "message": message,
-#             }
-#         )
-
-#     # Handler for user status updates within the global group
-#     async def user_status(self, event):
-#         # Send a message down to the client
-#         await self.send(text_data=json.dumps({
-#             "user_id": event["user_id"],
-#             "status": event["status"],
-#         }))
-
-#     # Handler for direct user messages
-#     async def user_message(self, event):
-#         # Send a message down to the client
-#         await self.send(text_data=json.dumps({
-#             "message": event["message"],
-#         }))
-
-#     async def onlineCheck(self, event):
-#         logger.info('___DBG___09___ : ___ONLINE___CHECK___HANDLER___')
-
-
 class StatusConsumer(AsyncWebsocketConsumer):
     online_ids = {}
     async def connect(self):
@@ -613,60 +524,3 @@ class StatusConsumer(AsyncWebsocketConsumer):
     #         "online_id": online_id,
     #         "status": status,
     #     }))
-
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-# class StatusConsumer(AsyncWebsocketConsumer):
-#     async def connect(self):
-#         self.user = self.scope["user"]
-#         self.global_group_name = "global_notifications"
-
-#         # Join a global group to receive notifications
-#         await self.channel_layer.group_add(
-#             self.global_group_name,
-#             self.channel_name
-#         )
-
-#         await self.accept()
-
-#         # Broadcast new user status
-#         await self.broadcast_user_status(self.user.id, "online")
-
-#     async def disconnect(self, close_code):
-#         # Leave the global group
-#         await self.channel_layer.group_discard(
-#             self.global_group_name,
-#             self.channel_name
-#         )
-
-#         # Broadcast user offline status
-#         await self.broadcast_user_status(self.user.id, "offline")
-
-#     async def broadcast_user_status(self, user_id, status):
-#         # Broadcasts user status to the global notifications group
-#         await self.channel_layer.group_send(
-#             self.global_group_name,
-#             {
-#                 "type": "user.status",
-#                 "user_id": user_id,
-#                 "status": status,
-#             }
-#         )
-
-#     # Handler for user status updates within the group
-#     async def user_status(self, event):
-#         # Send a message down to the client
-#         await self.send(text_data=json.dumps({
-#             "user_id": event["user_id"],
-#             "status": event["status"],
-#         }))
