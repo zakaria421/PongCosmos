@@ -107,10 +107,10 @@ export function initGamePage(mode) {
         socket.close();
       }
       // console.error("playWithFriend222222222222");
-      if(gametype === "playWithFriend")
-      {
-        sessionStorage.removeItem("playerReloaded"); // Remove the key
-      }
+      // if(gametype === "playWithFriend")
+      // {
+      //   sessionStorage.removeItem("playerReloaded"); // Remove the key
+      // }
       if (gametype === "tournament") {
         
           document.querySelectorAll(".flex-container").forEach(element => element.remove());
@@ -136,11 +136,11 @@ export function initGamePage(mode) {
         socket.close();
       }
       // console.error("playWithFriend222222222222");
-      if(gametype === "playWithFriend")
-      {
-        sessionStorage.removeItem("playerReloaded"); // Remove the key
+      // if(gametype === "playWithFriend")
+      // {
+      //   sessionStorage.removeItem("playerReloaded"); // Remove the key
 
-      }
+      // }
       if (gametype === "tournament") {
         // document.getElementsByClassName("flex-container").remove();
         document.querySelectorAll(".flex-container").forEach(element => element.remove());
@@ -173,10 +173,10 @@ export function initGamePage(mode) {
       // window.removeEventListener('resize', sendNewSize);
       // window.removeEventListener('keyup', handleKeyEvent);
       // window.removeEventListener('keydown', handleKeyEvent);
-      if(gametype === "playWithFriend")
-      {
-        sessionStorage.removeItem("playerReloaded"); // Remove the key
-      }
+      // if(gametype === "playWithFriend")
+      // {
+      //   sessionStorage.removeItem("playerReloaded"); // Remove the key
+      // }
       let win_dow = document.createElement("div");
       win_dow.id = "gameover-window";
       let div = document.createElement("div");
@@ -361,7 +361,7 @@ export function initGamePage(mode) {
       }
       // const socket = new WebSocket('ws://localhost:8001/ws/pingPong/');
       let id = 0;
-      socket.onopen = function (e) {
+      socket.onopen = async function (e) {
         console.log("Connection established");
         if (gametype === "remote") {
           const token = localStorage.getItem('jwtToken');
@@ -377,21 +377,21 @@ export function initGamePage(mode) {
         }
         else if (gametype === "playWithFriend") {
           // Check if the player has reloaded the page
-          if (sessionStorage.getItem("playerReloaded") === null) {
-            // First visit: Set the value to false
-            sessionStorage.setItem("playerReloaded", "true");
-            console.log("This is the first visit.");
-          } else {
-            // Page reload detected
-            if (sessionStorage.getItem("playerReloaded") === "true") {
-              sessionStorage.removeItem("playerReloaded"); // Remove the key
-              console.log("Player reloaded the page.");
-              // socket.close();
-              changeInGame();
-              navigateTo("home");
-              return; // Prevent further execution
-            }
-          }
+          // if (sessionStorage.getItem("playerReloaded") === null) {
+          //   // First visit: Set the value to false
+          //   sessionStorage.setItem("playerReloaded", "true");
+          //   console.log("This is the first visit.");
+          // } else {
+          //   // Page reload detected
+          //   if (sessionStorage.getItem("playerReloaded") === "true") {
+          //     sessionStorage.removeItem("playerReloaded"); // Remove the key
+          //     console.log("Player reloaded the page.");
+          //     // socket.close();
+          //     changeInGame();
+          //     navigateTo("home");
+          //     return; // Prevent further execution
+          //   }
+          // }
           
           // Mark the page as reloaded on subsequent visits
           // sessionStorage.setItem("playerReloaded", "true");
@@ -401,6 +401,24 @@ export function initGamePage(mode) {
           if (queryString) {
               const params = new URLSearchParams(queryString);
               const room_id = params.get('id');
+
+
+            // 5 am
+              const game_status = localStorage.getItem('currentGame');
+              console.log("___________GAME___________STATUS__________FROM_____LOCAL___STORAGE",game_status);
+              if(!game_status || game_status !== `${room_id}_progress`)
+              {
+                localStorage.removeItem('currentGame');
+                await socket.close();
+                changeInGame();
+                console.log("_______GAME_______ALREADY__________CLOSED________00______");
+                navigateTo("play");
+                return ;
+              }
+
+
+
+
               console.log(room_id);
               socket.send(
                 JSON.stringify({
@@ -565,9 +583,11 @@ export function initGamePage(mode) {
         }
         // Handle game state updates here
       };
-
-      socket.onclose = function (e) {
+// 6 am
+      socket.onclose = async function (e) {
         console.error("WebSocket closed unexpectedly");
+        localStorage.removeItem('currentGame');
+        await changeInGame();
         return;
       };
 
