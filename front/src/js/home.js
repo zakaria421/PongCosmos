@@ -568,7 +568,9 @@ export function initHomePage() {
       socket.send(JSON.stringify(responsePayload));
       document.getElementById("gameInviteModal").remove();
       if (action === "accept") {
+        // INJECT HEEERE
         console.log("Game invitation accepted. Redirecting to game...");
+        localStorage.setItem('currentGame', `${inviteId}_progress`)
         navigateTo("game", { mode: "playWithFriend", id: inviteId });
       }
     } else {
@@ -579,6 +581,8 @@ export function initHomePage() {
 
   function handleInviteResponse(status, senderName, inviteId) {
     if (status === "accept") {
+      // INJECT HEEERE
+      localStorage.setItem('currentGame', `${inviteId}_progress`)
       showNotification(`${senderName} accepted your game invitation!`);
       navigateTo("game", { mode: "playWithFriend", id: inviteId });
     } else if (status === "declined") {
@@ -1390,7 +1394,7 @@ export function initHomePage() {
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-            }
+            },
           });
 
           const friendResponse = await fetch(`https://${location.host}/api/profile/ingame/?user_id=${friend.id}` , {
@@ -1398,7 +1402,7 @@ export function initHomePage() {
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-            }
+            },
           });
           if(currentUserResponse.ok && friendResponse.ok){
             const currentUserStatus = await currentUserResponse.json();

@@ -479,6 +479,7 @@ async function loadPage(page, mode = null) {
       }
     } else {
       // Load component dynamically for other pages
+      console.log("weeeeeeeeeeeeee", `src/components/${page}.html`);
       const html = await fetchHtml(`src/components/${page}.html`);
       contentDiv.innerHTML = html;
       console.log("INITIAT SCRIPT :", page);
@@ -606,10 +607,14 @@ export function navigateTo(page, queryParams = {}) {
 
   const fullUrl = `${window.location.origin}/${hash}`;
 
-  if (window.location.href === fullUrl) return;
+  if (window.location.href === fullUrl) {
+    console.log("URL unchanged, forcing routing...");
+    handleRouting(); // Force routing if the URL is unchanged
+    return;
+  }
 
   history.pushState({ page }, '', fullUrl);
-  console.log("page in navigate To: ", page);
+  console.log("Navigated to page:", page);
   handleRouting();
 }
 

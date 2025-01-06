@@ -143,7 +143,7 @@ export function initOtherUserPage(name) {
     }
     else {
       document.getElementById("notyet").style.display = "none";
-      const recentMatches = matches.slice(-10);
+      const recentMatches = matches.slice(0, 10);
       recentMatches.forEach((match) => {
         const matchCard = createMatchCard(match);
         matchHistoryContainer.appendChild(matchCard);

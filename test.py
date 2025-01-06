@@ -2,7 +2,6 @@ import json
 import random
 import time
 import requests
-import math
 from channels.generic.websocket import AsyncWebsocketConsumer
 import asyncio
 
@@ -371,10 +370,6 @@ class remotGameLogic:
         self.player2_total_wins = 0
         self.player1_token = ''
         self.player2_token = ''
-        self.winner_xp = 0
-        self.loser_xp = 0
-        self.loserLevel = 0
-        self.winnerLevel = 0
         
         
     def toJson(self):
@@ -418,6 +413,33 @@ class remotGameLogic:
             self.windowHeight = jsondata['height']
             
     def parsMove(self, jsonData ):
+        # if(jsonData.get('id') == self.player1):
+        #     self.player1Move = True
+        # if(jsonData.get('id') == self.player2):
+        #     self.player2Move = True
+        # if(jsonData.get('key')):
+        #     self.key = jsonData['key']
+        #     if all(value == False for value in self.key.values()):
+        #         self.keycontrol = False
+        #         self.player1Move = False
+        #         self.player2Move = False
+        #     else:
+        #         self.keycontrol = True
+        # if(jsonData.get('id') == self.player1):
+        #     self.player1Move = True
+        #     self.player1Key = jsonData.get('key', {}) 
+        # if(jsonData.get('id') == self.player2):
+        #     self.player2Move = True
+        #     self.player2Key = jsonData.get('key', {}) 
+        # if(jsonData.get('key')):
+        #     # self.keycontrol = any(self.player1Key.values()) or any(self.player2Key.values())
+
+        #     if all(value == False for value in self.player1Key.values()):
+        #         self.player1Move = False
+        #     if all(value == False for value in self.player2Key.values()):
+        #         self.player2Move = False
+        #     if self.player1Move == False and self.player2Move == False:
+        #         self.keycontrol = True
         player_id = jsonData.get('id')
         
         # Get the key data
@@ -462,41 +484,23 @@ class remotGameLogic:
             print(f"Current progress: Level {level:.1f}.")
 
         return level
-    # def increaseLevelLoser(self, level, games_played):
-    #     effective_games_played = games_played * 0.15
+    def increaseLevelLoser(self, level, games_played):
+        effective_games_played = games_played * 0.25
 
-    #     required_games_for_current_level = sum(i for i in range(1, int(level) + 1))
-    #     required_games_for_next_level = sum(i for i in range(1, int(level) + 2))
+        required_games_for_current_level = sum(i for i in range(1, int(level) + 1))
+        required_games_for_next_level = sum(i for i in range(1, int(level) + 2))
 
-    #     if effective_games_played >= required_games_for_next_level:
-    #         level = int(level) + 1
-    #         print(f"Level up (loser)! You are now level {level}.")
-    #     else:
-    #         progress_within_level = (effective_games_played - required_games_for_current_level) / (
-    #             required_games_for_next_level - required_games_for_current_level
-    #         )
-    #         level = int(level) + progress_within_level
-    #         print(f"Current progress (loser): Level {level:.1f}.")
-
-    #     return level
-    
-    def xpcount(self,games_played, is_winner):
-        if is_winner:
-            return games_played * 2  # Winners gain 2 XP per game
+        if effective_games_played >= required_games_for_next_level:
+            level = int(level) + 1
+            print(f"Level up (loser)! You are now level {level}.")
         else:
-            return games_played * 0.5  # Losers gain 0.5 XP per game
-        pass
+            progress_within_level = (effective_games_played - required_games_for_current_level) / (
+                required_games_for_next_level - required_games_for_current_level
+            )
+            level = int(level) + progress_within_level
+            print(f"Current progress (loser): Level {level:.1f}.")
 
-    def calculate_level(self,xp):
-
-        level = 0
-        required_xp = 0
-        while xp >= required_xp:
-            level += 1
-            required_xp += level  # Level 1 requires 1 XP, Level 2 requires 2 XP, etc.
-        return level - 1  # Subtract 1 because we incremented one extra in the loop
-    
-    
+        return level
     def post_result(self, result,token, level,id,score,opponent_name,opponent_score):
         url = f"http://web:8000/api/profile/update/{result}/"
         headers = {
@@ -529,70 +533,30 @@ class remotGameLogic:
         print('sending result to database')
         if(winner == "left"):
             self.player1_total_wins += 1
-            self.player2_total_wins += 1
-            print('player 1 total wins: ', self.player1_total_wins)
-            print('player 2 total wins: ', self.player2_total_wins)
-            # self.winner_xp = self.xpcount(self.player1_total_wins, True)
-            # self.winnerLevel = self.calculate_level(self.winner_xp)
-            self.winnerLevel = self.increaseLevelWiner(self.player1_level , self.player1_total_wins)
-            # self.loser_xp = self.xpcount(self.player2_total_wins, False)
-            self.loserLevel = self.player2_level + 0.15
-            
-            self.winnerLevel = self.l7sabat(self.winnerLevel)
-            self.loserLevel = self.l7sabat(self.loserLevel)
-            # loserLevel = self.increaseLevelLoser(self.player2_total_wins)
-            print('player1 level9999: ', self.player1_level)
-            self.post_result('win', self.player1_token, self.winnerLevel, self.player1, self.leftPlayerScore, self.player2_Name, self.rightPlayerScore)
-            self.post_result('lose', self.player2_token, self.loserLevel, self.player2, self.rightPlayerScore, self.player1_Name, self.leftPlayerScore)
+            winnerLevel = self.increaseLevelWiner(self.player1_level, self.player1_total_wins)
+            loserLevel = self.increaseLevelLoser(self.player2_level, self.player2_total_wins)
+            self.post_result('win', self.player1_token, winnerLevel, self.player1, self.leftPlayerScore, self.player2_Name, self.rightPlayerScore)
+            self.post_result('lose', self.player2_token, loserLevel, self.player2, self.rightPlayerScore, self.player1_Name, self.leftPlayerScore)
         elif (winner == "right"):
             self.player2_total_wins += 1
-            self.player1_total_wins += 1
-            print('player 1 total wins: ', self.player1_total_wins)
-            print('player 2 total wins: ', self.player2_total_wins)
-            # self.winner_xp = self.xpcount(self.player2_total_wins, True)
-            # self.winnerLevel = self.calculate_level(self.winner_xp)
-            # self.loser_xp = self.xpcount(self.player1_total_wins, False)
-            
-            self.loserLevel = self.player1_level + 0.15
-            self.winnerLevel = self.increaseLevelWiner(self.player2_level, self.player2_total_wins)
-            self.winnerLevel = self.l7sabat(self.winnerLevel)
-            self.loserLevel = self.l7sabat(self.loserLevel)
-            # loserLevel = self.increaseLevelLoser(self.player1_total_wins)
-            self.post_result('win', self.player2_token, self.winnerLevel, self.player2, self.rightPlayerScore, self.player1_Name, self.leftPlayerScore)
-            self.post_result('lose', self.player1_token, self.loserLevel, self.player1, self.leftPlayerScore, self.player2_Name, self.rightPlayerScore)
+            winnerLevel = self.increaseLevelWiner(self.player2_level, self.player2_total_wins)
+            loserLevel = self.increaseLevelLoser(self.player1_level, self.player1_total_wins)
+            self.post_result('win', self.player2_token, winnerLevel, self.player2, self.rightPlayerScore, self.player1_Name, self.leftPlayerScore)
+            self.post_result('lose', self.player1_token, loserLevel, self.player1, self.leftPlayerScore, self.player2_Name, self.rightPlayerScore)
             
         else:
             if winner == self.player1_Name:
                 self.player1_total_wins += 1
-                self.player2_total_wins += 1
-                print('player 1 total wins: ', self.player1_total_wins)
-                print('player 2 total wins: ', self.player2_total_wins)
-                # self.winner_xp = self.xpcount(self.player1_total_wins, True)
-                # self.winnerLevel = self.calculate_level(self.winner_xp)
-                # self.loser_xp = self.xpcount(self.player2_total_wins, False)
-                self.loserLevel = self.player2_level + 0.15
-                self.winnerLevel = self.increaseLevelWiner(self.player1_level, self.player1_total_wins)
-                
-                self.winnerLevel = self.l7sabat(self.winnerLevel)
-                self.loserLevel = self.l7sabat(self.loserLevel)
-                # loserLevel = self.increaseLevelLoser(self.player2_total_wins)
-                self.post_result('win', self.player1_token, self.winnerLevel, self.player1 , self.leftPlayerScore, self.player2_Name, self.rightPlayerScore)
-                self.post_result('lose', self.player2_token, self.loserLevel, self.player2, self.rightPlayerScore, self.player1_Name, self.leftPlayerScore)
+                winnerLevel = self.increaseLevelWiner(self.player1_level, self.player1_total_wins)
+                loserLevel = self.increaseLevelLoser(self.player2_level, self.player2_total_wins)
+                self.post_result('win', self.player1_token, winnerLevel, self.player1 , self.leftPlayerScore, self.player2_Name, self.rightPlayerScore)
+                self.post_result('lose', self.player2_token, loserLevel, self.player2, self.rightPlayerScore, self.player1_Name, self.leftPlayerScore)
             elif winner == self.player2_Name:
                 self.player2_total_wins += 1
-                self.player1_total_wins += 1
-                print('player 1 total wins: ', self.player1_total_wins)
-                print('player 2 total wins: ', self.player2_total_wins)
-                # self.winner_xp = self.xpcount(self.player2_total_wins, True)
-                # self.winnerLevel = self.calculate_level(self.winner_xp)
-                # self.loser_xp = self.xpcount(self.player1_total_wins, False)
-                self.loserLevel = self.player1_level + 0.15
-                self.winnerLevel = self.increaseLevelWiner(self.player2_level, self.player2_total_wins)
-                self.winnerLevel = self.l7sabat(self.winnerLevel)
-                self.loserLevel = self.l7sabat(self.loserLevel)
-                # loserLevel = self.increaseLevelLoser(self.player1_total_wins)
-                self.post_result('win', self.player2_token, self.winnerLevel, self.player2, self.rightPlayerScore, self.player1_Name, self.leftPlayerScore)
-                self.post_result('lose', self.player1_token, self.loserLevel, self.player1, self.leftPlayerScore, self.player2_Name, self.rightPlayerScore)
+                winnerLevel = self.increaseLevelWiner(self.player2_level, self.player2_total_wins)
+                loserLevel = self.increaseLevelLoser(self.player1_level, self.player1_total_wins)
+                self.post_result('win', self.player2_token, winnerLevel, self.player2, self.rightPlayerScore, self.player1_Name, self.leftPlayerScore)
+                self.post_result('lose', self.player1_token, loserLevel, self.player1, self.leftPlayerScore, self.player2_Name, self.rightPlayerScore)
     
     def calculation(self):
         if(self.begin):

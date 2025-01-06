@@ -51,3 +51,7 @@ ZAKARIA:
 - endpoint other user  (by name)
 - MATCH HISTORY dyal l user tzad f user info
 - 
+
+
+
+when exit tab, inGame stays true in case the user was in game

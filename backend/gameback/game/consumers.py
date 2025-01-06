@@ -230,8 +230,8 @@ class pingPongConsumer(AsyncWebsocketConsumer):
                         rooms_game_logic[self.room_group_name].player2_Name = player.nickname
                         rooms_game_logic[self.room_group_name].player1_level = self.level
                         rooms_game_logic[self.room_group_name].player2_level = player.level
-                        rooms_game_logic[self.room_group_name].player1_total_wins = self.wins
-                        rooms_game_logic[self.room_group_name].player2_total_wins = player.wins
+                        rooms_game_logic[self.room_group_name].player1_total_wins = self.wins + self.losses
+                        rooms_game_logic[self.room_group_name].player2_total_wins = player.wins + player.losses
                         rooms_game_logic[self.room_group_name].player1_token = self.token
                         rooms_game_logic[self.room_group_name].player2_token = player.token
                         

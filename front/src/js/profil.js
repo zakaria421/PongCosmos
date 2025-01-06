@@ -156,15 +156,15 @@ export function initProfilPage() {
         const toSanitize = await response.json();
         let userData = sanitizeObject(toSanitize);
         console.log(userData);
-        let matchDatas = userData.matches;
+        let matchDatas = userData.match_details;
         console.log(matchDatas);
         if (matchDatas.length == 0) {
           document.getElementById("notyet").style.display = "block";
         }
         else {
           document.getElementById("notyet").style.display = "none";
-          console.log("LENGTH: ", matchDatas.length);
-          const recentMatches = matchDatas.slice(-10);
+          console.log("LENGTHkmjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj: ", matchDatas.length);
+          const recentMatches = matchDatas.slice(0, 10);
           console.log("LENGTH RECENT MATCHES", recentMatches);
           recentMatches.forEach((match) => {
             const matchCard = createMatchCard(match);
