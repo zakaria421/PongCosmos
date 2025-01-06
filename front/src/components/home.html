@@ -62,10 +62,13 @@
       <div id="user-profile-button" draggable="false"></div>
       
       <div id="notification-icon" class="notification-icon position-relative notif" draggable="false">
-        <i class="fa-solid fa-bell" draggable="false"></i>
-        <span id="notification-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger noti " draggable="false">
-          0
-        </span>
+        <button id="friendRequestButton" class="btn btn-outline-danger btn-sm position-relative" draggable="false">
+          <i class="fa-solid fa-bell" draggable="false"></i>
+          <span id="friendRequestBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" draggable="false">
+              0
+          </span>
+      </button>
+      <div class="friend-requests-container d-none" draggable="false"></div>
       </div>
       <!-- Dropdown Menu -->
       <div id="user-menu" class="user-menu hidden position-absolute bg-white rounded shadow" draggable="false">
@@ -97,18 +100,11 @@
         <div class="friend-header" draggable="false">
           <h5 draggable="false">Friends</h5>
           <div class="friend-actions" draggable="false">
-            <div class="friend-requests-container d-none" draggable="false"></div>
               <button class="btn btn-outline-primary btn-sm customBtn" id="searchBtn" draggable="false">
                   <i class="fa-solid fa-magnifying-glass" draggable="false"></i>
               </button>
               <button class="btn btn-outline-primary btn-sm customBtn" id="addFriendBtn" draggable="false">
                   <i class="fa-solid fa-user-plus" draggable="false"></i>
-              </button>
-              <button id="friendRequestButton" class="btn btn-outline-danger btn-sm position-relative" draggable="false">
-                  Requests
-                  <span id="friendRequestBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" draggable="false">
-                      0
-                  </span>
               </button>
               <button class="btn btn-outline-danger btn-sm d-lg-none" id="closeFriendList" draggable="false">
                   <i class="fa-solid fa-xmark" draggable="false"></i>

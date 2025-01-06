@@ -107,40 +107,92 @@ export function initAboutPage() {
 function renderUser(userData, profilePicture) {
   const sanitizedNickname = sanitizeInput(userData.nickname);
   const sanitizedLevel = sanitizeInput(userData.level);
-  return `
-        <button class="user btn p-2 no-border" draggable="false">
-          <div class="d-flex align-items-center gap-2" draggable="false">
-            <!-- Profile Image -->
-            <div id="toggler" draggable="false">
-              <div class="users-container" draggable="false">
-                <img src="./src/assets/home/border.png" alt="" class="users-border" draggable="false">
-                <img src="${profilePicture}" alt="Profile Image" class="rounded-circle users" id="profilePicture" draggable="false">
-                <p class="level text-white text-decoration-none" draggable="false">
-                  <strong draggable="false">${sanitizedLevel}</strong>
-                </p>
-                </div>
 
-              <!-- User Name -->
-              <div class="UserProfile" draggable="false">
-                <p class="text-white text-decoration-none" draggable="false" id="profileN">
-                  <strong draggable="false">${sanitizedNickname}</strong>
-                </p>
-              </div>
-            </div>
-            <!-- Notification Icon -->
-            <div class="Notifications" draggable="false">
-              <i class="bi bi-bell-fill text-white" draggable="false"></i>
-            </div>
-          </div>
-        </button>
-    `;
+  // Create button
+  const button = document.createElement("button");
+  button.className = "user btn p-2 no-border";
+  button.setAttribute("draggable", "false");
+
+  // Create main container
+  const container = document.createElement("div");
+  container.className = "d-flex align-items-center gap-2";
+  container.setAttribute("draggable", "false");
+  button.appendChild(container);
+
+  // Create profile image section
+  const profileImageWrapper = document.createElement("div");
+  profileImageWrapper.id = "toggler";
+  profileImageWrapper.setAttribute("draggable", "false");
+  container.appendChild(profileImageWrapper);
+
+  const usersContainer = document.createElement("div");
+  usersContainer.className = "users-container";
+  usersContainer.setAttribute("draggable", "false");
+  profileImageWrapper.appendChild(usersContainer);
+
+  const borderImg = document.createElement("img");
+  borderImg.src = "./src/assets/home/border.png";
+  borderImg.alt = "";
+  borderImg.className = "users-border";
+  borderImg.setAttribute("draggable", "false");
+  usersContainer.appendChild(borderImg);
+
+  const profileImg = document.createElement("img");
+  profileImg.src = profilePicture;
+  profileImg.alt = "Profile Image";
+  profileImg.className = "rounded-circle users";
+  profileImg.id = "profilePicture";
+  profileImg.setAttribute("draggable", "false");
+  usersContainer.appendChild(profileImg);
+
+  const levelParagraph = document.createElement("p");
+  levelParagraph.className = "level text-white text-decoration-none";
+  levelParagraph.setAttribute("draggable", "false");
+  const levelStrong = document.createElement("strong");
+  levelStrong.setAttribute("draggable", "false");
+  levelStrong.textContent = sanitizedLevel;
+  levelParagraph.appendChild(levelStrong);
+  usersContainer.appendChild(levelParagraph);
+
+  // Create user name section
+  const userProfile = document.createElement("div");
+  userProfile.className = "UserProfile";
+  userProfile.setAttribute("draggable", "false");
+  container.appendChild(userProfile);
+
+  const nicknameParagraph = document.createElement("p");
+  nicknameParagraph.className = "text-white text-decoration-none";
+  nicknameParagraph.id = "profileN";
+  nicknameParagraph.setAttribute("draggable", "false");
+  const nicknameStrong = document.createElement("strong");
+  nicknameStrong.setAttribute("draggable", "false");
+  nicknameStrong.textContent = sanitizedNickname;
+  nicknameParagraph.appendChild(nicknameStrong);
+  userProfile.appendChild(nicknameParagraph);
+
+  // Create notification icon
+  const notificationsDiv = document.createElement("div");
+  notificationsDiv.className = "Notifications";
+  notificationsDiv.setAttribute("draggable", "false");
+  const notificationIcon = document.createElement("i");
+  notificationIcon.className = "bi bi-bell-fill text-white";
+  notificationIcon.setAttribute("draggable", "false");
+  notificationsDiv.appendChild(notificationIcon);
+  container.appendChild(notificationsDiv);
+
+  return button;
 }
 
+function updateUserDisplay(userData, profilePicture) {
+  const userProfileButtonContainer = document.getElementById("user-profile-button");
 
-  function updateUserDisplay(userData, profilePicture) {
-    const userProfileButtonContainer = document.getElementById("user-profile-button");
-    userProfileButtonContainer.innerHTML = renderUser(userData, profilePicture);
-  }
+  // Clear existing content
+  userProfileButtonContainer.replaceChildren(); // Clears all child nodes
+
+  // Render new user profile button
+  const userProfileButton = renderUser(userData, profilePicture);
+  userProfileButtonContainer.appendChild(userProfileButton);
+}
 
   fetchUserData();
 

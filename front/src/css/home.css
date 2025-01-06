@@ -765,3 +765,81 @@ input:checked + .slider {
 input:checked + .slider:before {
   transform: translateX(20px);
 }
+
+/**********************************/
+
+/* Base styles for the friend requests container */
+.friend-requests-container {
+  position: absolute;
+  top: 150%;
+  right: 0;
+  z-index: 10;
+  width: 300px;
+  max-height: 400px;
+  overflow-y: auto;
+  background-color: var(--colors-body);
+  border: 1px solid hsl(210, 14%, 40%);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  padding: 10px;
+  animation: slideDown 0.3s ease;
+  color: white;
+}
+
+/* Show the container when toggled */
+.friend-requests-container.active {
+  display: block;
+}
+
+/* Style individual friend request items */
+.friend-request {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 8px;
+  border-radius: 4px;
+  background-color:  var(--colors-body); /* Dark background for items */
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Request info (nickname) */
+.request-info {
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+}
+
+/* Action buttons */
+.request-actions button {
+  margin-left: 5px;
+}
+
+.request-actions .btn {
+  font-size: 12px;
+  padding: 5px 10px;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.btn .btn-success {
+  background-color: green !important;
+}
+
+.btn .btn-danger {
+  background-color: red !important;
+}
+
+/* Optional: Slide-down animation */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

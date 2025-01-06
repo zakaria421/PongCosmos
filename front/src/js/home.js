@@ -338,8 +338,13 @@ export function initHomePage() {
     async function handlel(event) {
 
       const clickedItem = event.target.closest('.dropdown-item');
-
+      const isClickInside = notificationButton.contains(event.target) ||
+                          friendRequestsContainer.contains(event.target);
+      if (!isClickInside) {
+        friendRequestsContainer.classList.add("d-none");
+      }
       fetchFriendRequests();
+      fetchFriendList();
 
       if (clickedItem && clickedItem.querySelector("#view-profile")) {
         console.log("Viewing profile...");
@@ -873,8 +878,6 @@ export function initHomePage() {
     }
   });
 
-
-
   async function fetchFriendRequests() {
     try {
       const response = await fetch("https://0.0.0.0:8443/api/friends/friend-requests/", {
@@ -886,58 +889,56 @@ export function initHomePage() {
       });
 
       if (response.ok) {
-        refreshAttempts = 0;
         const requests = await response.json();
 
-        // Update the badge count
-        friendRequestBadge.textContent = requests.length;
-        friendRequestBadge.style.display = requests.length > 0 ? "inline-block" : "none";
+      // Update the badge count
+      friendRequestBadge.textContent = requests.length;
+      friendRequestBadge.style.display = requests.length > 0 ? "inline-block" : "none";
 
-        // Update the friend requests container
-        if (friendRequestsContainer) {
-          // Clear the container
-          friendRequestsContainer.textContent = "";
+      // Update the friend requests container
+      if (friendRequestsContainer) {
+        // Clear the container
+        friendRequestsContainer.textContent = "";
 
-          requests.forEach((request) => {
-            // Create the friend request container
-            const requestElement = document.createElement("div");
-            requestElement.className = "friend-request";
+        requests.forEach((request) => {
+          // Create the friend request container
+          const requestElement = document.createElement("div");
+          requestElement.className = "friend-request";
 
-            // Create the request info section
-            const infoElement = document.createElement("div");
-            infoElement.className = "request-info";
+          // Create the request info section
+          const infoElement = document.createElement("div");
+          infoElement.className = "request-info";
 
-            const nameElement = document.createElement("span");
-            nameElement.className = "requester-name";
-            nameElement.textContent = request.nickname; // Use textContent to prevent XSS
-            infoElement.appendChild(nameElement);
+          const nameElement = document.createElement("span");
+          nameElement.className = "requester-name";
+          nameElement.textContent = request.nickname; // Use textContent to prevent XSS
+          infoElement.appendChild(nameElement);
 
-            // Create the request actions section
-            const actionsElement = document.createElement("div");
-            actionsElement.className = "request-actions";
+          // Create the request actions section
+          const actionsElement = document.createElement("div");
+          actionsElement.className = "request-actions";
 
-            // Create Accept button
-            const acceptButton = document.createElement("button");
-            acceptButton.className = "btn btn-success accept-request";
-            acceptButton.dataset.nickname = request.nickname;
-            acceptButton.textContent = "Accept"; // Use textContent
-            actionsElement.appendChild(acceptButton);
+          // Create Accept button
+          const acceptButton = document.createElement("button");
+          acceptButton.className = "btn btn-success accept-request";
+          acceptButton.dataset.nickname = request.nickname;
+          acceptButton.textContent = "Accept"; // Use textContent
+          actionsElement.appendChild(acceptButton);
 
-            // Create Cancel button
-            const cancelButton = document.createElement("button");
-            cancelButton.className = "btn btn-danger cancel-request";
-            cancelButton.dataset.nickname = request.nickname;
-            cancelButton.textContent = "Cancel"; // Use textContent
-            actionsElement.appendChild(cancelButton);
+          // Create Cancel button
+          const cancelButton = document.createElement("button");
+          cancelButton.className = "btn btn-danger cancel-request";
+          cancelButton.dataset.nickname = request.nickname;
+          cancelButton.textContent = "Cancel"; // Use textContent
+          actionsElement.appendChild(cancelButton);
 
-            // Append sections to the main request element
-            requestElement.appendChild(infoElement);
-            requestElement.appendChild(actionsElement);
+          // Append sections to the main request element
+          requestElement.appendChild(infoElement);
+          requestElement.appendChild(actionsElement);
 
-            // Append the request element to the container
-            friendRequestsContainer.appendChild(requestElement);
-
-          });
+          // Append the request element to the container
+          friendRequestsContainer.appendChild(requestElement);
+        });
         }
 
         // Reattach listeners for Accept and Cancel buttons
@@ -976,10 +977,12 @@ export function initHomePage() {
       console.error("Error fetching friend requests:", err);
     }
   }
-
+  let notificationButton = document.getElementById('friendRequestButton');
   // Event listener to open the friend requests container when clicking the button
-  friendRequestButton.addEventListener("click", () => {
-    friendRequestsContainer.classList.toggle("d-none");
+  notificationButton.addEventListener("click", () => {
+    if (friendRequestsContainer.children.length > 0) {
+      friendRequestsContainer.classList.toggle("d-none");
+    }
   });
 
   // Function to attach event listeners for Accept and Cancel buttons
@@ -999,10 +1002,14 @@ export function initHomePage() {
           if (response.ok) {
             refreshAttempts = 0;
             const result = await response.json();
+            if (friendRequestsContainer.children.length > 0)
+              friendRequestsContainer.classList.toggle("d-none");
             console.log(result.message);
             button.closest(".friend-request").remove();
-            fetchFriendRequests();
-            fetchFriendList();
+            setTimeout(() => {
+              fetchFriendRequests();
+              fetchFriendList();
+          }, 500);
           } else if (response.status === 401) {
             console.log("Access token expired. Refreshing token...");
 
