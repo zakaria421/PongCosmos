@@ -13,14 +13,16 @@ profilePics = [
     'images/poro6.jpg',
 ]
 
-def get_random_profile_pic():
+
+def getRandomPic():
     return random.choice(profilePics)
+
 
 class UserProfile(models.Model):
     user                    = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user_profile')
     id                      = models.AutoField(primary_key=True)
     nickname                = models.CharField(max_length=10, unique=True, )
-    profile_picture         = models.ImageField(upload_to="images/", default=get_random_profile_pic, blank=True, null=True)
+    profile_picture         = models.ImageField(upload_to="images/", default=getRandomPic, blank=True, null=True)
     mimeType                = models.CharField(max_length=50, default="image/jpg")
     email                   = models.EmailField(max_length=255,unique=True)
     bio                     = models.CharField(max_length=100, blank=True)
