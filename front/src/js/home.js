@@ -528,36 +528,40 @@ export function initHomePage() {
 
     socket.onerror = (error) => console.error("WebSocket error:", error);
   }
+
+
   function showGameInviteModal(senderName, inviteId) {
-    const modalHTML = `
-            <div class="modal fade show" id="gameInviteModal" tabindex="-1" style="display: block; background: rgba(0,0,0,0.5)">
-                <div class="modal-dialog">
-                    <div class="modal-content" style="background-color: #452c63; color: white; border: 1px solid #720e9e;">
-                        <div class="modal-header" style="border-bottom: 1px solid #720e9e;">
-                            <h5 class="modal-title">Game Invitation</h5>
-                        </div>
-                        <div class="modal-body">
-                            <p>${senderName} has invited you to play a game!</p>
-                        </div>
-                        <div class="modal-footer" style="border-top: 1px solid #720e9e;">
-                            <button class="btn btn-outline-secondary" onclick="respondToInvite(${inviteId}, 'decline')">
-                                Decline
-                            </button>
-                            <button class="btn btn-primary" style="background-color: #DDA0DD; border: 1px solid #4B0082;" onclick="respondToInvite(${inviteId}, 'accept')">
-                                Accept
-                            </button>
-                        </div>
-                    </div>
-                </div>
+  const modalHTML = `
+  <div class="modal fade show" id="gameInviteModal" tabindex="-1" style="display: block;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Game Invitation</h5>
             </div>
-          `;
+            <div class="modal-body">
+                <p> ${senderName}  has invited you to play a game! </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary decline-btn" onclick="respondToInvite(${inviteId}, 'decline')">
+                    Decline
+                </button>
+                <button class="btn btn-primary accept-btn" onclick="respondToInvite(${inviteId}, 'accept')">
+                    Accept
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+`;
 
-    // Remove existing modals and add new modal
-    const existingModal = document.getElementById("gameInviteModal");
-    if (existingModal) existingModal.remove();
+// Remove existing modals and add new modal
+const existingModal = document.getElementById("gameInviteModal");
+if (existingModal) existingModal.remove();
 
-    document.body.insertAdjacentHTML("beforeend", modalHTML);
-  }
+document.body.insertAdjacentHTML("beforeend", modalHTML);}
+
+
+
 
 
   window.respondToInvite = function (inviteId, action) {
@@ -598,28 +602,28 @@ export function initHomePage() {
   function showNotification(message) {
     const notification = document.createElement('div');
     notification.className = 'custom-notification';
-    notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background-color: #800080;
-            color: white;
-            padding: 15px 25px;
-            border-radius: 5px;
-            z-index: 1000;
-            animation: slideIn 0.5s ease-out;
-        `;
+    // notification.style.cssText = `
+    //         position: fixed;
+    //         top: 20px;
+    //         right: 20px;
+    //         background-color: #800080;
+    //         color: white;
+    //         padding: 15px 25px;
+    //         border-radius: 5px;
+    //         z-index: 1000;
+    //         animation: slideIn 0.5s ease-out;
+    //     `;
     notification.textContent = message;
 
     // Add animation keyframes
-    const style = document.createElement('style');
-    style.textContent = `
-            @keyframes slideIn {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-        `;
-    document.head.appendChild(style);
+    // const style = document.createElement('style');
+    // style.textContent = `
+    //         @keyframes slideIn {
+    //             from { transform: translateX(100%); opacity: 0; }
+    //             to { transform: translateX(0); opacity: 1; }
+    //         }
+    //     `;
+    // document.head.appendChild(style);
 
     // Add to document and remove after delay
     document.body.appendChild(notification);
