@@ -251,8 +251,7 @@ img {
   padding: 0 10px !important;
 }
 
-.wins,
-.level {
+.wins {
   font-size: 0.9rem !important;
 }
 
@@ -426,7 +425,7 @@ img {
   color: #ffffff;
 }
 
-.levels {
+.level {
   color: white;
   font-weight: bold;
   font-size: 10px;
