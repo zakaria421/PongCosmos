@@ -1,8 +1,9 @@
 import json
 import random
-import logging
-import requests
 from asgiref.sync import sync_to_async
+import logging
+from django.contrib.auth.models import User
+import requests
 import httpx
 
 logger = logging.getLogger('django')
@@ -25,31 +26,37 @@ player2Channel = {
 class pingPongConsumer(AsyncWebsocketConsumer):
  
     async def connect(self):
-        self.game_type = self.scope['url_route']['kwargs']['game_type']
-        if(self.game_type == 'remote'):
-            print('*****connected****')
-            # self.room_name = self.scope['url_route']['kwargs']['room_name']
-            self.room_name = None
-            self.room_group_name = None
-            self.playerID = None
-            self.other_playerId = None
-            self.nickname = None
-            self.level = 0
-            self.wins = 0
-            self.losses = 0
-            self.token = None
-            self.gameType = None
-            self.playWithFriendIdRoom = 0
-            # await self.channel_layer.group_add(
-            #     self.room_group_name,
-            #     self.channel_name
-            # )
-        elif(self.game_type == 'local'):
-            self.gameStatus = gameLogic.gameData()
-        elif(self.game_type == 'tournament'):
-            self.gameStatus = gameLogic.gameData()
-            
-        await self.accept()
+        # user = self.scope["user"]
+        # print("___________DBG_____________________", user)
+        # if user.is_authenticated:
+            self.game_type = self.scope['url_route']['kwargs']['game_type']
+            if(self.game_type == 'remote'):
+                print('*****connected****')
+                # self.room_name = self.scope['url_route']['kwargs']['room_name']
+                self.room_name = None
+                self.room_group_name = None
+                self.playerID = None
+                self.other_playerId = None
+                self.nickname = None
+                self.level = 0
+                self.wins = 0
+                self.losses = 0
+                self.token = None
+                self.gameType = None
+                self.playWithFriendIdRoom = 0
+                # await self.channel_layer.group_add(
+                #     self.room_group_name,
+                #     self.channel_name
+                # )
+            elif(self.game_type == 'local'):
+                self.gameStatus = gameLogic.gameData()
+            elif(self.game_type == 'tournament'):
+                self.gameStatus = gameLogic.gameData()
+                
+            await self.accept()
+        # else :
+        #     print("___________MIDDLE_____WARE__________")
+        #     await self.close()
        #send a message to the client
     async def disconnect(self, close_code):
         

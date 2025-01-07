@@ -334,6 +334,7 @@ export function initGamePage(mode) {
       }
     }
     function secondwindow(playerName) {
+      // let token = localStorage.getItem("jwtToken");
       let pause = false;
       let animationControle = undefined;
       function creatloadingscreen() {

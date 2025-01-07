@@ -1,4 +1,4 @@
-import { navigateTo } from "./main.js";
+import { navigateTo, statusCheck } from "./main.js";
 import { sanitizeFormData } from "./main.js";
 import { syncSession } from "./main.js";
 import { eventRegistry } from "./main.js";
@@ -205,6 +205,7 @@ export function initLoginPage() {
         }
         else {
           localStorage.setItem("jwtToken", token);
+          await statusCheck();
           syncSession();
           navigateTo("home");
         }
