@@ -26,13 +26,13 @@ services:
       - db
       - gethnode
     environment:
-      - DB_NAME=ft_transcandencedb
-      - DB_USER=othmane
-      - DB_PASSWORD=otitebah1234
-      - DB_HOST=db
-      - DB_PORT=5432
-      - WEB3_PROVIDER_URL="http://gethnode:8545"
-      - PYTHONUNBUFFERED=1
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - WEB3_PROVIDER_URL=${WEB3_PROVIDER_URL}
+      - PYTHONUNBUFFERED=${PYTHONUNBUFFERED}
     networks:
       - my-net
     volumes:
@@ -66,8 +66,8 @@ services:
       networks:
         - my-net
       environment:
-        - PYTHONUNBUFFERED=1
-        - PYTHONDONTWRITEBYTECODE=1
+        - PYTHONUNBUFFERED=${PYTHONUNBUFFERED}
+        - PYTHONDONTWRITEBYTECODE=${PYTHONDONTWRITEBYTECODE}
 
   chat:
       build: ./ChatBackend
@@ -82,15 +82,15 @@ services:
         - redis
         - db
       environment:
-        - REDIS_HOST=redis
-        - REDIS_PORT=6379
-        - DJANGO_SETTINGS_MODULE=chatapp.settings
-        - DB_NAME=ft_transcandencedb
-        - DB_USER=othmane
-        - DB_PASSWORD=otitebah1234
-        - DB_HOST=db
-        - DB_PORT=5432
-        - PYTHONDONTWRITEBYTECODE=1
+        - REDIS_HOST=${REDIS_HOST}
+        - REDIS_PORT=${REDIS_PORT}
+        - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}
+        - DB_NAME=${DB_NAME}
+        - DB_USER=${DB_USER}
+        - DB_PASSWORD=${DB_PASSWORD}
+        - DB_HOST=${DB_HOST}
+        - DB_PORT=${DB_PORT}
+        - PYTHONDONTWRITEBYTECODE=${PYTHONDONTWRITEBYTECODE}
 
   redis:
     image: redis:6
