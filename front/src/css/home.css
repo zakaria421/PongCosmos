@@ -786,12 +786,10 @@ input:checked + .slider:before {
   color: white;
 }
 
-/* Show the container when toggled */
 .friend-requests-container.active {
   display: block;
 }
 
-/* Style individual friend request items */
 .friend-request {
   display: flex;
   justify-content: space-between;
@@ -799,18 +797,16 @@ input:checked + .slider:before {
   margin-bottom: 10px;
   padding: 8px;
   border-radius: 4px;
-  background-color:  var(--colors-body); /* Dark background for items */
+  background-color:  var(--colors-body);
   transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
-/* Request info (nickname) */
 .request-info {
   font-size: 14px;
   font-weight: 500;
   color: white;
 }
 
-/* Action buttons */
 .request-actions button {
   margin-left: 5px;
 }
@@ -819,18 +815,27 @@ input:checked + .slider:before {
   font-size: 12px;
   padding: 5px 10px;
   color: white;
-  border-radius: 4px;
+  border: none !important;
   cursor: pointer;
   transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
-.btn .btn-success {
-  background-color: green !important;
+.success {
+  background-color: rgb(213, 5, 255) !important;
 }
 
-.btn .btn-danger {
-  background-color: red !important;
+.cancel {
+  background-color: rgb(15, 195, 231) !important;
 }
+
+.success:hover {
+  background-color: rgb(213, 5, 255, 0.7);
+}
+
+.cancel:hover {
+  background-color: rgba(15, 195, 231, 1, 0.7);
+}
+
 
 /* Optional: Slide-down animation */
 @keyframes slideDown {

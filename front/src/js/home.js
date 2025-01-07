@@ -920,14 +920,14 @@ export function initHomePage() {
 
           // Create Accept button
           const acceptButton = document.createElement("button");
-          acceptButton.className = "btn btn-success accept-request";
+          acceptButton.className = "btn success accept-request";
           acceptButton.dataset.nickname = request.nickname;
           acceptButton.textContent = "Accept"; // Use textContent
           actionsElement.appendChild(acceptButton);
 
           // Create Cancel button
           const cancelButton = document.createElement("button");
-          cancelButton.className = "btn btn-danger cancel-request";
+          cancelButton.className = "btn cancel cancel-request";
           cancelButton.dataset.nickname = request.nickname;
           cancelButton.textContent = "Cancel"; // Use textContent
           actionsElement.appendChild(cancelButton);
