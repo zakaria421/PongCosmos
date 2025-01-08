@@ -18,7 +18,7 @@ export function initHomePage() {
     }
 
     try {
-      const response = await fetch("https://0.0.0.0:8443/api/token/refresh/", {
+      const response = await fetch("https://10.12.8.11:8443/api/token/refresh/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -143,8 +143,6 @@ export function initHomePage() {
     userProfileButtonContainer.appendChild(userProfileButton);
   }
 
-
-  console.log("BEFORE FETCHING DATA: will it be twice and why");
   // Elements
   const friendListSection = document.getElementById("friendListSection");
   const closeFriendList = document.getElementById("closeFriendList");
@@ -249,7 +247,7 @@ export function initHomePage() {
   // Fetch User Data
   async function fetchUserData() {
     try {
-      let response = await fetch("https://0.0.0.0:8443/api/userinfo/", {
+      let response = await fetch("https://10.12.8.11:8443/api/userinfo/", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -260,15 +258,13 @@ export function initHomePage() {
       if (response.ok) {
         const toSanitize = await response.json();
         userData = sanitizeObject(toSanitize);
-        const profilePicture = "https://0.0.0.0:8443/" + sanitizeInput(userData.profile_picture);
+        const profilePicture = "https://10.12.8.11:8443/" + sanitizeInput(userData.profile_picture);
         switchCheckbox.checked = userData.is_2fa_enabled;
         updateUserDisplay(userData, profilePicture);
         attachUserMenuListeners();
         document.getElementById("prfl-pic").src = profilePicture;
         refreshAttempts = 0;
       } else if (response.status === 401) {
-        console.log("Access token expired. Refreshing token...");
-
         if (refreshAttempts < maxRefreshAttempts) {
 
           refreshAttempts++;
@@ -284,7 +280,6 @@ export function initHomePage() {
             navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
           }
         } else {
-          console.log(refreshAttempts, "WTF why", isRefreshing);
           console.error("Failed to refresh token after multiple attempts.");
           localStorage.removeItem("jwtToken");
           localStorage.removeItem("refresh");
@@ -306,7 +301,6 @@ export function initHomePage() {
   function attachUserMenuListeners() {
     const userContainer = document.getElementById("toggler");
     const userMenu = document.getElementById("user-menu");
-    console.log(userMenu, "WWAAAAAAWW", userContainer);
     if (userContainer && userMenu) {
       function handlej(event) {
         userMenu.classList.toggle("visible");
@@ -347,12 +341,10 @@ export function initHomePage() {
       fetchFriendList();
 
       if (clickedItem && clickedItem.querySelector("#view-profile")) {
-        console.log("Viewing profile...");
         navigateTo("profil");
       }
 
       if (clickedItem && clickedItem.querySelector("#log-out")) {
-        console.log("Logging out...");
         await disconnectSocket();
         localStorage.removeItem('jwtToken');
         localStorage.removeItem("refresh");
@@ -368,15 +360,13 @@ export function initHomePage() {
     });
 
     async function handlehone(event) {
-      console.log("change event INSIDE");
       if (event.target.classList.contains("input")) {
         const checkbox = event.target;
         const isChecked = checkbox.checked;
         const action = isChecked ? "enable" : "disable";
 
         try {
-          console.log("ACTION : ", action);
-          const response = await fetch(`https://0.0.0.0:8443/api/2fa/${action}/`, {
+          const response = await fetch(`https://10.12.8.11:8443/api/2fa/${action}/`, {
             method: "POST",
             headers: {
               "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -385,9 +375,8 @@ export function initHomePage() {
           });
 
           if (response.ok) {
-            console.log(`2FA ${action}d successfully.`);
+            ;
           } else {
-            console.error("Request failed. Reverting switch state.");
             checkbox.checked = !isChecked; // Revert state if request fails
           }
         } catch (error) {
@@ -411,7 +400,7 @@ export function initHomePage() {
     try {
       await new Promise((resolve) => setTimeout(resolve, 30000));
 
-      let response = await fetch("https://0.0.0.0:8443/api/online-offline/", {
+      let response = await fetch("https://10.12.8.11:8443/api/online-offline/", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -421,11 +410,8 @@ export function initHomePage() {
 
       if (response.ok) {
         const userData = await response.json();
-
-        // console.log("___DBG___ : Connection established", userData);
       }
       else if (response.status === 401) {
-        console.log("Access token expired. Refreshing token...");
 
         if (refreshAttempts < maxRefreshAttempts) {
 
@@ -460,7 +446,6 @@ export function initHomePage() {
   async function connectWebSocket(username, receiverId) {
     try{
       const roomId = `${Math.min(userData.id, receiverId)}_${Math.max(userData.id, receiverId)}`;
-      console.log("Connecting to room:", roomId);
 
         blockId = receiverId;
         const blockBtn = document.getElementById("blockBtn");
@@ -489,7 +474,6 @@ export function initHomePage() {
         disconnectWebSocket();
       }
       if (currentRoomId === roomId) {
-        console.log("Already connected to room:", roomId);
         return;
       }
 
@@ -519,7 +503,6 @@ export function initHomePage() {
 
 
       socket.onclose = () => {
-        // console.log("WebSocket disconnected.");
         currentRoomId = null;
       };
     }catch(err){
@@ -577,8 +560,6 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
       socket.send(JSON.stringify(responsePayload));
       document.getElementById("gameInviteModal").remove();
       if (action === "accept") {
-        // INJECT HEEERE
-        console.log("Game invitation accepted. Redirecting to game...");
         localStorage.setItem('currentGame', `${inviteId}_progress`)
         navigateTo("game", { mode: "playWithFriend", id: inviteId });
       }
@@ -635,7 +616,6 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
 
   function disconnectWebSocket() {
     if (socket) {
-      console.log("Disconnecting WebSocket...");
       socket.close();
       socket = null;
       currentRoomId = null;
@@ -651,8 +631,6 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
         username: userData.nickname,
         timestamp: new Date().toISOString(),
       };
-
-      console.log("Sending payload:", payload);
       socket.send(JSON.stringify(payload));
     } else {
       console.error("WebSocket connection is not open.");
@@ -697,7 +675,6 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
   const friendItems = document.querySelectorAll(".friend-item");
   friendItems.forEach((friend) => {
     friend.addEventListener("click", () => {
-      console.log(friend);
       // Update UI for the selected friend
       const friendName = friend.querySelector(".friend-name").textContent;
       const friendAvatar = friend.querySelector(".friend-avatar").src;
@@ -817,10 +794,8 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
       return;
     }
 
-    console.log("Sending friend request for nickname:", nickname);
-
     try {
-      const response = await fetch(`https://0.0.0.0:8443/api/friends/send-friend-request/${nickname}/`, {
+      const response = await fetch(`https://10.12.8.11:8443/api/friends/send-friend-request/${nickname}/`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -838,8 +813,6 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
         addFriendInput.value = "";
         refreshAttempts = 0;
       } else if (response.status === 401) {
-        console.log("Access token expired. Refreshing token...");
-
         if (refreshAttempts < maxRefreshAttempts) {
 
           refreshAttempts++;
@@ -884,7 +857,7 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
 
   async function fetchFriendRequests() {
     try {
-      const response = await fetch("https://0.0.0.0:8443/api/friends/friend-requests/", {
+      const response = await fetch("https://10.12.8.11:8443/api/friends/friend-requests/", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -948,8 +921,6 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
         // Reattach listeners for Accept and Cancel buttons
         attachFriendRequestListeners();
       } else if (response.status === 401) {
-        console.log("Access token expired. Refreshing token...");
-
         if (refreshAttempts < maxRefreshAttempts) {
 
           refreshAttempts++;
@@ -995,7 +966,7 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
       button.addEventListener("click", async function tz()  {
         const nickname = button.dataset.nickname;
         try {
-          const response = await fetch(`https://0.0.0.0:8443/api/friends/accept-friend-request/${nickname}/`, {
+          const response = await fetch(`https://10.12.8.11:8443/api/friends/accept-friend-request/${nickname}/`, {
             method: "POST",
             headers: {
               Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -1008,15 +979,12 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
             const result = await response.json();
             if (friendRequestsContainer.children.length > 0)
               friendRequestsContainer.classList.toggle("d-none");
-            console.log(result.message);
             button.closest(".friend-request").remove();
             setTimeout(() => {
               fetchFriendRequests();
               fetchFriendList();
           }, 500);
           } else if (response.status === 401) {
-            console.log("Access token expired. Refreshing token...");
-
             if (refreshAttempts < maxRefreshAttempts) {
 
               refreshAttempts++;
@@ -1054,9 +1022,8 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
     document.querySelectorAll(".cancel-request").forEach((button) => {
       button.addEventListener("click", async function tesst() {
         const nickname = button.dataset.nickname;
-        console.log(`Canceling friend request for: ${nickname}`); // Debug
         try {
-          const response = await fetch(`https://0.0.0.0:8443/api/friends/cancel-friend-request/${nickname}/`, {
+          const response = await fetch(`https://10.12.8.11:8443/api/friends/cancel-friend-request/${nickname}/`, {
             method: "POST",
             headers: {
               Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -1069,10 +1036,8 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
             const result = await response.json();
             console.log(result.message);
             button.closest(".friend-request").remove();
-            fetchFriendRequests(); // Refresh badge and container
+            fetchFriendRequests();
           } else if (response.status === 401) {
-            console.log("Access token expired. Refreshing token...");
-
             if (refreshAttempts < maxRefreshAttempts) {
 
               refreshAttempts++;
@@ -1126,7 +1091,7 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
 
     if (query) {
       try {
-        const response = await fetch(`https://0.0.0.0:8443/api/search-friends/?query=${encodeURIComponent(query)}`, {
+        const response = await fetch(`https://10.12.8.11:8443/api/search-friends/?query=${encodeURIComponent(query)}`, {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
             "Content-Type": "application/json",
@@ -1184,8 +1149,6 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
               const friendName = chatButton.dataset.friendName;
               const friendAvatar = chatButton.dataset.friendAvatar;
 
-              console.log("Starting chat with:", friendName);
-
               // Disconnect existing WebSocket (if any)
               disconnectWebSocket();
 
@@ -1208,14 +1171,11 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
             // Add event listener to result item
             resultItem.addEventListener("click", () => {
               const friendId = resultItem.dataset.friendId;
-              console.log("Selected friend ID:", friendId);
               searchInput.value = ""; // Clear search input
               searchResults.textContent = ""; // Clear search results
             });
           });
         } else if (response.status === 401) {
-          console.log("Access token expired. Refreshing token...");
-
           if (refreshAttempts < maxRefreshAttempts) {
 
             refreshAttempts++;
@@ -1259,7 +1219,7 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
       return;
     }
     try {
-      let response = await fetch("https://0.0.0.0:8443/api/friends/friend-list/", {
+      let response = await fetch("https://10.12.8.11:8443/api/friends/friend-list/", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -1270,8 +1230,6 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
         let data = await response.json();
         renderFriendList(data);
       } else if (response.status === 401) {
-        console.log("Access token expired. Refreshing token...");
-
         if (refreshAttempts < maxRefreshAttempts) {
 
           refreshAttempts++;
@@ -1371,8 +1329,6 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
         const friendName = name.textContent;
         const friendAvatar = avatar.src;
 
-        console.log(`Starting chat with: ${friendName}`);
-
         // Disconnect any existing WebSocket and initiate a new one
         disconnectWebSocket();
         connectWebSocket(userData.nickname, friendId);
@@ -1418,10 +1374,7 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
           if(currentUserResponse.ok && friendResponse.ok){
             const currentUserStatus = await currentUserResponse.json();
             const friendStatus = await friendResponse.json();
-            console.log("User status:", currentUserStatus.inGameStatus);
-            console.log("Friend status:", friendStatus.inGameStatus);
             if(currentUserStatus.inGameStatus === false && friendStatus.inGameStatus === false){
-              console.log("Game invite for Friend ID:", friend.id);
       
               const invitePayload = {
                 type: "game_invite",
@@ -1430,9 +1383,7 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
                 receiver_id: parseInt(friend.id),
                 invite_id: new Date().getTime(),
               };
-      
-              console.log("Sending game invite payload:", invitePayload);
-      
+            
               if (socket && socket.readyState === WebSocket.OPEN) {
                 socket.send(JSON.stringify(invitePayload));
                 showNotification("Game invitation sent!");
@@ -1443,9 +1394,7 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
               showNotification("One of the users is already in a game. Try again later.");
               return;
             }
-          }else if (response.status === 401) {
-            console.log("Access token expired. Refreshing token...");
-      
+          }else if (response.status === 401) {      
             if (refreshAttempts < maxRefreshAttempts) {
       
               refreshAttempts++;
@@ -1477,7 +1426,6 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
         });
       }
     });
-    console.log("Friend list rendered successfully.", !!StatusSocket);
   }
 
 
@@ -1493,7 +1441,7 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
 
         const result = await response.json();
         if (result.status === 'blocked') {
-            console.log("User successfully blocked:", result.message);
+            
             updateBlockButtonState(friendId, blockerId);
             blockBtn.textContent = 'Unblock';
             blockBtn.classList.remove('btn-danger');
@@ -1516,7 +1464,6 @@ async function unblockUser(friendId) {
         const result = await response.json();
         if (result.status === 'unblocked') {
             updateBlockButtonState(friendId, blockerId);
-            console.log("User successfully unblocked:", result.message);
             blockBtn.textContent = 'Block';
             blockBtn.classList.remove('btn-success');
             blockBtn.classList.add('btn-danger');

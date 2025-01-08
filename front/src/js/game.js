@@ -22,7 +22,6 @@ export function initGamePage(mode) {
     }
     else if(mode === "playWithFriend")
     {
-      console.log("playWithFriend");
       gametype = "playWithFriend";
     }
     let a =  await userData();
@@ -32,7 +31,6 @@ export function initGamePage(mode) {
     }
      async function changeInGame()
     {
-      console.error("changeInGame");
       try{
         const response =  await fetch(`https://${location.host}/api/profile/ingame/false/` , {
           method: "POST",
@@ -63,7 +61,6 @@ export function initGamePage(mode) {
         if(response.ok)
         {
           const data = await  response.json();
-          console.log("___________USER______INFO_______",data);
           if(data.inGame === true)
           {
             alert("You are already in a game");
@@ -98,15 +95,12 @@ export function initGamePage(mode) {
     }
   }
     function handleBeforeUnload() {
-      console.error("change body style");
       // event.preventDefault();
       // event.returnValue = ""; 
       changeInGame();
       if (socket && socket.readyState === WebSocket.OPEN) {
-        console.error("close socket before unload");
         socket.close();
       }
-      // console.error("playWithFriend222222222222");
       // if(gametype === "playWithFriend")
       // {
       //   sessionStorage.removeItem("playerReloaded"); // Remove the key
@@ -114,10 +108,8 @@ export function initGamePage(mode) {
       if (gametype === "tournament") {
         
           document.querySelectorAll(".flex-container").forEach(element => element.remove());
-        console.log(document.body.classList.remove("body-style"));
       }
       if (typeof sendNewSize === "function" && typeof handleKeyEvent === "function") {
-        console.log("sendNewSize is defined");
         window.removeEventListener("resize", sendNewSize);
         window.removeEventListener("keyup", handleKeyEvent);
         window.removeEventListener("keydown", handleKeyEvent);
@@ -127,15 +119,12 @@ export function initGamePage(mode) {
       navigateTo("play");
     }
     function handlePopState() {
-      console.error("change body style1");
       // event.preventDefault();
       // event.returnValue = ""; 
       changeInGame();
       if (socket && socket.readyState === WebSocket.OPEN) {
-        console.error("close socket on back button");
         socket.close();
       }
-      // console.error("playWithFriend222222222222");
       // if(gametype === "playWithFriend")
       // {
       //   sessionStorage.removeItem("playerReloaded"); // Remove the key
@@ -144,10 +133,8 @@ export function initGamePage(mode) {
       if (gametype === "tournament") {
         // document.getElementsByClassName("flex-container").remove();
         document.querySelectorAll(".flex-container").forEach(element => element.remove());
-        console.log(document.body.classList.remove("body-style"));
       }
       if (typeof sendNewSize === "function" && typeof handleKeyEvent === "function") {
-        console.log("sendNewSize is defined");
         window.removeEventListener("resize", sendNewSize);
         window.removeEventListener("keyup", handleKeyEvent);
         window.removeEventListener("keydown", handleKeyEvent);
@@ -160,7 +147,6 @@ export function initGamePage(mode) {
 
     firstwindow();
     function gameOver(winner) {
-      console.log("winner", winner);
       if (winner === "left")
         winner = document.getElementById("leftPlayerP").innerText;
       else if (winner === "right")
@@ -198,8 +184,6 @@ export function initGamePage(mode) {
       let span = document.createElement("span");
       if(gametype === "remote" || gametype === "local" || gametype === "tournament" )
       {
-        
-        console.error(gametype);
         button.id = "restart";
         span.innerText = "Restart";
         button.appendChild(span);
@@ -327,7 +311,6 @@ export function initGamePage(mode) {
       } else if (gametype === "remote" || gametype === "playWithFriend") {
         secondwindow();
       } else if (gametype === "tournament") {
-        console.log("PLOP");
         tournamentFile.namesForms().then((formData) => {
           secondwindow(formData);
         });
@@ -363,10 +346,8 @@ export function initGamePage(mode) {
       // const socket = new WebSocket('ws://localhost:8001/ws/pingPong/');
       let id = 0;
       socket.onopen = async function (e) {
-        console.log("Connection established");
         if (gametype === "remote") {
           const token = localStorage.getItem('jwtToken');
-          console.log(id);
           socket.send(
             JSON.stringify({
               message: "Hello, server!",
@@ -380,12 +361,10 @@ export function initGamePage(mode) {
           // if (sessionStorage.getItem("playerReloaded") === null) {
           //   // First visit: Set the value to false
           //   sessionStorage.setItem("playerReloaded", "true");
-          //   console.log("This is the first visit.");
           // } else {
           //   // Page reload detected
           //   if (sessionStorage.getItem("playerReloaded") === "true") {
           //     sessionStorage.removeItem("playerReloaded"); // Remove the key
-          //     console.log("Player reloaded the page.");
           //     // socket.close();
           //     changeInGame();
           //     navigateTo("home");
@@ -405,21 +384,15 @@ export function initGamePage(mode) {
 
             // 5 am
               const game_status = localStorage.getItem('currentGame');
-              console.log("___________GAME___________STATUS__________FROM_____LOCAL___STORAGE",game_status);
               if(!game_status || game_status !== `${room_id}_progress`)
               {
                 localStorage.removeItem('currentGame');
                 await socket.close();
                 changeInGame();
-                console.log("_______GAME_______ALREADY__________CLOSED________00______");
                 navigateTo("play");
                 return ;
               }
 
-
-
-
-              console.log(room_id);
               socket.send(
                 JSON.stringify({
                   message: "Hello, server!",
@@ -476,7 +449,6 @@ export function initGamePage(mode) {
         //parse the data and do something with it
         if (gametype === "tournament") {
           if (data.event === "tournament") {
-            console.log("begin tournament");
             let checkBoyd = document.getElementById("flex-container-names2");
             if (checkBoyd) {
               checkBoyd.remove();
@@ -484,7 +456,6 @@ export function initGamePage(mode) {
             tournamentFile.tournament(data.groups);
           }
           if (data.event === "OneVsOne") {
-            console.log("begin OneVsOne");
             tournamentFile.OneVsOne(data.players);
             playerName[0] = data.players[0];
             playerName[1] = data.players[1];
@@ -495,7 +466,6 @@ export function initGamePage(mode) {
           if(data.message === "remote-id")
           {
             id = data.id;
-            console.log("id",id);
           }
         }
         if (data.event === "draw") {
@@ -511,10 +481,8 @@ export function initGamePage(mode) {
           gameData.width = data.canvasWidth;
           gameData.height = data.canvasHeight;
           letsStart(data);
-          //    console.log('draw');
         }
         if (data.event === "gameOver") {
-          console.log("gameOver");
           window.cancelAnimationFrame(animationControle);
           if (gametype === "tournament") {
             firstInstructions = true;
@@ -585,7 +553,6 @@ export function initGamePage(mode) {
       };
 // 6 am
       socket.onclose = async function (e) {
-        console.error("WebSocket closed unexpectedly");
         localStorage.removeItem('currentGame');
         await changeInGame();
         return;
@@ -749,7 +716,6 @@ export function initGamePage(mode) {
           draw(0);
         };
         // setTimeout(() => {
-        //     console.log('start');
         //     if (socket.readyState === WebSocket.OPEN) {
         //         socket.send(JSON.stringify({
         //             event: 'start'
@@ -1052,12 +1018,6 @@ export function initGamePage(mode) {
         } else if (player === "right") {
           updateScore("right", gameData.rightPlayerScore);
         }
-        console.log(
-          "leftPlayerScore",
-          leftPlayerScore,
-          "rightPlayerScore",
-          rightPlayerScore
-        );
       }
 
       function updateScore(player, score) {
@@ -1117,12 +1077,10 @@ export function initGamePage(mode) {
       window.addEventListener("keydown", handleKeyEvent);
       // if(gametype === "playWithFriend")
       // {
-      //   console.log("playWithFriend11111111111");
       //   window.addEventListener("reload", handleload);
       // }
 
       // function handleload() {
-      //   console.log("playWithFriend222222222222");
       //   if(gametype === "playWithFriend")
       //   {
       //     navigateTo("home");
@@ -1139,7 +1097,6 @@ export function initGamePage(mode) {
       //   if (gametype === "tournament") {
           
       //       document.querySelectorAll(".flex-container").forEach(element => element.remove());
-      //     console.log(document.body.classList.remove("body-style"));
       //   }
       //   window.removeEventListener("resize", sendNewSize);
       //   window.removeEventListener("keyup", handleKeyEvent);
@@ -1157,7 +1114,6 @@ export function initGamePage(mode) {
       //   if (gametype === "tournament") {
       //     // document.getElementsByClassName("flex-container").remove();
       //     document.querySelectorAll(".flex-container").forEach(element => element.remove());
-      //     console.log(document.body.classList.remove("body-style"));
       //   }
       //   window.removeEventListener("resize", sendNewSize);
       //   window.removeEventListener("keyup", handleKeyEvent);
@@ -1245,7 +1201,6 @@ export function initGamePage(mode) {
 
       function animationMovementButton() {
         if (gametype === "local" || gametype === "tournament") {
-          console.log("first instructions");
           if (
             leftkeys &&
             rightkeys &&
@@ -1317,7 +1272,6 @@ export function initGamePage(mode) {
 
   
   if (mode) {
-    console.log("mode", mode);
     if (mode == 'Remote 1v1')
       game('remote');
     else if (mode == 'Tournament')

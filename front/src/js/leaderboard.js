@@ -12,12 +12,11 @@ export function initLeaderboardPage() {
     const refreshToken = localStorage.getItem("refresh");
 
     if (!refreshToken) {
-      console.error("No refresh token found.");
       return null;
     }
 
     try {
-      const response = await fetch("https://0.0.0.0:8443/api/token/refresh/", {
+      const response = await fetch("https://10.12.8.11:8443/api/token/refresh/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -26,8 +25,7 @@ export function initLeaderboardPage() {
       });
 
       if (!response.ok) {
-        console.error("Failed to refresh token");
-        return null; // Return null if refresh fails
+        return null;
       }
 
       const data = await response.json();
@@ -40,7 +38,6 @@ export function initLeaderboardPage() {
 
       return newAccessToken;
     } catch (error) {
-      console.error("Error refreshing access token:", error);
       localStorage.removeItem("jwtToken");
       localStorage.removeItem("refresh");
 
@@ -174,7 +171,7 @@ export function initLeaderboardPage() {
 
     const avatar = document.createElement('img');
     avatar.classList.add('avatar');
-    avatar.src = `https://0.0.0.0:8443${user.profile_picture}`;
+    avatar.src = `https://10.12.8.11:8443${user.profile_picture}`;
     avatar.alt = user.nickname;
 
     const name = document.createElement('div');
@@ -246,7 +243,7 @@ function createLeaderboardItem(user, index) {
               ${index + 1}
           </span>
           <div class="line-horizontal"></div>
-          <img src="https://0.0.0.0:8443${user.profile_picture}" 
+          <img src="https://10.12.8.11:8443${user.profile_picture}" 
                alt="${user.nickname}" 
                class="rounded-circle me-3 ${avatarClass}">
           <div class="flex-grow-1">
@@ -261,12 +258,11 @@ function createLeaderboardItem(user, index) {
 
   async function renderLeaderboard() {
     const podium = document.getElementById("podium");
-    podium.innerHTML = ''; // Ensure it's empty before adding new items
+    podium.innerHTML = '';
     const leaderboardList = document.getElementById("leaderboard-list");
     leaderboardList.innerHTML = '';
-    // let leaderboardData = [];
     try {
-      const response = await fetch("https://0.0.0.0:8443/api/topplayers/", {
+      const response = await fetch("https://10.12.8.11:8443/api/topplayers/", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -291,7 +287,6 @@ function createLeaderboardItem(user, index) {
 
           // Loop through the rankOrder array to append podium items in the desired order
           rankOrder.forEach(( { rank, data }) => {
-            console.log(rank, data);
             const podiumItem = createPodiumItem(data, rank);
             podium.appendChild(podiumItem);
           });
@@ -311,14 +306,11 @@ function createLeaderboardItem(user, index) {
           leaderboardList.innerHTML = leaderboardHtml;
         }
         else {
-          console.log("entered here : ");
           document.getElementById("notEnough").classList.remove("d-none");
           document.getElementById("leftOne").style.display = 'none';
           document.getElementById("rightOne").style.display = 'none';
         }
       } else if (response.status === 401) {
-        console.log("Access token expired. Refreshing token...");
-
         if (refreshAttempts < maxRefreshAttempts) {
           refreshAttempts++;
           token = await refreshAccessToken();
@@ -333,7 +325,6 @@ function createLeaderboardItem(user, index) {
             navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
           }
         } else {
-          console.error("Failed to refresh token after multiple attempts.");
           localStorage.removeItem("jwtToken");
           localStorage.removeItem("refresh");
 
@@ -341,12 +332,6 @@ function createLeaderboardItem(user, index) {
           navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
         }
       }
-      else {
-        const toSanitize = await response.json();
-
-        console.error("Failed to fetch user data:", toSanitize);
-      }
-
     } catch (error) {
       console.log(error);
     }
@@ -364,7 +349,7 @@ function createLeaderboardItem(user, index) {
   /**------------------------------------------------------------- */
   async function fetchUserData() {
     try {
-      let response = await fetch("https://0.0.0.0:8443/api/userinfo/", {
+      let response = await fetch("https://10.12.8.11:8443/api/userinfo/", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -375,13 +360,11 @@ function createLeaderboardItem(user, index) {
       if (response.ok) {
         const toSanitize = await response.json();
         const userData = sanitizeObject(toSanitize);
-        const profilePicture = "https://0.0.0.0:8443" + sanitizeInput(userData.profile_picture);
+        const profilePicture = "https://10.12.8.11:8443" + sanitizeInput(userData.profile_picture);
         switchCheckbox.checked = userData.is_2fa_enabled;
         updateUserDisplay(userData, profilePicture);
         attachUserMenuListeners();
       } else if (response.status === 401) {
-        console.log("Access token expired. Refreshing token...");
-
         if (refreshAttempts < maxRefreshAttempts) {
           refreshAttempts++;
           token = await refreshAccessToken();
@@ -396,7 +379,6 @@ function createLeaderboardItem(user, index) {
             navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
           }
         } else {
-          console.error("Failed to refresh token after multiple attempts.");
           localStorage.removeItem("jwtToken");
           localStorage.removeItem("refresh");
 
@@ -409,7 +391,6 @@ function createLeaderboardItem(user, index) {
         navigateTo("error", { message: "Error fetching, please relog" });
       }
     } catch (err) {
-      console.error("Error fetching user data:", err);
       navigateTo("error", { message: err.message });
     }
   }
@@ -476,7 +457,6 @@ function createLeaderboardItem(user, index) {
   function attachUserMenuListeners() {
     const userContainer = document.getElementById("toggler");
     const userMenu = document.getElementById("user-menu");
-    console.log(userMenu, "WWAAAAAAWW", userContainer);
     if (userContainer && userMenu) {
       function handlej(event) {
         userMenu.classList.toggle("visible");
@@ -515,12 +495,10 @@ function createLeaderboardItem(user, index) {
 
       // Check which specific dropdown item was clicked
       if (clickedItem.querySelector("#view-profile")) {
-        console.log("Viewing profile...");
         navigateTo("profil");
       }
 
       if (clickedItem.querySelector("#log-out")) {
-        console.log("Logging out...");
         localStorage.removeItem('jwtToken');
         syncSession();
         navigateTo("landing");
@@ -534,15 +512,13 @@ function createLeaderboardItem(user, index) {
     });
 
     async function handlehone(event) {
-      console.log("change event INSIDE");
       if (event.target.classList.contains("input")) {
         const checkbox = event.target;
         const isChecked = checkbox.checked;
         const action = isChecked ? "enable" : "disable";
 
         try {
-          console.log("ACTION : ", action);
-          const response = await fetch(`https://0.0.0.0:8443/api/2fa/${action}/`, {
+          const response = await fetch(`https://10.12.8.11:8443/api/2fa/${action}/`, {
             method: "POST",
             headers: {
               "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -552,9 +528,7 @@ function createLeaderboardItem(user, index) {
 
           if (response.ok) {
             console.log(`2FA ${action}d successfully.`);
-          } else if (response.status === 401) {
-            console.log("Access token expired. Refreshing token...");
-    
+          } else if (response.status === 401) {    
             if (refreshAttempts < maxRefreshAttempts) {
               refreshAttempts++;
               token = await refreshAccessToken();
@@ -569,7 +543,6 @@ function createLeaderboardItem(user, index) {
                 navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
               }
             } else {
-              console.error("Failed to refresh token after multiple attempts.");
               localStorage.removeItem("jwtToken");
           localStorage.removeItem("refresh");
 
@@ -578,11 +551,9 @@ function createLeaderboardItem(user, index) {
             }
           }
           else {
-            console.error("Request failed. Reverting switch state.");
             checkbox.checked = !isChecked; // Revert state if request fails
           }
         } catch (error) {
-          console.error("Error occurred:", error);
           checkbox.checked = !isChecked; // Revert state if an error occurs
         }
       }

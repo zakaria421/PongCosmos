@@ -3,7 +3,7 @@
 services:
   frontend:
       container_name: front
-      build: ./front  # Assuming the frontend Dockerfile is in a folder named 'frontend'
+      build: ./front
       ports:
         - "8080:80"
         - "8443:8443"
@@ -25,14 +25,8 @@ services:
     depends_on: 
       - db
       - gethnode
-    environment:
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - WEB3_PROVIDER_URL=${WEB3_PROVIDER_URL}
-      - PYTHONUNBUFFERED=${PYTHONUNBUFFERED}
+    env_file:
+      - .env
     networks:
       - my-net
     volumes:
@@ -43,10 +37,8 @@ services:
   db:
     container_name: database
     image: postgres:14
-    environment:
-      POSTGRES_DB: ft_transcandencedb
-      POSTGRES_USER: othmane
-      POSTGRES_PASSWORD: otitebah1234
+    env_file:
+      - .env
     ports:
       - "5432:5432"
     volumes:
@@ -65,6 +57,8 @@ services:
         - ./backend:/backend
       networks:
         - my-net
+      env_file:
+        - .env
       environment:
         - PYTHONUNBUFFERED=${PYTHONUNBUFFERED}
         - PYTHONDONTWRITEBYTECODE=${PYTHONDONTWRITEBYTECODE}
@@ -82,15 +76,9 @@ services:
         - redis
         - db
       environment:
-        - REDIS_HOST=${REDIS_HOST}
-        - REDIS_PORT=${REDIS_PORT}
-        - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}
-        - DB_NAME=${DB_NAME}
-        - DB_USER=${DB_USER}
-        - DB_PASSWORD=${DB_PASSWORD}
-        - DB_HOST=${DB_HOST}
-        - DB_PORT=${DB_PORT}
-        - PYTHONDONTWRITEBYTECODE=${PYTHONDONTWRITEBYTECODE}
+        - DJANGO_SETTINGS_MODULE=chatapp.settings
+      env_file:
+        - .env
 
   redis:
     image: redis:6

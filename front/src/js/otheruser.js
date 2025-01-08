@@ -12,12 +12,11 @@ export function initOtherUserPage(name) {
     const refreshToken = localStorage.getItem("refresh");
 
     if (!refreshToken) {
-      console.error("No refresh token found.");
       return null;
     }
 
     try {
-      const response = await fetch("https://0.0.0.0:8443/api/token/refresh/", {
+      const response = await fetch("https://10.12.8.11:8443/api/token/refresh/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -26,8 +25,7 @@ export function initOtherUserPage(name) {
       });
 
       if (!response.ok) {
-        console.error("Failed to refresh token");
-        return null; // Return null if refresh fails
+        return null;
       }
 
       const data = await response.json();
@@ -40,7 +38,6 @@ export function initOtherUserPage(name) {
 
       return newAccessToken;
     } catch (error) {
-      console.error("Error refreshing access token:", error);
       localStorage.removeItem("jwtToken");
       localStorage.removeItem("refresh");
 
@@ -82,7 +79,7 @@ export function initOtherUserPage(name) {
       const div = document.createElement("div");
       div.className = "friend-item";
       div.innerHTML = `
-              <img src="https://0.0.0.0:8443/${friend.profile_picture}" alt="${friend.nickname
+              <img src="https://10.12.8.11:8443/${friend.profile_picture}" alt="${friend.nickname
         }" class="friend-picture">
               <div>
                   <p class="friend-name">${friend.nickname}</p>
@@ -124,7 +121,7 @@ export function initOtherUserPage(name) {
                         <h5 class="enemy-name ${playerWon ? "loser" : "winner"
       } mb-2 mb-sm-0 me-sm-2">${match.opponent_name}</h5>
                         <img src="
-                          https://0.0.0.0:8443/${match.opponent_profile_picture}
+                          https://10.12.8.11:8443/${match.opponent_profile_picture}
                         " alt="" class="enemy-icon">
                     </div>
                 </div>
@@ -134,10 +131,7 @@ export function initOtherUserPage(name) {
   }
 
   async function displayMatchHistory() {
-    console.log("LENGTH: ", matches.length);
-
     const matchHistoryContainer = document.getElementById("matchHistory");
-    // matchHistoryContainer.innerHTML = "";
     if (matches.length == 0) {
       document.getElementById("notyet").style.display = "block";
     }
@@ -149,14 +143,11 @@ export function initOtherUserPage(name) {
         matchHistoryContainer.appendChild(matchCard);
       });
     }
-    // Get the last 10 games from matchData
   }
-  /**
-   * ------------------------------------------------------------------
-   */
+
   async function fetchUserData() {
     try {
-      let response = await fetch("https://0.0.0.0:8443/api/userinfo/", {
+      let response = await fetch("https://10.12.8.11:8443/api/userinfo/", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -167,13 +158,11 @@ export function initOtherUserPage(name) {
       if (response.ok) {
         const toSanitize = await response.json();
         const userData = sanitizeObject(toSanitize);
-        const profilePicture = "https://0.0.0.0:8443/" + userData.profile_picture;
+        const profilePicture = "https://10.12.8.11:8443/" + userData.profile_picture;
         switchCheckbox.checked = userData.is_2fa_enabled;
         updateUserDisplay(userData, profilePicture);
         attachUserMenuListeners();
       } else if (response.status === 401) {
-        console.log("Access token expired. Refreshing token...");
-
         if (refreshAttempts < maxRefreshAttempts) {
           refreshAttempts++;
           token = await refreshAccessToken();
@@ -188,7 +177,6 @@ export function initOtherUserPage(name) {
             navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
           }
         } else {
-          console.error("Failed to refresh token after multiple attempts.");
           localStorage.removeItem("jwtToken");
           localStorage.removeItem("refresh");
 
@@ -201,15 +189,13 @@ export function initOtherUserPage(name) {
         navigateTo("error", { message: "Error fetching, please relog" });
       }
     } catch (err) {
-      console.error("Error fetching user data:", err);
       navigateTo("error", { message: err.message });
     }
   }
 
   async function fetchProfilPlayer() {
-    console.log(token);
     try {
-      let response = await fetch(`https://0.0.0.0:8443/api/user-profile/${name}/`, {
+      let response = await fetch(`https://10.12.8.11:8443/api/user-profile/${name}/`, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -219,9 +205,8 @@ export function initOtherUserPage(name) {
       if (response.ok) {
         const toSanitize = await response.json();
         let userData = sanitizeObject(toSanitize);
-        console.log(userData);
-        // Decrypt the profile picture and update the user display
-        let profilePicture = "https://0.0.0.0:8443/" + userData.profile_picture;
+
+        let profilePicture = "https://10.12.8.11:8443/" + userData.profile_picture;
         document.getElementById("profileName").textContent = userData.nickname;
         document.getElementById("profileBio").textContent = userData.bio;
         document.getElementById("profileImage").src = profilePicture;
@@ -237,8 +222,6 @@ export function initOtherUserPage(name) {
         displayMatchHistory();
 
       }  else if (response.status === 401) {
-        console.log("Access token expired. Refreshing token...");
-
         if (refreshAttempts < maxRefreshAttempts) {
           refreshAttempts++;
           token = await refreshAccessToken();
@@ -253,7 +236,6 @@ export function initOtherUserPage(name) {
             navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
           }
         } else {
-          console.error("Failed to refresh token after multiple attempts.");
           localStorage.removeItem("jwtToken");
           localStorage.removeItem("refresh");
 
@@ -262,11 +244,9 @@ export function initOtherUserPage(name) {
         }
       }
       else {
-        console.log("ERROR : 11");
         navigateTo("error", { message: "User can not be found !" });
       }
     } catch (err) {
-      console.log("ERROR : 22");
       navigateTo("error", { message: "User can not be found !!" });
     }
   }
@@ -361,7 +341,6 @@ export function initOtherUserPage(name) {
     userProfileButtonContainer.appendChild(userProfileButton);
   }
 
-  console.log("displayed twice for some reason: ");
   fetchUserData();
 
   /******************************************************************************** */
@@ -420,19 +399,10 @@ export function initOtherUserPage(name) {
       handler: handled
     });
   }
-  // if (document.getElementsByClassName("profil")) {
-  // const profilButton = document.getElementsByClassName("profil");
-  // if (profilButton[0]) {
-  //   profilButton[0].addEventListener("click", function (event) {
-  //     event.preventDefault();
-  //     navigateTo("profil");
-  //   });
-  // }
-  // Function to attach event listeners when elements exist
+
   function attachUserMenuListeners() {
     const userContainer = document.getElementById("toggler");
     const userMenu = document.getElementById("user-menu");
-    console.log(userMenu, "WWAAAAAAWW", userContainer);
     if (userContainer && userMenu) {
       function handlej(event) {
         userMenu.classList.toggle("visible");
@@ -471,12 +441,10 @@ export function initOtherUserPage(name) {
 
       // Check which specific dropdown item was clicked
       if (clickedItem.querySelector("#view-profile")) {
-        console.log("Viewing profile...");
         navigateTo("profil");
       }
 
       if (clickedItem.querySelector("#log-out")) {
-        console.log("Logging out...");
         localStorage.removeItem('jwtToken');
         syncSession();
         navigateTo("landing");
@@ -490,15 +458,13 @@ export function initOtherUserPage(name) {
     });
 
     async function handlehone(event) {
-      console.log("change event INSIDE");
       if (event.target.classList.contains("input")) {
         const checkbox = event.target;
         const isChecked = checkbox.checked;
         const action = isChecked ? "enable" : "disable";
 
         try {
-          console.log("ACTION : ", action);
-          const response = await fetch(`https://0.0.0.0:8443/2fa/${action}/`, {
+          const response = await fetch(`https://10.12.8.11:8443/2fa/${action}/`, {
             method: "POST",
             headers: {
               "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -509,7 +475,6 @@ export function initOtherUserPage(name) {
           if (response.ok) {
             console.log(`2FA ${action}d successfully.`);
           } else if (response.status === 401) {
-            console.log("Access token expired. Refreshing token...");
     
             if (refreshAttempts < maxRefreshAttempts) {
               refreshAttempts++;
@@ -525,7 +490,6 @@ export function initOtherUserPage(name) {
                 navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
               }
             } else {
-              console.error("Failed to refresh token after multiple attempts.");
               localStorage.removeItem("jwtToken");
           localStorage.removeItem("refresh");
 
@@ -534,11 +498,9 @@ export function initOtherUserPage(name) {
             }
           } 
           else {
-            console.error("Request failed. Reverting switch state.");
             checkbox.checked = !isChecked; // Revert state if request fails
           }
         } catch (error) {
-          console.error("Error occurred:", error);
           checkbox.checked = !isChecked; // Revert state if an error occurs
         }
       }

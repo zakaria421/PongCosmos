@@ -30,3 +30,4 @@ txaio==23.1.1
 typing_extensions==4.12.2
 zope.interface==7.1.1
 django-cors-headers
+python-decouple==3.8

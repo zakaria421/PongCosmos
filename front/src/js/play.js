@@ -4,20 +4,18 @@ import { syncSession } from "./main.js";
 import { sanitizeInput, sanitizeObject } from "./main.js";
 
 export function initPlayPage() {
-  let isRefreshing = false; // Flag to track if token refresh is in progress
-  let refreshAttempts = 0; // Retry counter for token refresh attempts
-  const maxRefreshAttempts = 100; // Maximum number of attempts to refresh token
+  let refreshAttempts = 0;
+  const maxRefreshAttempts = 100;
   let token = localStorage.getItem("jwtToken");
   async function refreshAccessToken() {
     const refreshToken = localStorage.getItem("refresh");
 
     if (!refreshToken) {
-      console.error("No refresh token found.");
       return null;
     }
 
     try {
-      const response = await fetch("https://0.0.0.0:8443/api/token/refresh/", {
+      const response = await fetch("https://10.12.8.11:8443/api/token/refresh/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -26,8 +24,7 @@ export function initPlayPage() {
       });
 
       if (!response.ok) {
-        console.error("Failed to refresh token");
-        return null; // Return null if refresh fails
+        return null;
       }
 
       const data = await response.json();
@@ -40,7 +37,6 @@ export function initPlayPage() {
 
       return newAccessToken;
     } catch (error) {
-      console.error("Error refreshing access token:", error);
       localStorage.removeItem("jwtToken");
       localStorage.removeItem("refresh");
 
@@ -149,7 +145,7 @@ export function initPlayPage() {
 
   async function fetchUserData() {
     try {
-      let response = await fetch("https://0.0.0.0:8443/api/userinfo/", {
+      let response = await fetch("https://10.12.8.11:8443/api/userinfo/", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -160,23 +156,19 @@ export function initPlayPage() {
       if (response.ok) {
         const toSanitize = await response.json();
         const userData = sanitizeObject(toSanitize);
-        const profilePicture = "https://0.0.0.0:8443/" + userData.profile_picture;
+        const profilePicture = "https://10.12.8.11:8443/" + userData.profile_picture;
         switchCheckbox.checked = userData.is_2fa_enabled;
         updateUserDisplay(userData, profilePicture);
         attachUserMenuListeners();
       } else if (response.status === 401) {
-        console.log("Access token expired. Refreshing token...");
-
-        if (!isRefreshing && refreshAttempts < maxRefreshAttempts) {
-          isRefreshing = true; // Lock refresh to prevent infinite loop
-          refreshAttempts++; // Increment retry counter
+        if (refreshAttempts < maxRefreshAttempts) {
+          refreshAttempts++;
 
           token = await refreshAccessToken();
 
           if (token) {
             // Save the new token and reset the refresh state
             localStorage.setItem("jwtToken", token);
-            isRefreshing = false;
             return fetchUserData(); // Retry fetching data with the new token
           } else {
             // Refresh token failed, log out user
@@ -187,8 +179,6 @@ export function initPlayPage() {
             navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
           }
         } else {
-          // Too many refresh attempts or token refresh failed
-          console.error("Failed to refresh token after multiple attempts.");
           localStorage.removeItem("jwtToken");
           localStorage.removeItem("refresh");
 
@@ -201,7 +191,6 @@ export function initPlayPage() {
         navigateTo("error", { message: "Error fetching, please relog" });
       }
     } catch (err) {
-      console.error("Error fetching user data:", err);
       navigateTo("error", { message: err.message });
     }
   }
@@ -330,21 +319,16 @@ export function initPlayPage() {
       });
     }
 
-    // Delegated event listener for "View Profile" and "Log Out" clicks
     async function handlel(event) {
-
       const clickedItem = event.target.closest('.dropdown-item');
 
       if (!clickedItem) return;
 
-      // Check which specific dropdown item was clicked
       if (clickedItem.querySelector("#view-profile")) {
-        console.log("Viewing profile...");
         navigateTo("profil");
       }
 
       if (clickedItem.querySelector("#log-out")) {
-        console.log("Logging out...");
         localStorage.removeItem('jwtToken');
         syncSession();
         navigateTo("landing");
@@ -358,15 +342,13 @@ export function initPlayPage() {
     });
 
     async function handlehone(event) {
-      console.log("change event INSIDE");
       if (event.target.classList.contains("input")) {
         const checkbox = event.target;
         const isChecked = checkbox.checked;
         const action = isChecked ? "enable" : "disable";
 
         try {
-          console.log("ACTION : ", action);
-          const response = await fetch(`https://0.0.0.0:8443/api/2fa/${action}/`, {
+          const response = await fetch(`https://10.12.8.11:8443/api/2fa/${action}/`, {
             method: "POST",
             headers: {
               "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -377,12 +359,10 @@ export function initPlayPage() {
           if (response.ok) {
             console.log(`2FA ${action}d successfully.`);
           } else {
-            console.error("Request failed. Reverting switch state.");
-            checkbox.checked = !isChecked; // Revert state if request fails
+            checkbox.checked = !isChecked;
           }
         } catch (error) {
-          console.error("Error occurred:", error);
-          checkbox.checked = !isChecked; // Revert state if an error occurs
+          checkbox.checked = !isChecked;
         }
       }
     }

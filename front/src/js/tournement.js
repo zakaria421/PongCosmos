@@ -6,7 +6,6 @@ function tournament(players) {
   // clear the body from the previous elements
   const appElement = document.getElementById("app");
   [...document.body.children].forEach(node => {
-    console.log(node, appElement);
     if (node !== appElement) {
       node.remove();
     }

@@ -16,12 +16,11 @@ async function refreshAccessToken() {
 const refreshToken = localStorage.getItem("refresh");
 
   if (!refreshToken) {
-    console.error("No refresh token found.");
     return null;
   }
 
   try {
-    const response = await fetch("https://0.0.0.0:8443/api/token/refresh/", {
+    const response = await fetch("https://10.12.8.11:8443/api/token/refresh/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -30,8 +29,7 @@ const refreshToken = localStorage.getItem("refresh");
     });
 
     if (!response.ok) {
-      console.error("Failed to refresh token");
-      return null; // Return null if refresh fails
+      return null;
     }
 
     const data = await response.json();
@@ -44,7 +42,6 @@ const refreshToken = localStorage.getItem("refresh");
 
     return newAccessToken;
   } catch (error) {
-    console.error("Error refreshing access token:", error);
     localStorage.removeItem("jwtToken");
     localStorage.removeItem("refresh");
 
@@ -52,95 +49,6 @@ const refreshToken = localStorage.getItem("refresh");
     navigateTo("login");
   }
 }
-
-// async function statusCheck(){
-//   try {
-//     await new Promise((resolve) => setTimeout(resolve, 3000));
-
-//     const token = localStorage.getItem("jwtToken");
-//     let response = await fetch("https://0.0.0.0:8443/api/userinfo/", {
-//       headers: {
-//         Authorization: `Bearer ${token}`,
-//         "Content-Type": "application/json",
-//       },
-//       method: "GET",
-//     });
-
-//     if (response.ok) {
-//       const userData = await response.json();
-
-//       socket = new WebSocket(`wss://${location.host}/ws/status/?online_id=${userData.id}`);
-//       socket.onopen = async function (event) {
-//         socket.send(JSON.stringify({ type: "onlineCheck" }));
-//       }
-      
-//       socket.onmessage = function (event) {
-//         const data = JSON.parse(event.data);
-//         console.log("___DATA___DBG___ : ", data);
-//         if (data.type === "onlineCheckResponse") {
-//           console.log("___DBG___ : Online check response received");
-//           console.log("User ID:", data.online_id, "Status:", data.status);
-//           // Handle the onlineCheckResponse message here
-//         } else if (data.type === "user.status") {
-//           console.log("___DBG___ : User status update received");
-//           console.log("User ID:", data.user_id, "Status:", data.status);
-//           // if (data.status == 'online') {
-//           //   console.log("___FREIND____STATUS_____DBG___ :", friend.status);
-//           // }
-//           // else if (data.status == 'offline') {
-
-//           // }
-//         } 
-//         else {
-//           console.log("___DBG___ : Unhandled message type:", data.type);
-//         }
-//       };
-//     } else if (response.status === 401) {
-//       console.log("Access token expired. Refreshing token...");
-
-//       if (refreshAttempts < maxRefreshAttempts) {
-
-//         refreshAttempts++;
-
-//         token = await refreshAccessToken();
-
-//         if (token) {
-//           return statusCheck();
-//         } else {
-//           localStorage.removeItem("jwtToken");
-//       localStorage.removeItem("refresh");
-
-//           syncSession();
-//           navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
-//         }
-//       } else {
-//         console.error("Failed to refresh token after multiple attempts.");
-//         localStorage.removeItem("jwtToken");
-//       localStorage.removeItem("refresh");
-
-//         syncSession();
-//         navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
-//       }
-//     }
-//   } catch (err) {
-//     console.error("Error fetching user data:", err);
-//   }
-// }
-
-
-
-
-// export async function disconnectSocket() {
-//   console.log('___DISCONNECT___SOCKET___CALLED___');
-//   if (socket) {
-//     socket.send(JSON.stringify({ type: "set_offline" }));
-//     socket.close();
-//     console.log("WebSocket disconnected.");
-//     socket = null; // Ensure the socket variable is cleared
-//   } else {
-//     console.log("No active WebSocket connection to disconnect.");
-//   }
-// }
 
 const ss = { socket: null };
 
@@ -154,7 +62,7 @@ export async function statusCheck() {
   try {
     const token = localStorage.getItem("jwtToken");
 
-    let response = await fetch("https://0.0.0.0:8443/api/userinfo/", {
+    let response = await fetch("https://10.12.8.11:8443/api/userinfo/", {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -164,14 +72,10 @@ export async function statusCheck() {
 
     if (response.ok) {
       userData = await response.json();
-      console.log("___DBG___ : User data fetched successfully:", userData);
-
       await markUserOnline(token);
 
       setupWebSocket(userData.id);
     }else if (response.status === 401) {
-      console.log("Access token expired. Refreshing token...");
-
       if (refreshAttempts < maxRefreshAttempts) {
 
         refreshAttempts++;
@@ -197,7 +101,7 @@ export async function statusCheck() {
 
 async function markUserOnline(token) {
   try {
-    let response = await fetch("https://0.0.0.0:8443/api/online-offline/", {
+    let response = await fetch("https://10.12.8.11:8443/api/online-offline/", {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -208,7 +112,6 @@ async function markUserOnline(token) {
     if (response.ok) {
       console.log("___DBG___ : User marked as online.");
     } else if (response.status === 401) {
-      console.log("Access token expired. Refreshing token...");
 
       if (refreshAttempts < maxRefreshAttempts) {
 
@@ -235,7 +138,7 @@ async function markUserOnline(token) {
 async function markUserOffline() {
   try {
     const token = localStorage.getItem("jwtToken");
-    let response = await fetch("https://0.0.0.0:8443/api/online-offline/", {
+    let response = await fetch("https://10.12.8.11:8443/api/online-offline/", {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -246,7 +149,6 @@ async function markUserOffline() {
     if (response.ok) {
       console.log("___DBG___ : User marked as offline.");
     } else if (response.status === 401) {
-      console.log("Access token expired. Refreshing token...");
 
       if (refreshAttempts < maxRefreshAttempts) {
 
@@ -274,22 +176,14 @@ function setupWebSocket(userId) {
   ss.socket = new WebSocket(`wss://${location.host}/ws/status/?online_id=${userId}`);
 
   ss.socket.onopen = function () {
-    console.log("WebSocket connection opened.");
     ss.socket.send(JSON.stringify({ type: "onlineCheck" }));
   };
 
   ss.socket.onmessage = function (event) {
     const data = JSON.parse(event.data);
-    console.log("___DATA___DBG___ : ", data);
-
     if (data.type === "onlineCheckResponse") {
-      console.log("___DBG___ : Online check response received");
-      console.log("User ID:", data.online_id, "Status:", data.status);
     } else if (data.type === "user.status") {
-        console.log("___DBG___ : User status update received");
-        console.log("User ID:", data.user_id, "Status:", data.status);
         if (data.status == 'online') {
-            console.log("_____________________User is online_________________");
             updateFriendStatus(data.user_id, 'online');
         } else if (data.status == 'offline') {
             updateFriendStatus(data.user_id, 'offline');
@@ -302,13 +196,9 @@ function updateFriendStatus(userId, status) {
   const friendItem = document.querySelector(`.friend-item[data-friend-id="${userId}"]`);
   if (friendItem) {
     const statusElement = friendItem.querySelector('.friend-status');
-    console.log("_____________CHECK_________STATUS__________", statusElement);
     if (statusElement) {
       statusElement.textContent = status;
-      console.log(`Status updated fooooor user ${userId}: ${status}`);
     }
-  } else {
-    console.log("Friend not found");
   }
 }
 
@@ -316,7 +206,7 @@ function updateFriendStatus(userId, status) {
 export async function getOnlineUsers() {
   try {
     const token = localStorage.getItem("jwtToken");
-    const response = await fetch("https://0.0.0.0:8443/api/online-offline/", {
+    const response = await fetch("https://10.12.8.11:8443/api/online-offline/", {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -326,11 +216,8 @@ export async function getOnlineUsers() {
 
     if (response.ok) {
       const data = await response.json();
-      console.log("___DBG___ : Online users fetched successfully:", data.online_users);
       updateOnlineUsersUI(data.online_users);
     }else if (response.status === 401) {
-      console.log("Access token expired. Refreshing token...");
-
       if (refreshAttempts < maxRefreshAttempts) {
 
         refreshAttempts++;
@@ -355,7 +242,6 @@ export async function getOnlineUsers() {
 
 function updateOnlineUsersUI(onlineUsers) {
   const friendItems = document.querySelectorAll(".friend-item");
-  console.log("_____________________FRIEND ID_________________ :", friendItems);
   friendItems.forEach((item) => {
     const friendId = item.getAttribute("data-friend-id");
 
@@ -363,14 +249,12 @@ function updateOnlineUsersUI(onlineUsers) {
       const statusElement = item.querySelector(".friend-status");
       if (statusElement) {
         statusElement.textContent = "online";
-        console.log(`User ${friendId} is online.`);
       }
     } else {
       // Mark as offline
       const statusElement = item.querySelector(".friend-status");
       if (statusElement) {
         statusElement.textContent = "offline";
-        console.log(`User ${friendId} is offline.`);
       }
     }
   });
@@ -379,15 +263,11 @@ function updateOnlineUsersUI(onlineUsers) {
 getOnlineUsers();
 
 export async function disconnectSocket() {
-  console.log('___DISCONNECT___SOCKET___CALLED___');
   if (ss.socket) {
     ss.socket.send(JSON.stringify({ type: "set_offline" }));
     markUserOffline();
     ss.socket.close();
-    console.log("WebSocket disconnected.");
     ss.socket = null;
-  } else {
-    console.log("No active WebSocket connection to disconnect.");
   }
 }
 
@@ -456,11 +336,9 @@ async function loadPage(page, mode = null) {
 
   // Handle page loading and rendering dynamically
   contentDiv.innerHTML = ''; // Clear previous content
-  console.log("TMS7 KOLO");
 
   // Extract query parameters from the URL hash
   const modeToSend = getQueryParamsFromUrl();
-  console.log(page, "in LoadPage");
 
   try {
     if (page === 'landing' || page === 'login') {
@@ -470,7 +348,6 @@ async function loadPage(page, mode = null) {
         html = await fetchHtml('src/components/landing.html');
         contentDiv.innerHTML = html;
         initializePageScripts(page);
-        // Event listener for landing page interaction
         document.getElementById('startButton').addEventListener('click', () => navigateTo('login'));
       } else if (page === 'login') {
         html = await fetchHtml('login.html');
@@ -478,15 +355,11 @@ async function loadPage(page, mode = null) {
         initializePageScripts(page);
       }
     } else {
-      // Load component dynamically for other pages
-      console.log("weeeeeeeeeeeeee", `src/components/${page}.html`);
       const html = await fetchHtml(`src/components/${page}.html`);
       contentDiv.innerHTML = html;
-      console.log("INITIAT SCRIPT :", page);
       initializePageScripts(page, modeToSend);
     }
   } catch (error) {
-    console.log("Error loading page:", error);
     const errorMessage = `Failed to load page: ${page}`;
     navigateTo('error', { message: errorMessage });
   }
@@ -509,13 +382,10 @@ async function fetchHtml(url) {
 }
 
 function initializePageScripts(page, mode) {
-  console.log("in initializePageScripts");
-  // cleanUpCurrentPage();
 
   const body = document.body;
   const firstChild = body.firstElementChild;
   const appElement = document.getElementById("app");
-  // Loop through body children and remove all except the first child and the one with id="app"
   Array.from(body.children).forEach((child) => {
     if (child !== firstChild && child !== appElement) {
       body.removeChild(child);
@@ -528,9 +398,6 @@ function initializePageScripts(page, mode) {
     existingScript.remove();
   }
 
-  // const clonedContentDiv = contentDiv.cloneNode(true); // False will not clone child nodes, just the div itself
-  // contentDiv.parentNode.replaceChild(clonedContentDiv, contentDiv);
-  // Dynamically import the relevant module based on the page
   switch (page) {
     case 'home':
       import('./home.js').then(module => {
@@ -592,7 +459,6 @@ function getQueryParamsFromUrl() {
   const queryString = hash.split('?')[1]; // after '?'
   const urlParams = new URLSearchParams(queryString);
   const modeToGet = urlParams.get('mode');
-  console.log(modeToGet);
   if (!modeToGet) {
     const name = urlParams.get('name');
     if (name)
@@ -608,13 +474,11 @@ export function navigateTo(page, queryParams = {}) {
   const fullUrl = `${window.location.origin}/${hash}`;
 
   if (window.location.href === fullUrl) {
-    console.log("URL unchanged, forcing routing...");
     handleRouting(); // Force routing if the URL is unchanged
     return;
   }
 
   history.pushState({ page }, '', fullUrl);
-  console.log("Navigated to page:", page);
   handleRouting();
 }
 
@@ -637,20 +501,9 @@ function handleRouting() {
 
     history.replaceState(null, '', cleanedUrl);
   }
-
-  console.log("page in handleRouting To: ", page);
-
   
-  // Load the appropriate page
   loadPage(page || 'landing', modeToGet);
 }
-
-// // Add a single event listener for routing
-// window.addEventListener('hashchange', handleRouting);
-// window.addEventListener('popstate', (event) => {
-//   // Ensure proper routing on back/forward navigation
-//   handleRouting(event);
-// });
 
 if (!window._listenersAdded) {
   window.addEventListener('hashchange', handleRouting);
@@ -661,16 +514,10 @@ if (!window._listenersAdded) {
 }
 
 export function removeAllEventListeners() {
-  console.log("---------------------");
-
-  console.log(eventRegistry.length, "THEIR LENGTH");
   eventRegistry.forEach(({ element, eventType, handler }) => {
     element.removeEventListener(eventType, handler);
   });
   eventRegistry.length = 0;
-  // eventRegistry = [];
-  console.log("---------------------");
-  console.log(eventRegistry, "ALL DELETED");
 }
 
 // Sync session in all tabs

@@ -78,10 +78,8 @@ export function initLoginPage() {
     }
     const formData = new FormData(this);
     const sanitizedData = sanitizeFormData(formData);
-
-    console.log("FORM: ", sanitizedData);
     try {
-      let response = await fetch("https://0.0.0.0:8443/api/signup/", {
+      let response = await fetch("https://10.12.8.11:8443/api/signup/", {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
@@ -119,7 +117,7 @@ export function initLoginPage() {
     const formData = new FormData(this);
     const sanitizedData = sanitizeFormData(formData);
     try {
-      let response = await fetch("https://0.0.0.0:8443/api/signin/", {
+      let response = await fetch("https://10.12.8.11:8443/api/signin/", {
         headers: {
           "Content-Type": "application/json", // Ensure the content type is set to JSON
           Accept: "application/json", // Optionally, specify the format you want the response in
@@ -133,7 +131,6 @@ export function initLoginPage() {
         const refresh = rewind.refresh;
         localStorage.setItem("refresh", refresh);
         const bool = rewind.twoFa;
-        console.log("TOKEENEENENENEN e", token);
         if (bool) {
           // document.getElementById("qrcode").style.display = "block";
           const QR = rewind.qr_code;
@@ -147,7 +144,7 @@ export function initLoginPage() {
                 alert("Invalid OTP. Please enter a 6-digit code.");
                 return;
               }
-              const response = await fetch(`https://0.0.0.0:8443/api/2fa/verify/`, {
+              const response = await fetch(`https://10.12.8.11:8443/api/2fa/verify/`, {
                 method: "POST",
                 headers: {
                   Authorization: `Bearer ${token}`,
@@ -167,9 +164,7 @@ export function initLoginPage() {
                 hideQRCodeModal();
                 await statusCheck();
                 navigateTo("home");
-              } else if (response.status === 401) {
-                console.log("Access token expired. Refreshing token...");
-        
+              } else if (response.status === 401) {        
                 if (refreshAttempts < maxRefreshAttempts) {
                   refreshAttempts++;
                   token = await refreshAccessToken();

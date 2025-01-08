@@ -12,12 +12,11 @@ export function initProfilPage() {
     const refreshToken = localStorage.getItem("refresh");
 
     if (!refreshToken) {
-      console.error("No refresh token found.");
       return null;
     }
 
     try {
-      const response = await fetch("https://0.0.0.0:8443/api/token/refresh/", {
+      const response = await fetch("https://10.12.8.11:8443/api/token/refresh/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -26,8 +25,7 @@ export function initProfilPage() {
       });
 
       if (!response.ok) {
-        console.error("Failed to refresh token");
-        return null; // Return null if refresh fails
+        return null;
       }
 
       const data = await response.json();
@@ -40,7 +38,6 @@ export function initProfilPage() {
 
       return newAccessToken;
     } catch (error) {
-      console.error("Error refreshing access token:", error);
       localStorage.removeItem("jwtToken");
       localStorage.removeItem("refresh");
 
@@ -94,7 +91,7 @@ export function initProfilPage() {
       const div = document.createElement("div");
       div.className = "friend-item";
       div.innerHTML = `
-              <img src="https://0.0.0.0:8443/${friend.profile_picture}" alt="${friend.nickname
+              <img src="https://10.12.8.11:8443/${friend.profile_picture}" alt="${friend.nickname
         }" class="friend-picture">
               <div>
                   <p class="friend-name">${friend.nickname}</p>
@@ -129,7 +126,7 @@ export function initProfilPage() {
                         <h5 class="enemy-name ${playerWon ? "loser" : "winner"
       } mb-2 mb-sm-0 me-sm-2">${match.opponent_name}</h5>
                         <img src="
-                          https://0.0.0.0:8443/${match.opponent_profile_picture}
+                          https://10.12.8.11:8443/${match.opponent_profile_picture}
                         " alt="" class="enemy-icon">
                     </div>
                 </div>
@@ -141,11 +138,8 @@ export function initProfilPage() {
   async function displayMatchHistory() {
 
     const matchHistoryContainer = document.getElementById("matchHistory");
-    console.log(matchHistoryContainer);
-    // matchHistoryContainer.innerHTML = "";
-    console.log("WST MATCH HISTORY : ", token);
     try {
-      let response = await fetch(`https://0.0.0.0:8443/api/profile/matchHistory?user_id=${userId}`, {
+      let response = await fetch(`https://10.12.8.11:8443/api/profile/matchHistory?user_id=${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -155,17 +149,13 @@ export function initProfilPage() {
       if (response.ok) {
         const toSanitize = await response.json();
         let userData = sanitizeObject(toSanitize);
-        console.log(userData);
         let matchDatas = userData.match_details;
-        console.log(matchDatas);
         if (matchDatas.length == 0) {
           document.getElementById("notyet").style.display = "block";
         }
         else {
           document.getElementById("notyet").style.display = "none";
-          console.log("LENGTHkmjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj: ", matchDatas.length);
           const recentMatches = matchDatas.slice(0, 10);
-          console.log("LENGTH RECENT MATCHES", recentMatches);
           recentMatches.forEach((match) => {
             const matchCard = createMatchCard(match);
             matchHistoryContainer.appendChild(matchCard);
@@ -173,8 +163,6 @@ export function initProfilPage() {
         }
       }
       else if (response.status === 401) {
-        console.log("Access token expired. Refreshing token...");
-
         if (refreshAttempts < maxRefreshAttempts) {
             isRefreshing = true;
             refreshAttempts++;
@@ -191,7 +179,6 @@ export function initProfilPage() {
                 navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
             }
         } else {
-            console.error("Failed to refresh token after multiple attempts.");
             localStorage.removeItem("jwtToken");
           localStorage.removeItem("refresh");
 
@@ -202,16 +189,11 @@ export function initProfilPage() {
     } catch (err) {
       console.log("error", err);
     }
-    // Get the last 10 games from matchData
   }
 
-  /**
-   * ------------------------------------------------------------------
-   */
   async function fetchUserData() {
-    console.log(token);
     try {
-      let response = await fetch("https://0.0.0.0:8443/api/userinfo/", {
+      let response = await fetch("https://10.12.8.11:8443/api/userinfo/", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -221,11 +203,10 @@ export function initProfilPage() {
       if (response.ok) {
         const toSanitize = await response.json();
         let userData = sanitizeObject(toSanitize);
-        console.log(userData);
-        // Decrypt the profile picture and update the user display
-        let profilePicture = "https://0.0.0.0:8443/" + userData.profile_picture;
+
+        let profilePicture = "https://10.12.8.11:8443/" + userData.profile_picture;
         switchCheckbox.checked = userData.is_2fa_enabled;
-        console.log(profilePicture);
+
         updateUserDisplay(userData, profilePicture);
         document.getElementById("profileName").textContent = userData.nickname;
         document.getElementById("profileBio").textContent = userData.bio;
@@ -241,8 +222,6 @@ export function initProfilPage() {
         attachUserMenuListeners();
         displayMatchHistory();
       } else if (response.status === 401) {
-        console.log("Access token expired. Refreshing token...");
-
         if (refreshAttempts < maxRefreshAttempts) {
           refreshAttempts++; // Increment retry counter
 
@@ -260,7 +239,6 @@ export function initProfilPage() {
           }
         } else {
           // Too many refresh attempts or token refresh failed
-          console.error("Failed to refresh token after multiple attempts.");
           localStorage.removeItem("jwtToken");
           localStorage.removeItem("refresh");
 
@@ -273,7 +251,6 @@ export function initProfilPage() {
         navigateTo("error", { message: "Error fetching, please relog" });
       }
     } catch (err) {
-      console.error("Error fetching user data:", err);
       navigateTo("error", { message: err.message });
     }
   }
@@ -368,7 +345,6 @@ export function initProfilPage() {
     userProfileButtonContainer.appendChild(userProfileButton);
   }
 
-  console.log("displayed twice for some reason: ");
   fetchUserData();
   // Edit profile logic
   async function handlehg() {
@@ -434,7 +410,7 @@ export function initProfilPage() {
 
   async function updateProfile(updatedName, updatedBio) {
     try {
-      const response = await fetch("https://0.0.0.0:8443/api/profile/update/", {
+      const response = await fetch("https://10.12.8.11:8443/api/profile/update/", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -449,12 +425,10 @@ export function initProfilPage() {
         document.getElementById("profileName").textContent = userData.nickname;
         document.getElementById("profileN").textContent = userData.nickname;
       } else if (response.status === 401) {
-        console.log("Access token expired. Refreshing...");
         token = await refreshAccessToken();
         if (token) {
           await updateProfile(updatedName, updatedBio);
         } else {
-          console.error("Unable to refresh access token. Please log in again.");
           localStorage.removeItem("jwtToken");
           localStorage.removeItem("refresh");
           syncSession();
@@ -478,7 +452,6 @@ export function initProfilPage() {
         eventType: "click",
         handler: handlepl
       });
-      console.log("Image clicked");
       if (isEditing) {
         document.getElementById("fileInput").click();
       }
@@ -493,14 +466,12 @@ export function initProfilPage() {
 
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
     if (!allowedTypes.includes(file.type)) {
-      console.error("Invalid file type. Only image files are allowed.");
       alert("Please upload a valid image file (JPG, PNG, GIF).");
       return;
     }
 
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (file.size > maxSize) {
-      console.error("File size exceeds the limit of 5MB.");
       alert("File size exceeds the limit of 5MB.");
       return;
     }
@@ -525,7 +496,7 @@ export function initProfilPage() {
         return;
       }
 
-      fetch("https://0.0.0.0:8443/api/profile/update/picture/", {
+      fetch("https://10.12.8.11:8443/api/profile/update/picture/", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -539,13 +510,12 @@ export function initProfilPage() {
           return response.json();
         })
         .then((userData) => {
-          const imageUrl = "https://0.0.0.0:8443/" + sanitizeInput(userData.profile_picture);
+          const imageUrl = "https://10.12.8.11:8443/" + sanitizeInput(userData.profile_picture);
           document.getElementById("profilePicture").src = imageUrl;
           document.getElementById("profileImage").src = imageUrl;
           selectedFile = null;
         })
         .catch((error) => {
-          console.error("Error uploading image:", error);
           alert(error.message);
         });
     }
@@ -656,12 +626,10 @@ export function initProfilPage() {
 
       // Check which specific dropdown item was clicked
       if (clickedItem.querySelector("#view-profile")) {
-        console.log("Viewing profile...");
         navigateTo("profil");
       }
 
       if (clickedItem.querySelector("#log-out")) {
-        console.log("Logging out...");
         localStorage.removeItem('jwtToken');
         syncSession();
         navigateTo("landing");
@@ -675,15 +643,13 @@ export function initProfilPage() {
     });
 
     async function handlehone(event) {
-      console.log("change event INSIDE");
       if (event.target.classList.contains("input")) {
         const checkbox = event.target;
         const isChecked = checkbox.checked;
         const action = isChecked ? "enable" : "disable";
 
         try {
-          console.log("ACTION : ", action);
-          const response = await fetch(`https://0.0.0.0:8443/api/2fa/${action}/`, {
+          const response = await fetch(`https://10.12.8.11:8443/api/2fa/${action}/`, {
             method: "POST",
             headers: {
               "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -693,9 +659,7 @@ export function initProfilPage() {
 
           if (response.ok) {
             console.log(`2FA ${action}d successfully.`);
-          } else if (response.status === 401) {
-            console.log("Access token expired. Refreshing token...");
-    
+          } else if (response.status === 401) {    
             if (refreshAttempts < maxRefreshAttempts) {
               isRefreshing = true;
               refreshAttempts++;
@@ -712,7 +676,6 @@ export function initProfilPage() {
                 navigateTo("error", { message: "Unable to refresh access token. Please log in again." });
               }
             } else {
-              console.error("Failed to refresh token after multiple attempts.");
               localStorage.removeItem("jwtToken");
           localStorage.removeItem("refresh");
 
@@ -721,11 +684,9 @@ export function initProfilPage() {
             }
           }
           else {
-            console.error("Request failed. Reverting switch state.");
             checkbox.checked = !isChecked; // Revert state if request fails
           }
         } catch (error) {
-          console.error("Error occurred:", error);
           checkbox.checked = !isChecked; // Revert state if an error occurs
         }
       }

@@ -4,7 +4,6 @@ export function initErrorPage() {
     const params = new URLSearchParams(window.location.hash.split('?')[1]);
     const errorMessage = params.get('message') || 'An unexpected error occurred';
 
-    console.log(errorMessage);
 
     const errorDiv = document.getElementById('error-message');
     if (errorDiv) {
