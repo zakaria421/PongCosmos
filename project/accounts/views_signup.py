@@ -10,4 +10,3 @@ class RegisterView(generics.CreateAPIView):
     queryset            = UserProfile.objects.all()
     permission_classes  = (AllowAny, )
     serializer_class = RegistreSerializer
-    # parser_classes = [MultiPartParser, FormParser]  # Add this line

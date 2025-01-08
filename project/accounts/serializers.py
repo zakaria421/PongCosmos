@@ -112,7 +112,7 @@ class LoginSerializer(serializers.Serializer):
         # Authenticate the user using Django's authenticate function
         user = authenticate(username=nickname, password=password)
 
-        # Check if user is authenticated and active
+        # Check if user is authenticated
         if user is None:
             raise serializers.ValidationError("Invalid credentials")
 

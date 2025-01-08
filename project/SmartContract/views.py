@@ -15,12 +15,6 @@ nonce_lock = Lock()
 WEB3_PROVIDER_URL = "http://gethnode:8545/"
 web3 = Web3(Web3.HTTPProvider(WEB3_PROVIDER_URL))
 
-if web3.is_connected():
-    print("Connected to Ethereum node")
-
-else:
-    print("Failed to connect")
-
 def load_contract_data():
     with open('/app/SmartContract/SM/abi.json', 'r') as abifile:
         abi_data = json.load(abifile)
@@ -34,8 +28,7 @@ account = Account.from_key(private_key)
 CHAIN_ID = 1337
 global_nonce = web3.eth.get_transaction_count(account.address, 'latest')
 contract_instance = web3.eth.contract(abi=abi, bytecode=byteCode)
-print("********BEFORE***************")
-time.sleep(2)
+time.sleep(10)
 transaction = contract_instance.constructor().build_transaction({
     'from': account.address,
     'gas': 4700000,
@@ -46,7 +39,6 @@ signed_txn = web3.eth.account.sign_transaction(transaction, private_key)
 txn_hash = web3.eth.send_raw_transaction(signed_txn.raw_transaction)
 txn_receipt = web3.eth.wait_for_transaction_receipt(txn_hash)
 contract = web3.eth.contract(address=txn_receipt.contractAddress, abi=abi)
-print("Smart contract address : ", contract.address)
 gas_price = web3.eth.gas_price
 
 @csrf_exempt

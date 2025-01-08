@@ -14,7 +14,6 @@ from .views import OnlineOfflineView
 from . import viewsUserInfo
 
 urlpatterns = [
-    # path('proxy/block/<int:user_id>/', ProxyToChat.as_view(), name='proxy_to_chat'),
     path('userinfo/', ProtectedView.as_view(),),
     path('oauthcallback/', oauth_callback),
     path('signup/',RegisterView.as_view(),),
@@ -23,26 +22,16 @@ urlpatterns = [
     path('profile/update/changepassword/',ChangePasswordView.as_view()),
     path('profile/update/picture/',ChangeProfilePictureAPIView.as_view(),),
     path('online-offline/', OnlineOfflineView.as_view(), name='online-offline'),
-    path('profile/update/<str:result>/', UpdateWinLossView.as_view()), #this is the url for the win or loss
-    
-    ### Path to know if the user is already in game
+    path('profile/update/<str:result>/', UpdateWinLossView.as_view()),
     path('profile/ingame/<str:result>/', UserInGame.as_view()),
     path('profile/ingame/', UserInGame.as_view()),
-
-    # path('profile/ingame/', UserInGame.as_view()),
-    ####
     path('user-profile/<str:nickname>/', UserProfileDetailView.as_view(), name='user-profile-detail'),
-    # *************************************************************************new
     path('search-friends/', viewsUserInfo.search_friends, name='search_friends'),
     path('api/add-friend/', viewsUserInfo.add_friend, name='add_friend'),
-    # path('search-friends/', viewsUserInfo.search_friends, name='search_friends'),
-
     path('2fa/enable/', Enable2FAView.as_view(), name='enable_2fa'),
     path("2fa/verify/", VerifyOTPView.as_view(), name="verify_otp"),
     path("2fa/disable/", Disable2FAView.as_view(), name="disable_2fa"),
-
     path('profile/matchHistory/', matchHistory.as_view(), name='user_profile_detail'),
-
     path('topplayers/', TopPlayersView.as_view(), name='top-players'),
     
 ]

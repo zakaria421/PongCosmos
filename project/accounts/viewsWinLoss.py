@@ -42,7 +42,7 @@ class UpdateWinLossView(APIView):
             opponent_profile = get_object_or_404(UserProfile, nickname=opponent_name)
             match = Match.objects.create(
                     user=user_profile,
-                    opponent=opponent_profile,  # Use the UserProfile object instead of the opponent's name
+                    opponent=opponent_profile,
                     score=score,
                     opponent_score=opponent_score
                 )
@@ -57,7 +57,7 @@ class UpdateWinLossView(APIView):
                     "match_id": match.match_id,
                     "score": score,
                     "opponent_score": opponent_score,
-                    "opponent_name": opponent_profile.nickname,  # Corrected opponent name retrieval
+                    "opponent_name": opponent_profile.nickname,
                     "opponent_profile_picture": opponent_profile_picture
                 }
             }, status=200)
@@ -73,7 +73,7 @@ class matchHistory(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        user_profile = request.user.user_profile  # Assuming user is authenticated and has a OneToOne relation with UserProfile
+        user_profile = request.user.user_profile
         
         # Serialize the user profile data including the match history
         serializer = UserProfileSerializer(user_profile)

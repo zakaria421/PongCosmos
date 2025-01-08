@@ -13,12 +13,10 @@ from .models import UserProfile
 from django.views.decorators.csrf import csrf_exempt
 import json
 
-# this is the view that is shown when "0.0.0.0:8000/"
 class ProtectedView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        # The authenticated user can be accessed here
         user = request.user
         try:
             # Get the UserProfile related to this user
@@ -32,9 +30,6 @@ class ProtectedView(APIView):
         # Return the serialized data
         return Response(serializer.data, )
 
-
-
-#***************************************************************************************************
 @csrf_exempt
 
 def add_friend(request):
