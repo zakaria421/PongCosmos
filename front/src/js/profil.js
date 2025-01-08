@@ -16,7 +16,7 @@ export function initProfilPage() {
     }
 
     try {
-      const response = await fetch("https://10.12.8.11:8443/api/token/refresh/", {
+      const response = await fetch("https://0.0.0.0:8443/api/token/refresh/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -91,7 +91,7 @@ export function initProfilPage() {
       const div = document.createElement("div");
       div.className = "friend-item";
       div.innerHTML = `
-              <img src="https://10.12.8.11:8443/${friend.profile_picture}" alt="${friend.nickname
+              <img src="https://0.0.0.0:8443/${friend.profile_picture}" alt="${friend.nickname
         }" class="friend-picture">
               <div>
                   <p class="friend-name">${friend.nickname}</p>
@@ -126,7 +126,7 @@ export function initProfilPage() {
                         <h5 class="enemy-name ${playerWon ? "loser" : "winner"
       } mb-2 mb-sm-0 me-sm-2">${match.opponent_name}</h5>
                         <img src="
-                          https://10.12.8.11:8443/${match.opponent_profile_picture}
+                          https://0.0.0.0:8443/${match.opponent_profile_picture}
                         " alt="" class="enemy-icon">
                     </div>
                 </div>
@@ -139,7 +139,7 @@ export function initProfilPage() {
 
     const matchHistoryContainer = document.getElementById("matchHistory");
     try {
-      let response = await fetch(`https://10.12.8.11:8443/api/profile/matchHistory?user_id=${userId}`, {
+      let response = await fetch(`https://0.0.0.0:8443/api/profile/matchHistory?user_id=${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -193,7 +193,7 @@ export function initProfilPage() {
 
   async function fetchUserData() {
     try {
-      let response = await fetch("https://10.12.8.11:8443/api/userinfo/", {
+      let response = await fetch("https://0.0.0.0:8443/api/userinfo/", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -204,7 +204,7 @@ export function initProfilPage() {
         const toSanitize = await response.json();
         let userData = sanitizeObject(toSanitize);
 
-        let profilePicture = "https://10.12.8.11:8443/" + userData.profile_picture;
+        let profilePicture = "https://0.0.0.0:8443/" + userData.profile_picture;
         switchCheckbox.checked = userData.is_2fa_enabled;
 
         updateUserDisplay(userData, profilePicture);
@@ -410,7 +410,7 @@ export function initProfilPage() {
 
   async function updateProfile(updatedName, updatedBio) {
     try {
-      const response = await fetch("https://10.12.8.11:8443/api/profile/update/", {
+      const response = await fetch("https://0.0.0.0:8443/api/profile/update/", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -496,7 +496,7 @@ export function initProfilPage() {
         return;
       }
 
-      fetch("https://10.12.8.11:8443/api/profile/update/picture/", {
+      fetch("https://0.0.0.0:8443/api/profile/update/picture/", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -510,7 +510,7 @@ export function initProfilPage() {
           return response.json();
         })
         .then((userData) => {
-          const imageUrl = "https://10.12.8.11:8443/" + sanitizeInput(userData.profile_picture);
+          const imageUrl = "https://0.0.0.0:8443/" + sanitizeInput(userData.profile_picture);
           document.getElementById("profilePicture").src = imageUrl;
           document.getElementById("profileImage").src = imageUrl;
           selectedFile = null;
@@ -649,7 +649,7 @@ export function initProfilPage() {
         const action = isChecked ? "enable" : "disable";
 
         try {
-          const response = await fetch(`https://10.12.8.11:8443/api/2fa/${action}/`, {
+          const response = await fetch(`https://0.0.0.0:8443/api/2fa/${action}/`, {
             method: "POST",
             headers: {
               "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,

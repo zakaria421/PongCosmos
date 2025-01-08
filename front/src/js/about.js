@@ -16,7 +16,7 @@ export function initAboutPage() {
     }
 
     try {
-      const response = await fetch("https://10.12.8.11:8443/api/token/refresh/", {
+      const response = await fetch("https://0.0.0.0:8443/api/token/refresh/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -51,7 +51,7 @@ export function initAboutPage() {
   const switchCheckbox = document.getElementById("2fa-switch");
   async function fetchUserData() {  
     try {
-      let response = await fetch("https://10.12.8.11:8443/api/userinfo/", {
+      let response = await fetch("https://0.0.0.0:8443/api/userinfo/", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -62,7 +62,7 @@ export function initAboutPage() {
       if (response.ok) {
         const toSanitize = await response.json();
         const userData = sanitizeObject(toSanitize);  
-        const profilePicture = "https://10.12.8.11:8443/" + sanitizeInput(userData.profile_picture);
+        const profilePicture = "https://0.0.0.0:8443/" + sanitizeInput(userData.profile_picture);
         switchCheckbox.checked = userData.is_2fa_enabled;
         updateUserDisplay(userData, profilePicture);
         attachUserMenuListeners();
@@ -195,35 +195,35 @@ function updateUserDisplay(userData, profilePicture) {
   const developers = [
     {
       name: "Othmane Titebah",
-      role: "Backend Engineer",
-      description: "Specializes in Django and PostgreSQL.",
-      image: "/src/assets/imgs/116597377.jpeg",
+      role: "Backend Developer",
+      description: "",
+      image: "/src/assets/imgs/othmane.jpeg",
       github: "https://github.com/otitebah",
       linkedin: "https://www.linkedin.com/in/otitebah/"
     },
     {
-      name: "Jane Smith",
-      role: "Backend Developer",
-      description: "Loves building APIs and databases.",
-      image: "https://i.pravatar.cc/160?img=3",
-      github: "https://github.com/janesmith",
-      linkedin: "https://linkedin.com/in/janesmith"
+      name: "Ayoub Bioussoufa",
+      role: "BlockChain Developer",
+      description: "",
+      image: "/src/assets/imgs/akhiran.webp",
+      github: "https://github.com/Ayoubioussoufa",
+      linkedin: "https://www.linkedin.com/in/ayoubbioussoufa/"
     },
     {
-      name: "Jane Smith",
-      role: "Backend Developer",
-      description: "Loves building APIs and databases.",
-      image: "https://i.pravatar.cc/160?img=3",
-      github: "https://github.com/janesmith",
-      linkedin: "https://linkedin.com/in/janesmith"
+      name: "Lamyaa Sadiq",
+      role: "Full Stack Developer",
+      description: "",
+      image: "/src/assets/imgs/lamia.jpeg",
+      github: "https://github.com/lamiae-sadiq",
+      linkedin: "https://www.linkedin.com/in/lamyaa-sadiq/"
     },
     {
-      name: "Jane Smith",
-      role: "Backend Developer",
-      description: "Loves building APIs and databases.",
-      image: "https://i.pravatar.cc/160?img=3",
-      github: "https://github.com/janesmith",
-      linkedin: "https://linkedin.com/in/janesmith"
+      name: "Zakaria Bentaleb",
+      role: "Full Stack Developer",
+      description: "",
+      image: "/src/assets/imgs/download.jpeg",
+      github: "https://github.com/zakaria421",
+      linkedin: ""
     }
     // Add more developers as needed
   ];
@@ -418,7 +418,7 @@ function updateUserDisplay(userData, profilePicture) {
           const action = isChecked ? "enable" : "disable";
   
           try {
-            const response = await fetch(`https://10.12.8.11:8443/api/2fa/${action}/`, {
+            const response = await fetch(`https://0.0.0.0:8443/api/2fa/${action}/`, {
               method: "POST",
               headers: {
                 "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,

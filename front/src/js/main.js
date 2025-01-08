@@ -20,7 +20,7 @@ const refreshToken = localStorage.getItem("refresh");
   }
 
   try {
-    const response = await fetch("https://10.12.8.11:8443/api/token/refresh/", {
+    const response = await fetch("https://0.0.0.0:8443/api/token/refresh/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -62,7 +62,7 @@ export async function statusCheck() {
   try {
     const token = localStorage.getItem("jwtToken");
 
-    let response = await fetch("https://10.12.8.11:8443/api/userinfo/", {
+    let response = await fetch("https://0.0.0.0:8443/api/userinfo/", {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -101,7 +101,7 @@ export async function statusCheck() {
 
 async function markUserOnline(token) {
   try {
-    let response = await fetch("https://10.12.8.11:8443/api/online-offline/", {
+    let response = await fetch("https://0.0.0.0:8443/api/online-offline/", {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -138,7 +138,7 @@ async function markUserOnline(token) {
 async function markUserOffline() {
   try {
     const token = localStorage.getItem("jwtToken");
-    let response = await fetch("https://10.12.8.11:8443/api/online-offline/", {
+    let response = await fetch("https://0.0.0.0:8443/api/online-offline/", {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -206,7 +206,7 @@ function updateFriendStatus(userId, status) {
 export async function getOnlineUsers() {
   try {
     const token = localStorage.getItem("jwtToken");
-    const response = await fetch("https://10.12.8.11:8443/api/online-offline/", {
+    const response = await fetch("https://0.0.0.0:8443/api/online-offline/", {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",

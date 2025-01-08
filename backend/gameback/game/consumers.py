@@ -168,7 +168,8 @@ class pingPongConsumer(AsyncWebsocketConsumer):
                 if self.room_group_name:
                     print('room = ',self.room_group_name)
             if(self.room_group_name and text_data_json.get('event') == 'movement'):
-                rooms_game_logic[self.room_group_name].parsMove(text_data_json)
+                if rooms_game_logic[self.room_group_name]:
+                    rooms_game_logic[self.room_group_name].parsMove(text_data_json)
         if(self.game_type == 'tournament'):
             game = gameLogic.gamelogic()
             if(text_data_json.get('message') == 'Hello, server!'):

@@ -16,7 +16,7 @@ export function initLeaderboardPage() {
     }
 
     try {
-      const response = await fetch("https://10.12.8.11:8443/api/token/refresh/", {
+      const response = await fetch("https://0.0.0.0:8443/api/token/refresh/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -171,7 +171,7 @@ export function initLeaderboardPage() {
 
     const avatar = document.createElement('img');
     avatar.classList.add('avatar');
-    avatar.src = `https://10.12.8.11:8443${user.profile_picture}`;
+    avatar.src = `https://0.0.0.0:8443${user.profile_picture}`;
     avatar.alt = user.nickname;
 
     const name = document.createElement('div');
@@ -243,7 +243,7 @@ function createLeaderboardItem(user, index) {
               ${index + 1}
           </span>
           <div class="line-horizontal"></div>
-          <img src="https://10.12.8.11:8443${user.profile_picture}" 
+          <img src="https://0.0.0.0:8443${user.profile_picture}" 
                alt="${user.nickname}" 
                class="rounded-circle me-3 ${avatarClass}">
           <div class="flex-grow-1">
@@ -262,7 +262,7 @@ function createLeaderboardItem(user, index) {
     const leaderboardList = document.getElementById("leaderboard-list");
     leaderboardList.innerHTML = '';
     try {
-      const response = await fetch("https://10.12.8.11:8443/api/topplayers/", {
+      const response = await fetch("https://0.0.0.0:8443/api/topplayers/", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -349,7 +349,7 @@ function createLeaderboardItem(user, index) {
   /**------------------------------------------------------------- */
   async function fetchUserData() {
     try {
-      let response = await fetch("https://10.12.8.11:8443/api/userinfo/", {
+      let response = await fetch("https://0.0.0.0:8443/api/userinfo/", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -360,7 +360,7 @@ function createLeaderboardItem(user, index) {
       if (response.ok) {
         const toSanitize = await response.json();
         const userData = sanitizeObject(toSanitize);
-        const profilePicture = "https://10.12.8.11:8443" + sanitizeInput(userData.profile_picture);
+        const profilePicture = "https://0.0.0.0:8443" + sanitizeInput(userData.profile_picture);
         switchCheckbox.checked = userData.is_2fa_enabled;
         updateUserDisplay(userData, profilePicture);
         attachUserMenuListeners();
@@ -518,7 +518,7 @@ function createLeaderboardItem(user, index) {
         const action = isChecked ? "enable" : "disable";
 
         try {
-          const response = await fetch(`https://10.12.8.11:8443/api/2fa/${action}/`, {
+          const response = await fetch(`https://0.0.0.0:8443/api/2fa/${action}/`, {
             method: "POST",
             headers: {
               "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,

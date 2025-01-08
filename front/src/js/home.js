@@ -18,7 +18,7 @@ export function initHomePage() {
     }
 
     try {
-      const response = await fetch("https://10.12.8.11:8443/api/token/refresh/", {
+      const response = await fetch("https://0.0.0.0:8443/api/token/refresh/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -247,7 +247,7 @@ export function initHomePage() {
   // Fetch User Data
   async function fetchUserData() {
     try {
-      let response = await fetch("https://10.12.8.11:8443/api/userinfo/", {
+      let response = await fetch("https://0.0.0.0:8443/api/userinfo/", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -258,7 +258,7 @@ export function initHomePage() {
       if (response.ok) {
         const toSanitize = await response.json();
         userData = sanitizeObject(toSanitize);
-        const profilePicture = "https://10.12.8.11:8443/" + sanitizeInput(userData.profile_picture);
+        const profilePicture = "https://0.0.0.0:8443/" + sanitizeInput(userData.profile_picture);
         switchCheckbox.checked = userData.is_2fa_enabled;
         updateUserDisplay(userData, profilePicture);
         attachUserMenuListeners();
@@ -366,7 +366,7 @@ export function initHomePage() {
         const action = isChecked ? "enable" : "disable";
 
         try {
-          const response = await fetch(`https://10.12.8.11:8443/api/2fa/${action}/`, {
+          const response = await fetch(`https://0.0.0.0:8443/api/2fa/${action}/`, {
             method: "POST",
             headers: {
               "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -400,7 +400,7 @@ export function initHomePage() {
     try {
       await new Promise((resolve) => setTimeout(resolve, 30000));
 
-      let response = await fetch("https://10.12.8.11:8443/api/online-offline/", {
+      let response = await fetch("https://0.0.0.0:8443/api/online-offline/", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -560,6 +560,7 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
       socket.send(JSON.stringify(responsePayload));
       document.getElementById("gameInviteModal").remove();
       if (action === "accept") {
+        disconnectSocket();
         localStorage.setItem('currentGame', `${inviteId}_progress`)
         navigateTo("game", { mode: "playWithFriend", id: inviteId });
       }
@@ -573,6 +574,7 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
     if (status === "accept") {
       // INJECT HEEERE
       localStorage.setItem('currentGame', `${inviteId}_progress`)
+      disconnectSocket();
       showNotification(`${senderName} accepted your game invitation!`);
       navigateTo("game", { mode: "playWithFriend", id: inviteId });
     } else if (status === "declined") {
@@ -711,16 +713,26 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
   const sendButton = document.querySelector(".chat-input button");
   const chatInput = document.querySelector(".chat-input input");
 
-  sendButton.addEventListener("click", () => {
+
+  function removeevent() {
     const message = chatInput.value.trim();
     if (message) {
       sendMessage(message);
       // appendMessageToChat(userData.nickname, message, new Date().toISOString());
       chatInput.value = "";
     }
+  }
+
+  sendButton.addEventListener("click", removeevent);
+  eventRegistry.push({
+    element: sendButton,
+    eventType: "click",
+    handler: removeevent
   });
 
-  chatInput.addEventListener("keypress", (event) => {
+
+
+  function remooveevent (event) {
     if (event.key === "Enter") {
       const message = chatInput.value.trim();
       if (message !== "") {
@@ -728,6 +740,13 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
         chatInput.value = "";
       }
     }
+  }
+
+  chatInput.addEventListener("keypress", remooveevent);
+  eventRegistry.push({
+    element: chatInput,
+    eventType: "keypress",
+    handler: remooveevent
   });
 
 
@@ -795,7 +814,7 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
     }
 
     try {
-      const response = await fetch(`https://10.12.8.11:8443/api/friends/send-friend-request/${nickname}/`, {
+      const response = await fetch(`https://0.0.0.0:8443/api/friends/send-friend-request/${nickname}/`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -857,7 +876,7 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
 
   async function fetchFriendRequests() {
     try {
-      const response = await fetch("https://10.12.8.11:8443/api/friends/friend-requests/", {
+      const response = await fetch("https://0.0.0.0:8443/api/friends/friend-requests/", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -966,7 +985,7 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
       button.addEventListener("click", async function tz()  {
         const nickname = button.dataset.nickname;
         try {
-          const response = await fetch(`https://10.12.8.11:8443/api/friends/accept-friend-request/${nickname}/`, {
+          const response = await fetch(`https://0.0.0.0:8443/api/friends/accept-friend-request/${nickname}/`, {
             method: "POST",
             headers: {
               Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -1023,7 +1042,7 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
       button.addEventListener("click", async function tesst() {
         const nickname = button.dataset.nickname;
         try {
-          const response = await fetch(`https://10.12.8.11:8443/api/friends/cancel-friend-request/${nickname}/`, {
+          const response = await fetch(`https://0.0.0.0:8443/api/friends/cancel-friend-request/${nickname}/`, {
             method: "POST",
             headers: {
               Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
@@ -1091,7 +1110,7 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
 
     if (query) {
       try {
-        const response = await fetch(`https://10.12.8.11:8443/api/search-friends/?query=${encodeURIComponent(query)}`, {
+        const response = await fetch(`https://0.0.0.0:8443/api/search-friends/?query=${encodeURIComponent(query)}`, {
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,
             "Content-Type": "application/json",
@@ -1219,7 +1238,7 @@ document.body.insertAdjacentHTML("beforeend", modalHTML);}
       return;
     }
     try {
-      let response = await fetch("https://10.12.8.11:8443/api/friends/friend-list/", {
+      let response = await fetch("https://0.0.0.0:8443/api/friends/friend-list/", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,

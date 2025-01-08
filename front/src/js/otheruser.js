@@ -16,7 +16,7 @@ export function initOtherUserPage(name) {
     }
 
     try {
-      const response = await fetch("https://10.12.8.11:8443/api/token/refresh/", {
+      const response = await fetch("https://0.0.0.0:8443/api/token/refresh/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -79,7 +79,7 @@ export function initOtherUserPage(name) {
       const div = document.createElement("div");
       div.className = "friend-item";
       div.innerHTML = `
-              <img src="https://10.12.8.11:8443/${friend.profile_picture}" alt="${friend.nickname
+              <img src="https://0.0.0.0:8443/${friend.profile_picture}" alt="${friend.nickname
         }" class="friend-picture">
               <div>
                   <p class="friend-name">${friend.nickname}</p>
@@ -121,7 +121,7 @@ export function initOtherUserPage(name) {
                         <h5 class="enemy-name ${playerWon ? "loser" : "winner"
       } mb-2 mb-sm-0 me-sm-2">${match.opponent_name}</h5>
                         <img src="
-                          https://10.12.8.11:8443/${match.opponent_profile_picture}
+                          https://0.0.0.0:8443/${match.opponent_profile_picture}
                         " alt="" class="enemy-icon">
                     </div>
                 </div>
@@ -147,7 +147,7 @@ export function initOtherUserPage(name) {
 
   async function fetchUserData() {
     try {
-      let response = await fetch("https://10.12.8.11:8443/api/userinfo/", {
+      let response = await fetch("https://0.0.0.0:8443/api/userinfo/", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -158,7 +158,7 @@ export function initOtherUserPage(name) {
       if (response.ok) {
         const toSanitize = await response.json();
         const userData = sanitizeObject(toSanitize);
-        const profilePicture = "https://10.12.8.11:8443/" + userData.profile_picture;
+        const profilePicture = "https://0.0.0.0:8443/" + userData.profile_picture;
         switchCheckbox.checked = userData.is_2fa_enabled;
         updateUserDisplay(userData, profilePicture);
         attachUserMenuListeners();
@@ -195,7 +195,7 @@ export function initOtherUserPage(name) {
 
   async function fetchProfilPlayer() {
     try {
-      let response = await fetch(`https://10.12.8.11:8443/api/user-profile/${name}/`, {
+      let response = await fetch(`https://0.0.0.0:8443/api/user-profile/${name}/`, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -206,7 +206,7 @@ export function initOtherUserPage(name) {
         const toSanitize = await response.json();
         let userData = sanitizeObject(toSanitize);
 
-        let profilePicture = "https://10.12.8.11:8443/" + userData.profile_picture;
+        let profilePicture = "https://0.0.0.0:8443/" + userData.profile_picture;
         document.getElementById("profileName").textContent = userData.nickname;
         document.getElementById("profileBio").textContent = userData.bio;
         document.getElementById("profileImage").src = profilePicture;
@@ -464,7 +464,7 @@ export function initOtherUserPage(name) {
         const action = isChecked ? "enable" : "disable";
 
         try {
-          const response = await fetch(`https://10.12.8.11:8443/2fa/${action}/`, {
+          const response = await fetch(`https://0.0.0.0:8443/2fa/${action}/`, {
             method: "POST",
             headers: {
               "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`,

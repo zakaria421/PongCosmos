@@ -19,9 +19,9 @@ def tokenFunc(code):
     token_url = 'https://api.intra.42.fr/oauth/token'
     payload = {
         "grant_type": "authorization_code",
-        "client_id": "u-s4t2ud-9b226e159cb7418b115f6ffec20c7d4f106700e9c84cf534a15aa8c91137abb2",
-        "client_secret": "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",
-        "redirect_uri": "https://10.12.8.11:8443/login",
+        "client_id": "u-s4t2ud-9e8cb1d6b2b0bb181505b29a9397b6d8e3079ab0fe7be47c059b43e8f4603fcf",
+        "client_secret": "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",
+        "redirect_uri": "https://0.0.0.0:8443/login",
         "code": code
     }
     #Sending a post request to the Token endPoint

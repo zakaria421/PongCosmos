@@ -272,7 +272,7 @@ h2 {
   background-color: #46494d;
   color: white; */
   align-self: flex-end;
-  background-color: #c8e6c9; /* Light green for sent messages */
+  background-color: #e9d4ea; /* Light green for sent messages */
   color: #000;
   border-radius: 10px 10px 0 10px;
 }
@@ -282,7 +282,7 @@ h2 {
   background-color: #e5e5e5;
   color: black; */
   align-self: flex-start;
-  background-color: #e3f2fd;
+  background-color: #aef0fa;
   color: #000;
   border-radius: 10px 10px 10px 0;
 }
