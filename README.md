@@ -1,6 +1,6 @@
-# ft_transcendence
+# PongCosmos
 
-**ft_transcendence** is a real-time multiplayer ping pong game built using modern web technologies. It offers both local and remote gameplay modes, allowing players to enjoy the game with friends or compete with others online. The project emphasizes responsive design, seamless communication, and immersive gameplay.
+**PongCosmos** is a real-time multiplayer ping pong game built using modern web technologies. It offers both local and remote gameplay modes, allowing players to enjoy the game with friends or compete with others online. The project emphasizes responsive design, seamless communication, and immersive gameplay.
 ---
 
 ## 🌟 Features
@@ -47,8 +47,8 @@ Make sure you have the following installed:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/ft_transcendence.git
-   cd ft_transcendence
+   git clone https://github.com/zakaria421/PongCosmos.git
+   cd PongCosmos
 2. Build and start the Docker containers:
    ```bash
    docker-compose up --build
